@@ -17,6 +17,7 @@ import { Parameter } from './parameter';
 
 export class Node {
     public xml: string;
+    /** 
     public connection: any = [];
     public id: string;
     public input: Parameter[];
@@ -29,5 +30,6 @@ export class Node {
     public template: Template;
     public type: string;
     public instanceType: string;
+    */
 
 }

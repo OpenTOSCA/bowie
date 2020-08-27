@@ -22,12 +22,16 @@ Then look at http://localhost:4242.
 
 # Features / Status
 
+- Starten mit Docker
 - Laden von Diagrammen
 - Speichern von Diagrammen
 
 
 # To Do
 
--  Dockerfile ergänzen \o.o/
+-  Dockerfile noch anpassen (docker rise)
 -  vielleicht den Load Button später entfernen
 -  den Save Button in der Palette fürs Erste ignorieren
+
+Phase 3:
+- Node Management Task hinzufügen (siehe Präsentation & SITCOM)

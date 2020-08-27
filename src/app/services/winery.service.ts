@@ -49,49 +49,14 @@ export class WineryService {
 
 
     public save(data: string) {
-        console.log(data);
-        console.log(this.namespace);
         const url = 'servicetemplates/' + this.encode(this.namespace)
             + '/' + this.encode(this.serviceTemplateId) + '/plans/' + this.encode(this.plan) + '/file';
-        let xml: string;
-        xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
-            '<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">\n' +
-            '<bpmn:process id="Process_1" isExecutable="false">\n' +
-            '<bpmn:startEvent id="StartEvent_1">\n' +
-            '<bpmn:outgoing>SequenceFlow_0e3dski</bpmn:outgoing>\n' +
-            '</bpmn:startEvent>\n' +
-            '<bpmn:intermediateThrowEvent id="IntermediateThrowEvent_14m4gg5">\n' +
-            '<bpmn:incoming>SequenceFlow_0e3dski</bpmn:incoming>\n' +
-            '</bpmn:intermediateThrowEvent>\n' +
-            '<bpmn:sequenceFlow id="SequenceFlow_0e3dski" sourceRef="StartEvent_1" targetRef="IntermediateThrowEvent_14m4gg5" />\n' +
-            '</bpmn:process>\n' +
-            '<bpmndi:BPMNDiagram id="BPMNDiagram_1">\n' +
-            '<bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">\n' +
-            '<bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1"><dc:Bounds x="173" y="102" width="36" height="36" />\n' +
-            '</bpmndi:BPMNShape><bpmndi:BPMNShape id="IntermediateThrowEvent_14m4gg5_di" bpmnElement="IntermediateThrowEvent_14m4gg5">\n' +
-            '<dc:Bounds x="358" y="135" width="36" height="36" />\n' +
-            '</bpmndi:BPMNShape><bpmndi:BPMNEdge id="SequenceFlow_0e3dski_di" bpmnElement="SequenceFlow_0e3dski">\n' +
-            '<di:waypoint x="209" y="120" />\n' +
-            '<di:waypoint x="284" y="120" />\n' +
-            '<di:waypoint x="284" y="153" />\n' +
-            '<di:waypoint x="358" y="153" />\n' +
-            '</bpmndi:BPMNEdge>\n' +
-            '</bpmndi:BPMNPlane>\n' +
-            '</bpmndi:BPMNDiagram>\n' +
-            '</bpmn:definitions>';
-        console.log(JSON.stringify(xml));
-        
         
         const requestData = '-----------------------------7da24f2e50046\r\n'
             + 'Content-Disposition: form-data; name=\"file\"; filename=\"file.json\"\r\n'
             + 'Content-type: plain/text\r\n\r\n'
             + data + '\r\n-----------------------------7da24f2e50046--\r\n';
-        console.log(this.getFullUrl(url));
-        let parser = new DOMParser();
-        let xmlDoc = parser.parseFromString(xml, "text/xml");
-        console.log(xmlDoc);
-        console.log(xmlDoc.getElementsByTagName('bpmn:startEvent'));
-        console.log(xmlDoc.getElementsByTagName('bpmn:sequenceFlow')[0].getAttribute('sourceRef'));
+        
         const headers = new HttpHeaders({ 'Content-Type': 'multipart/form-data; boundary=---------------------------7da24f2e50046' });
 
         this.httpService.put(this.getFullUrl(url), requestData, { headers: headers })
