@@ -13,12 +13,15 @@
  *******************************************************************************/
 
 import { Injectable } from '@angular/core';
-
 import { PageParameter } from '../model/page-parameter';
+import { NodeTemplate } from '../model/nodetemplate';
 import { Node } from '../model/workflow/node';
 import { HttpService } from '../util/http.service';
 import { BroadcastService } from './broadcast.service';
 import { HttpHeaders } from '@angular/common/http';
+import { map } from 'rxjs/internal/operators';
+import { Observable } from 'rxjs/Rx';
+import { ToscaInterface } from '../model/toscaInterface';
 
 /**
  * WineryService
@@ -30,6 +33,7 @@ export class WineryService {
     private namespace: string;
     private serviceTemplateId: string;
     private plan: string;
+    nodetemplate;
 
     constructor(private broadcastService: BroadcastService,
                 private httpService: HttpService) {
@@ -45,6 +49,42 @@ export class WineryService {
         if (this.repositoryURL) {
             this.loadPlan();
         }
+    }
+
+    public loadNodeTemplates() {
+        const url = 'servicetemplates/' + this.encode(this.namespace)
+            + '/' + this.encode(this.serviceTemplateId) + '/topologytemplate/';
+            console.log(this.namespace);
+            console.log(this.serviceTemplateId);
+            this.httpService.get(this.getFullUrl(url)).subscribe(response => {
+                this.nodetemplate = this.transferResponse2NodeTemplate(response);
+                return response});
+    }
+
+    
+    private transferResponse2NodeTemplate(response: any) {
+        const nodeTemplates: NodeTemplate[] = [];
+        for (const key in response.nodeTemplates) {
+            if (response.nodeTemplates.hasOwnProperty(key)) {
+                const nodeTemplate = response.nodeTemplates[key];
+                nodeTemplates.push(new NodeTemplate(
+                    nodeTemplate.id,
+                    nodeTemplate.name,
+                    nodeTemplate.type,
+                    nodeTemplate.type.replace(/^\{(.+)\}(.+)/, '$1')));
+            }
+        }
+        console.log("NODETEM")
+        console.log(nodeTemplates);
+        return nodeTemplates;
+    }
+
+    public loadNodeTemplateInterfaces(namespace: string, nodeType: string): Observable<ToscaInterface[]> {
+        const url = 'nodetypes/' + this.encode(namespace)
+            + '/' + this.encode(nodeType) + '/interfaces/';
+            console.log('Interface')
+        console.log(this.httpService.get(this.getFullUrl(url)));
+        return this.httpService.get(this.getFullUrl(url));
     }
 
 
@@ -75,9 +115,13 @@ export class WineryService {
             return nodes;});
     }
 
+    
+
     public loadPlan2(modeler:any) {
         const url = 'servicetemplates/' + this.encode(this.namespace)
             + '/' + this.encode(this.serviceTemplateId) + '/plans/' + this.encode(this.plan) + '/file';
+        const url2 = 'http://localhost:4200/#/servicetemplates/http%253A%252F%252Fopentosca.org%252Fservicetemplates/MyTinyToDo_Bare_Docker/xml';
+        
         this.httpService.get(this.getFullUrl(url)).subscribe(response => {
             const nodes = JSON.stringify(response) === '{}' ? [] : <Node[]>response;
             console.log(this.broadcastService.planModel);

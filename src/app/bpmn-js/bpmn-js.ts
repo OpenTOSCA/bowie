@@ -32,4 +32,5 @@ export interface IPalette {
 
 export interface IPropertiesProvider {
   getTabs(elemnt): any;
+  loadNodeTemplateInterfaces(namespace, nodetype): any;
 }

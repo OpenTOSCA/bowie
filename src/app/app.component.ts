@@ -40,7 +40,8 @@ const customModdle = {
 export class AppComponent implements OnInit {
   title = 'bpmn.io for Winery';
   modeler;
-
+  s: any;
+  
   constructor(private http: HttpClient, private route: ActivatedRoute,private wineryService: WineryService) {
   }
 
@@ -51,10 +52,10 @@ export class AppComponent implements OnInit {
       height: '600px',
       additionalModules: [
         PropertiesPanelModule,
-        OriginalPropertiesProvider,
+        //OriginalPropertiesProvider,
 
-        //{[InjectionNames.bpmnPropertiesProvider]: ['type', OriginalPropertiesProvider.propertiesProvider[1]]},
-        //{[InjectionNames.propertiesProvider]: ['type', CustomPropsProvider]},
+        {[InjectionNames.bpmnPropertiesProvider]: ['type', OriginalPropertiesProvider.propertiesProvider[1]]},
+        {[InjectionNames.propertiesProvider]: ['type', CustomPropsProvider]},
 
         {[InjectionNames.originalPaletteProvider]: ['type', OriginalPaletteProvider]},
         {[InjectionNames.paletteProvider]: ['type', CustomPaletteProvider]},
@@ -67,6 +68,7 @@ export class AppComponent implements OnInit {
       }
     });
     this.route.queryParams.subscribe(params => {this.wineryService.setRequestParam(<PageParameter>params);});
+
     this.initiate();
     
   }
@@ -89,9 +91,16 @@ export class AppComponent implements OnInit {
       },
       this.handleError
     );
+    
   }
   load(){
-    
+    this.wineryService.loadNodeTemplates();
+    this.s = this.wineryService.loadNodeTemplates();
+
+    let namespace = "http://opentosca.org/nodetypes";
+    this.wineryService.loadNodeTemplateInterfaces(namespace,'MyTinyToDoDockerContainer');
+
+    console.log(this.s);
     this.wineryService.loadPlan2(this.modeler);
     
   }
