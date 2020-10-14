@@ -13,6 +13,7 @@
  *******************************************************************************/
 
 import { Injectable } from '@angular/core';
+import { saveAs } from 'file-saver';
 import { PageParameter } from '../model/page-parameter';
 import { NodeTemplate } from '../model/nodetemplate';
 import { Node } from '../model/workflow/node';
@@ -22,6 +23,7 @@ import { HttpHeaders } from '@angular/common/http';
 import { map } from 'rxjs/internal/operators';
 import { Observable } from 'rxjs/Rx';
 import { ToscaInterface } from '../model/toscaInterface';
+import JSZip from 'jszip';
 
 /**
  * WineryService
@@ -91,16 +93,22 @@ export class WineryService {
     public save(data: string) {
         const url = 'servicetemplates/' + this.encode(this.namespace)
             + '/' + this.encode(this.serviceTemplateId) + '/plans/' + this.encode(this.plan) + '/file';
-        
+        console.log(url);
         const requestData = '-----------------------------7da24f2e50046\r\n'
-            + 'Content-Disposition: form-data; name=\"file\"; filename=\"file.json\"\r\n'
-            + 'Content-type: plain/text\r\n\r\n'
+            + 'Content-Disposition: form-data; name=\"file\"; filename=\"example.zip\"\r\n'
+            + 'Content-type: application/zip\r\n\r\n'
             + data + '\r\n-----------------------------7da24f2e50046--\r\n';
-        
+            var zip = new JSZip();
+            zip.file("file.json", requestData);
+            zip.generateAsync({type:"blob"})
+            .then(function(content) {
+                // see FileSaver.js
+                saveAs(content, "example.zip");
+            });
         const headers = new HttpHeaders({ 'Content-Type': 'multipart/form-data; boundary=---------------------------7da24f2e50046' });
-
+       
         this.httpService.put(this.getFullUrl(url), requestData, { headers: headers })
-            .subscribe(response => console.log('save date success'));
+            .subscribe(response => {console.log('save date success');console.log(this.getFullUrl(url))});
     }
 
     public loadPlan() {

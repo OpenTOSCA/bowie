@@ -6,6 +6,8 @@ import {CustomPaletteProvider} from "./props-provider/CustomPaletteProvider";
 import {WineryService} from "./services/winery.service";
 import { ActivatedRoute } from '@angular/router';
 import { PageParameter } from './model/page-parameter';
+import _camundaModdleDescriptor from "camunda-bpmn-moddle/resources/camunda.json";
+
 
 const customModdle = {
   name: "customModdle",
@@ -52,7 +54,7 @@ export class AppComponent implements OnInit {
       height: '600px',
       additionalModules: [
         PropertiesPanelModule,
-        //OriginalPropertiesProvider,
+        OriginalPropertiesProvider,
 
         {[InjectionNames.bpmnPropertiesProvider]: ['type', OriginalPropertiesProvider.propertiesProvider[1]]},
         {[InjectionNames.propertiesProvider]: ['type', CustomPropsProvider]},
@@ -63,8 +65,8 @@ export class AppComponent implements OnInit {
       propertiesPanel: {
         parent: '#properties'
       },
-      moddleExtension: {
-        custom: customModdle
+      moddleExtensions: {
+        custom: _camundaModdleDescriptor
       }
     });
     this.route.queryParams.subscribe(params => {this.wineryService.setRequestParam(<PageParameter>params);});

@@ -82,7 +82,7 @@ private getFullUrl(relativePath: string) {
                 label : 'Interface',
                 selectOptions: function(element){ 
                   var options = [{name: 'Test', value: 'Test'},{name: 'Test1', value: 'Test1'}];
-                  EntryFactory.loadNodeTemplateInterfaces('http://opentosca.org', 'OpenTOSCAToDoDockerContainer');
+                  //EntryFactory.loadNodeTemplateInterfaces('http://opentosca.org', 'OpenTOSCAToDoDockerContainer');
                   return options;},
                 setControlValue: true,
                 modelProperty : 'example'
