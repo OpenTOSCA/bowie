@@ -128,7 +128,6 @@ export class WineryService {
     public loadPlan2(modeler:any) {
         const url = 'servicetemplates/' + this.encode(this.namespace)
             + '/' + this.encode(this.serviceTemplateId) + '/plans/' + this.encode(this.plan) + '/file';
-        const url2 = 'http://localhost:4200/#/servicetemplates/http%253A%252F%252Fopentosca.org%252Fservicetemplates/MyTinyToDo_Bare_Docker/xml';
         
         this.httpService.get(this.getFullUrl(url)).subscribe(response => {
             const nodes = JSON.stringify(response) === '{}' ? [] : <Node[]>response;

@@ -1,33 +1,123 @@
-import {IPalette, IPaletteProvider} from "../bpmn-js/bpmn-js";
+import {
+  assign
+} from 'min-dash';
 
-export class CustomPaletteProvider implements IPaletteProvider {
 
-  static $inject = ['palette', 'originalPaletteProvider', 'elementFactory'];
+/**
+ * A palette that allows you to create BPMN _and_ custom elements.
+ */
+export default function CustomPaletteProvider(palette, create, elementFactory, bpmnFactory,spaceTool, lassoTool) {
 
-  private readonly elementFactory: any;
+  this._create = create;
+  this._elementFactory = elementFactory;
+  this._spaceTool = spaceTool;
+  this._bpmnFactory = bpmnFactory;
+  this._lassoTool = lassoTool;
 
-  // Note that names of arguments must match injected modules, see InjectionNames.
-  // I don't know why originalPaletteProvider matters but it breaks if it isn't there.
-  // I guess since this component is injected, and it requires an instance of originalPaletteProvider,
-  // originalPaletteProvider will be new'ed and thus call palette.registerProvider for itself.
-  // There probably is a better way.
-  constructor(private palette: IPalette, private originalPaletteProvider: IPaletteProvider, elementFactory) {
-    // console.log(this.constructor.name, "constructing", palette, originalPaletteProvider);
-    palette.registerProvider(this);
-    this.elementFactory = elementFactory;
-  }
+  palette.registerProvider(this);
+}
 
-  getPaletteEntries() {
-    // console.log(this.constructor.name, "getPaletteEntries", this.palette, this.originalPaletteProvider);
+CustomPaletteProvider.$inject = [
+  'palette',
+  'create',
+  'elementFactory',
+  'bpmnFactory',
+  'spaceTool',
+  'lassoTool'
+];
+
+
+CustomPaletteProvider.prototype.getPaletteEntries = function(element) {
+
+  var actions  = {},
+      create = this._create,
+      elementFactory = this._elementFactory,
+      bpmnFactory = this._bpmnFactory,
+      spaceTool = this._spaceTool,
+      lassoTool = this._lassoTool;
+
+
+      function createRect(suitabilityScore) {
+        return function(event) {
+          const businessObject = bpmnFactory.create('bpmn:Task');
+    
+          const shape = elementFactory.createShape({
+            type: 'bpmn:Task',
+            businessObject: businessObject
+          });
+      
+          create.start(event, shape); 
+  
+        
+      }}
+  function createAction(type, group, className, title, options) {
+
+    function createListener(event) {
+      var shape = elementFactory.createShape(assign({ type: type }, options));
+
+      if (options) {
+        shape.businessObject.di.isExpanded = options.isExpanded;
+      }
+
+      create.start(event, shape);
+    }
+
+    var shortType = type.replace(/^bpmn:/, '');
+
     return {
-      save: {
-        group: 'tools',
-        className: ['fa-save', 'fa'],
-        title: 'TEST',
-        action: {
-          click: () => console.log( 'TEST Action clicked! Elementfactory: ', this.elementFactory)
-        }
+      group: group,
+      className: className,
+      title: title || 'Create ' + shortType,
+      action: {
+        dragstart: createListener,
+        click: createListener
       }
     };
   }
-}
+
+  function createParticipant(event, collapsed) {
+    create.start(event, elementFactory.createParticipantShape(collapsed));
+  }
+
+  assign(actions, {
+    'custom-triangle': createAction(
+      'custom:triangle', 'custom', 'icon-custom-triangle', 'triangle', ''
+    ),
+    'task':{
+      group: 'activity',
+      className: 'bpmn-icon-task',
+      title: 'Activate the lasso tool',
+      action: {
+        dragstart: createRect('60'),
+        click: createRect('60')
+        
+      }
+    },
+    'lasso-tool': {
+      group: 'tools',
+      className: 'bpmn-icon-lasso-tool',
+      title: 'Activate the lasso tool',
+      action: {
+        click: function(event) {
+          lassoTool.activateSelection(event);
+        }
+      }
+    },
+    'space-tool': {
+      group: 'tools',
+      className: 'bpmn-icon-space-tool',
+      title: 'Activate the create/remove space tool',
+      action: {
+        click: function(event) {
+          spaceTool.activateSelection(event);
+        }
+      }
+    },
+    'tool-separator': {
+      group: 'tools',
+      separator: true
+    }
+  });
+
+  return actions;
+};
