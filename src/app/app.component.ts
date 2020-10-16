@@ -1,8 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Modeler, OriginalPropertiesProvider, PropertiesPanelModule, InjectionNames, OriginalPaletteProvider} from "./bpmn-js/bpmn-js";
-import {CustomPropsProvider} from './props-provider/CustomPropsProvider';
-import {CustomPaletteProvider} from "./props-provider/CustomPaletteProvider";
+//import {CustomPropsProvider} from './props-provider/CustomPropsProvider';
+import CustomPaletteProvider from "./props-provider/CustomPaletteProvider";
 import {WineryService} from "./services/winery.service";
 import { ActivatedRoute } from '@angular/router';
 import { PageParameter } from './model/page-parameter';
@@ -57,7 +57,7 @@ export class AppComponent implements OnInit {
         OriginalPropertiesProvider,
 
         {[InjectionNames.bpmnPropertiesProvider]: ['type', OriginalPropertiesProvider.propertiesProvider[1]]},
-        {[InjectionNames.propertiesProvider]: ['type', CustomPropsProvider]},
+        //{[InjectionNames.propertiesProvider]: ['type', CustomPropsProvider]},
 
         {[InjectionNames.originalPaletteProvider]: ['type', OriginalPaletteProvider]},
         {[InjectionNames.paletteProvider]: ['type', CustomPaletteProvider]},

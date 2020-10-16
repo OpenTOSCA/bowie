@@ -33,15 +33,16 @@ var EXTERNAL_CAPABLE_PROPS = {
 };
 
 async function update2(selectOptions){
+	console.log("vor update 3");
   var selectOptions2 = await update3(selectOptions);
-  console.log("Test");
+  console.log("nach update 3");
   console.log(selectOptions2);
 
   return selectOptions2;
 }
-async function update3(selectOptions){
+function update3(selectOptions){
 
-  return new Promise(() =>{
+  return new Promise(resolve =>{
   var http = new XMLHttpRequest();
       http.open("GET", "http://localhost:8080/winery/nodetypes/http%253A%252F%252Fopentosca.org%252Fnodetypes/MyTinyToDoDockerContainer/interfaces/", true);
                      http.send();
@@ -50,16 +51,20 @@ async function update3(selectOptions){
         alert(http.responseText);
         var si = JSON.parse(http.responseText);
         console.log(si[0].operation[0].inputParameters.inputParameter);
+		var counter = 0; //test
         for(var i=0; i<5; i++){
           selectOptions.push({value: si[0].operation[0].inputParameters.inputParameter[i].name, name:
             si[0].operation[0].inputParameters.inputParameter[i].name})
-          console.log(selectOptions);
+          console.log(selectOptions, counter);
+		  counter++;  //test
         }
-        return selectOptions
+		console.log(selectOptions);
+        resolve(selectOptions);
+		
 
       }
     }
-  }).then(()=> console.log("Got it"))
+  }).then(response =>{return response})// console.log("Got it", response)) 
 }
 module.exports = function(element, bpmnFactory, options, translate) {
 
@@ -118,7 +123,7 @@ module.exports = function(element, bpmnFactory, options, translate) {
   entries.push(entryFactory.selectBox(translate, {
     id : 'implementation',
     label: translate('Implementation'),
-    selectOptions: update2(selectOptions),
+    selectOptions: function(){var ops = update2(selectOptions); console.log("options:", ops); return ops;},
     modelProperty: 'implType',
 
     get: function(element, node) {
