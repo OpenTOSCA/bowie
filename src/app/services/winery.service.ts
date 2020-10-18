@@ -24,6 +24,7 @@ import { map } from 'rxjs/internal/operators';
 import { Observable } from 'rxjs/Rx';
 import { ToscaInterface } from '../model/toscaInterface';
 import JSZip from 'jszip';
+import { AppComponent } from '../app.component';
 
 /**
  * WineryService
@@ -60,6 +61,7 @@ export class WineryService {
             console.log(this.serviceTemplateId);
             this.httpService.get(this.getFullUrl(url)).subscribe(response => {
                 this.nodetemplate = this.transferResponse2NodeTemplate(response);
+               
                 return response});
     }
 
