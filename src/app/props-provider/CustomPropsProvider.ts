@@ -20,16 +20,15 @@ import { Injectable } from '@angular/core';
 export class CustomPropsProvider implements IPropertiesProvider {
 
   static $inject = ['translate', 'bpmnPropertiesProvider'];
-  static options = [{ name: 'Test', value: 'Test' }, { name: 'Test1', value: 'Test1' }];
-  static interfaces = [{ name: 'Test', value: 'Test' }, { name: 'Test1', value: 'Test1' }];
-  static template = [{ name: 'Test', value: 'Test' }, { name: 'Test1', value: 'Test1' }];
+  static options = [];
+  static interfaces = [];
+  static template = [];
   static winery2: WineryService;
 
 
   // Note that names of arguments must match injected modules, see InjectionNames.
   constructor(private translate, private bpmnPropertiesProvider, private httpService: HttpService, private winery: WineryService) {
     this.update2(CustomPropsProvider.options);
-   
     //this.loadNodeTemplates('http://opentosca.org/servicetemplates', 'MyTinyToDo_Bare_Docker', CustomPropsProvider.template);
     const url = 'servicetemplates/' + this.encode('http://opentosca.org/servicetemplates')
             + '/' + this.encode('MyTinyToDo_Bare_Docker') + '/topologytemplate/';//this.loadNodeTemplateInterfaces('http://opentosca.org/nodetypes', 'http://opentosca.org/nodetypes', CustomPropsProvider.interfaces);
@@ -40,10 +39,8 @@ export class CustomPropsProvider implements IPropertiesProvider {
 
   public async update2(selectOptions) {
     console.log(CustomPropsProvider.winery2);
-    this.loadNodeTemplates();
-    if(CustomPropsProvider.winery2 != undefined){
-    console.log(CustomPropsProvider.winery2.httpService);
-    }
+    var template = await this.loadNodeTemplates(CustomPropsProvider.template);
+    console.log(template);
     console.log("vor update 3");
     var selectOptions2 = await this.update3(selectOptions);
     console.log("nach update 3");
@@ -87,7 +84,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
     }).then(response => { return response })// console.log("Got it", response)) 
   }
 
-  public loadNodeTemplates(){
+  public async loadNodeTemplates(options){
     if(CustomPropsProvider.winery2 !=undefined){
      CustomPropsProvider.winery2.loadNodeTemplates();
     var httpService = CustomPropsProvider.winery2.httpService;
@@ -98,7 +95,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
       if(httpService != undefined){
         console.log("Hirra")
     return httpService.get(this.getFullUrl(url))
-        .pipe(map(this.transferResponse2NodeTemplate));
+        .pipe(map(await this.transferResponse2NodeTemplate));
       }
     }
 }
@@ -121,6 +118,8 @@ export class CustomPropsProvider implements IPropertiesProvider {
     for (const key in response.nodeTemplates) {
         if (response.nodeTemplates.hasOwnProperty(key)) {
             const nodeTemplate = response.nodeTemplates[key];
+            CustomPropsProvider.template.concat({value: nodeTemplate.id, name: nodeTemplate.id});
+
             nodeTemplates.push(new NodeTemplate(
                 nodeTemplate.id,
                 nodeTemplate.name,
@@ -171,34 +170,38 @@ public  transformNodeTemplates(url, selectOptions)  {
     return this.bpmnPropertiesProvider.getTabs(element)
       .concat({
         id: 'custom',
-        label: this.translate('Custom'),
+        label: this.translate('Properties'),
         groups: [
           {
-            id: 'customText',
-            label: this.translate('customText'),
+            id: 'opProp',
+            label: this.translate('OperationTask Properties'),
             entries: [
+              EntryFactory.textBox({
+                id: 'servicetemplateID',
+                description: 'ServiceTemplate ID',
+                label: 'Service Template ID',
+                modelProperty: 'servicetemplateID'
+              }),
               EntryFactory.selectBox({
-                id: 'interface',
-                description: 'interface',
-                label: 'Interface',
+                id: 'nodetemplate',
+                description: 'NodeTemplate',
+                label: 'NodeTemplate',
                 selectOptions: function (element, values) {
-                  var options = [{ name: 'Test', value: 'Test' }, { name: 'Test1', value: 'Test1' }];
-                  return options;
+                  return CustomPropsProvider.template;
                 },
                 setControlValue: true,
-                modelProperty: 'example1'
+                modelProperty: 'nodetemplate'
               }),
               EntryFactory.selectBox({
                 id: 'interface',
-                description: 'interface',
+                description: 'Interface',
                 label: 'Interface',
                 selectOptions: function (element, values) {
                   var options = [{ name: 'Test', value: 'Test' }, { name: 'Test1', value: 'Test1' }];
-                  
                   return options;
                 },
                 setControlValue: true,
-                modelProperty: 'example'
+                modelProperty: 'interface'
               }),
               EntryFactory.selectBox({
                 id: 'operation',
@@ -206,10 +209,32 @@ public  transformNodeTemplates(url, selectOptions)  {
                 label: 'Operation',
                 selectOptions: function (element) {
                   var options = [{ name: 'Test', value: 'Test' }, { name: 'Test1', value: 'Test1' }];
+                  return options;
+                },
+                setControlValue: true,
+                modelProperty: 'operation'
+              }),
+              EntryFactory.selectBox({
+                id: 'inputParams',
+                description: 'Input Parameter',
+                label: 'Input Parameter',
+                selectOptions: function (element) {
+                  var options = [{ name: 'Test', value: 'Test' }, { name: 'Test1', value: 'Test1' }];
                   return CustomPropsProvider.options;
                 },
                 setControlValue: true,
-                modelProperty: 'example2'
+                modelProperty: 'inputParams'
+              }),
+              EntryFactory.selectBox({
+                id: 'outputParams',
+                description: 'Output Parameter',
+                label: 'Output Parameter',
+                selectOptions: function (element) {
+                  var options = [{ name: 'Test', value: 'Test' }, { name: 'Test1', value: 'Test1' }];
+                  return options;
+                },
+                setControlValue: true,
+                modelProperty: 'outputParams'
               })
 
             ]

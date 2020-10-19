@@ -76,7 +76,7 @@ export class WineryService {
         for (const key in response.nodeTemplates) {
             if (response.nodeTemplates.hasOwnProperty(key)) {
                 const nodeTemplate = response.nodeTemplates[key];
-                WineryService.nodetemplates2.push({value: nodeTemplate.name, name:
+                CustomPropsProvider.template.push({value: nodeTemplate.name, name:
                     nodeTemplate.name})
                 nodeTemplates.push(new NodeTemplate(
                     nodeTemplate.id,
