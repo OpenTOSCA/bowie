@@ -1,7 +1,8 @@
 import {
   assign
 } from 'min-dash';
-
+import _camundaModdleDescriptor from "camunda-bpmn-moddle/resources/camunda.json";
+import BpmnModdle from 'bpmn-moddle';
 
 /**
  * A palette that allows you to create BPMN _and_ custom elements.
@@ -27,6 +28,9 @@ CustomPaletteProvider.$inject = [
 ];
 
 
+const moddle = new BpmnModdle({camunda: _camundaModdleDescriptor});
+
+
 CustomPaletteProvider.prototype.getPaletteEntries = function(element) {
 
   var actions  = {},
@@ -39,10 +43,10 @@ CustomPaletteProvider.prototype.getPaletteEntries = function(element) {
 
       function createRect(suitabilityScore) {
         return function(event) {
-          const businessObject = bpmnFactory.create('bpmn:Task');
+          const businessObject = bpmnFactory.create('bpmn:ServiceTask');
     
           const shape = elementFactory.createShape({
-            type: 'bpmn:Task',
+            type: 'bpmn:ServiceTask',
             businessObject: businessObject
           });
       
@@ -50,6 +54,40 @@ CustomPaletteProvider.prototype.getPaletteEntries = function(element) {
   
         
       }}
+      
+    // danke internet https://forum.bpmn.io/t/proper-way-to-create-and-update-activities-in-bpmn-js-modeler/4696
+
+	  function createGroovyRect(suitabilityScore) {
+        return function(event) {
+          const businessObject = bpmnFactory.create('bpmn:ScriptTask', {
+            extensionElements: moddle.create('bpmn:ExtensionElements', {
+              values: [
+                moddle.create('camunda:InputOutput', {
+                  inputParameters: [
+                    moddle.create('camunda:InputParameter', { name: 'parameter1' }),
+                    moddle.create('camunda:InputParameter', { name: 'parameter2' }),
+                  ],
+                }),
+              ],
+            })
+          });
+
+          businessObject.name = "lustige groovy node operations";
+          businessObject.scriptFormat = "groovy";
+          businessObject.resource = "deployment://CallNodeOperation.groovy";
+          
+    
+          const shape = elementFactory.createShape({
+            type: 'bpmn:ScriptTask',
+            businessObject: businessObject
+          });
+          console.log(businessObject);
+
+          create.start(event, shape); 
+  
+        
+      }}
+
   function createAction(type, group, className, title, options) {
 
     function createListener(event) {
@@ -83,13 +121,23 @@ CustomPaletteProvider.prototype.getPaletteEntries = function(element) {
     'custom-triangle': createAction(
       'custom:triangle', 'custom', 'icon-custom-triangle', 'triangle', ''
     ),
-    'task':{
+    'task1':{
       group: 'activity',
       className: 'bpmn-icon-task',
-      title: 'Activate the lasso tool',
+      title: 'Create Task',
       action: {
         dragstart: createRect('60'),
         click: createRect('60')
+        
+      }
+    },
+	'task':{
+      group: 'activity',
+      className: 'bpmn-icon-task',
+      title: 'Create Groovy',
+      action: {
+        dragstart: createGroovyRect('60'),
+        click: createGroovyRect('60')
         
       }
     },
