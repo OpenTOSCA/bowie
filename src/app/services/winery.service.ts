@@ -25,6 +25,7 @@ import { Observable } from 'rxjs/Rx';
 import { ToscaInterface } from '../model/toscaInterface';
 import JSZip from 'jszip';
 import { AppComponent } from '../app.component';
+import { CustomPropsProvider } from '../props-provider/CustomPropsProvider';
 
 /**
  * WineryService
@@ -32,15 +33,17 @@ import { AppComponent } from '../app.component';
  */
 @Injectable()
 export class WineryService {
+    
     private repositoryURL: string;
     private namespace: string;
     private serviceTemplateId: string;
     private plan: string;
-    nodetemplate;
+    static nodetemplates2 = [{ name: 'Test', value: 'Test' }, { name: 'Test1', value: 'Test1' }];
 
     constructor(private broadcastService: BroadcastService,
-                private httpService: HttpService) {
+                public httpService: HttpService) {
         this.broadcastService.saveEvent$.subscribe(data => this.save(data));
+        
     }
 
     public setRequestParam(queryParams: PageParameter) {
@@ -54,23 +57,27 @@ export class WineryService {
         }
     }
 
-    public loadNodeTemplates() {
+    public  loadNodeTemplates() {
         const url = 'servicetemplates/' + this.encode(this.namespace)
             + '/' + this.encode(this.serviceTemplateId) + '/topologytemplate/';
             console.log(this.namespace);
             console.log(this.serviceTemplateId);
-            this.httpService.get(this.getFullUrl(url)).subscribe(response => {
-                this.nodetemplate = this.transferResponse2NodeTemplate(response);
+            this.httpService.get(this.getFullUrl(url)).subscribe( response => {
+                this.transferResponse2NodeTemplate(response);
                
                 return response});
     }
 
     
     private transferResponse2NodeTemplate(response: any) {
+        console.log(response);
+        
         const nodeTemplates: NodeTemplate[] = [];
         for (const key in response.nodeTemplates) {
             if (response.nodeTemplates.hasOwnProperty(key)) {
                 const nodeTemplate = response.nodeTemplates[key];
+                CustomPropsProvider.template.push({value: nodeTemplate.name, name:
+                    nodeTemplate.name})
                 nodeTemplates.push(new NodeTemplate(
                     nodeTemplate.id,
                     nodeTemplate.name,

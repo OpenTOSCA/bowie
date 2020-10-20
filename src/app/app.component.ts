@@ -4,9 +4,10 @@ import {Modeler, OriginalPropertiesProvider, PropertiesPanelModule, InjectionNam
 import {CustomPropsProvider} from './props-provider/CustomPropsProvider';
 import CustomPaletteProvider from "./props-provider/CustomPaletteProvider";
 import {WineryService} from "./services/winery.service";
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Params } from '@angular/router';
 import { PageParameter } from './model/page-parameter';
 import _camundaModdleDescriptor from "camunda-bpmn-moddle/resources/camunda.json";
+
 
 
 const customModdle = {
@@ -45,6 +46,7 @@ export class AppComponent implements OnInit {
   static options = [{ name: 'Test3', value: 'Test3' }, { name: 'Test4', value: 'Test4' }];
   s: any;
   static interfaces =  [{ name: 'Test3', value: 'Test3' }, { name: 'Test4', value: 'Test4' }];
+  static param : Params;
   
   constructor(private http: HttpClient, private route: ActivatedRoute,private wineryService: WineryService) {
   }
@@ -71,7 +73,9 @@ export class AppComponent implements OnInit {
         custom: _camundaModdleDescriptor
       }
     });
-    this.route.queryParams.subscribe(params => {this.wineryService.setRequestParam(<PageParameter>params);});
+    
+    this.route.queryParams.subscribe(params => {this.wineryService.setRequestParam(<PageParameter>params)
+    CustomPropsProvider.winery2 = this.wineryService});
 
     this.initiate();
     
@@ -97,15 +101,16 @@ export class AppComponent implements OnInit {
     );
     
   }
+
   load(){
+    console.log(this.wineryService);
     this.wineryService.loadNodeTemplates();
     this.s = this.wineryService.loadNodeTemplates();
 
     let namespace = "http://opentosca.org/nodetypes";
     this.wineryService.loadNodeTemplateInterfaces(namespace,'MyTinyToDoDockerContainer');
 
-    console.log(this.s);
-    this.wineryService.loadPlan2(this.modeler);
+    //this.wineryService.loadPlan2(this.modeler);
     
   }
 
