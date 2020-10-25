@@ -132,6 +132,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
   }
 
   getTabs(element) {
+    this.update2(CustomPropsProvider.options);
     return this.bpmnPropertiesProvider.getTabs(element)
       .concat({
         id: 'custom',
@@ -170,6 +171,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       http.send();
                       http.onreadystatechange = function () {
                         if (http.readyState == XMLHttpRequest.DONE) {
+
                           console.log(http.responseText);
                           var response = JSON.parse(http.responseText);
                           CustomPropsProvider.interfaces = [];
@@ -179,6 +181,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                             CustomPropsProvider.interfaces.push({
                               name: response[i].name, value: response[i].name
                             })
+
 
                           }
                           console.log(CustomPropsProvider.interfaces);
