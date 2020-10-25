@@ -7,14 +7,15 @@ import { ToscaInterface } from '../model/toscaInterface';
 import { AppComponent } from '../app.component';
 import { NodeTemplate } from '../model/nodetemplate';
 import { map } from 'rxjs/internal/operators';
-import {WineryService}  from '../services/winery.service';
+import { WineryService } from '../services/winery.service';
 import { HttpClient, HttpHandler } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { FindValueSubscriber } from 'rxjs/internal/operators/find';
 
 
 
 /**
- * Eventuell muessen wir die Klasse umbauen, also wie damals mit group.entries.push
+ * 
  */
 @Injectable()
 export class CustomPropsProvider implements IPropertiesProvider {
@@ -22,6 +23,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
   static $inject = ['translate', 'bpmnPropertiesProvider'];
   static options = [];
   static interfaces = [];
+  static operations = [];
   static template = [];
   static winery2: WineryService;
 
@@ -31,10 +33,10 @@ export class CustomPropsProvider implements IPropertiesProvider {
     this.update2(CustomPropsProvider.options);
     //this.loadNodeTemplates('http://opentosca.org/servicetemplates', 'MyTinyToDo_Bare_Docker', CustomPropsProvider.template);
     const url = 'servicetemplates/' + this.encode('http://opentosca.org/servicetemplates')
-            + '/' + this.encode('MyTinyToDo_Bare_Docker') + '/topologytemplate/';//this.loadNodeTemplateInterfaces('http://opentosca.org/nodetypes', 'http://opentosca.org/nodetypes', CustomPropsProvider.interfaces);
-            
+      + '/' + this.encode('MyTinyToDo_Bare_Docker') + '/topologytemplate/';//this.loadNodeTemplateInterfaces('http://opentosca.org/nodetypes', 'http://opentosca.org/nodetypes', CustomPropsProvider.interfaces);
 
-    
+
+
   }
 
   public async update2(selectOptions) {
@@ -56,7 +58,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
       var http = new XMLHttpRequest();
       http.open("GET", "http://localhost:8080/winery/nodetypes/http%253A%252F%252Fopentosca.org%252Fnodetypes/MyTinyToDoDockerContainer/interfaces/", true);
       http.send();
-      
+
       http.onreadystatechange = function () {
         if (http.readyState == XMLHttpRequest.DONE) {
           //alert(http.responseText);
@@ -66,7 +68,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
           var counter = 0; //test
           var containsParam = false;
           for (var i = 0; i < length; i++) {
-            for (var j = 0; j < selectOptions.length; j++) {        
+            for (var j = 0; j < selectOptions.length; j++) {
               if (si[0].operation[0].inputParameters.inputParameter[i].name == selectOptions[j].name) {
                 containsParam = true;
               }
@@ -84,78 +86,44 @@ export class CustomPropsProvider implements IPropertiesProvider {
     }).then(response => { return response })// console.log("Got it", response)) 
   }
 
-  public async loadNodeTemplates(options){
-    if(CustomPropsProvider.winery2 !=undefined){
-     CustomPropsProvider.winery2.loadNodeTemplates();
-    var httpService = CustomPropsProvider.winery2.httpService;
-    console.log('Service', httpService);
-    const url = 'servicetemplates/' + this.encode('http://opentosca.org/servicetemplates')
+  public async loadNodeTemplates(options) {
+    if (CustomPropsProvider.winery2 != undefined) {
+      CustomPropsProvider.winery2.loadNodeTemplates();
+      var httpService = CustomPropsProvider.winery2.httpService;
+      console.log('Service', httpService);
+      const url = 'servicetemplates/' + this.encode('http://opentosca.org/servicetemplates')
         + '/' + this.encode('MyTinyToDo_Bare_Docker') + '/topologytemplate/';
-    
-      if(httpService != undefined){
-        console.log("Hirra")
-    return httpService.get(this.getFullUrl(url))
-        .pipe(map(await this.transferResponse2NodeTemplate));
+
+      if (httpService != undefined) {
+        return httpService.get(this.getFullUrl(url))
+          .pipe(map(await this.transferResponse2NodeTemplate));
       }
     }
-}
-
-  public async loadNodeTemplateInterfaces(namespace, nodeType, interfaces) {
-    const url = 'nodetypes/' + this.encode(namespace)
-      + '/' + this.encode(nodeType) + '/interfaces/';
-    console.log("Interfaces davor" + CustomPropsProvider.interfaces)
-    var response = await this.transformNodeTemplates(url, interfaces);
-    console.log("Interfaces danach");
-    
-    return this.httpService.get(this.getFullUrl(url))
   }
+
 
   private transferResponse2NodeTemplate(response: any) {
     console.log("cHECK");
     console.log(response);
-    
+
     const nodeTemplates: NodeTemplate[] = [];
     for (const key in response.nodeTemplates) {
-        if (response.nodeTemplates.hasOwnProperty(key)) {
-            const nodeTemplate = response.nodeTemplates[key];
-            CustomPropsProvider.template.concat({value: nodeTemplate.id, name: nodeTemplate.id});
+      if (response.nodeTemplates.hasOwnProperty(key)) {
+        const nodeTemplate = response.nodeTemplates[key];
+        CustomPropsProvider.template.concat({ value: nodeTemplate.id, name: nodeTemplate.id });
 
-            nodeTemplates.push(new NodeTemplate(
-                nodeTemplate.id,
-                nodeTemplate.name,
-                nodeTemplate.type,
-                nodeTemplate.type.replace(/^\{(.+)\}(.+)/, '$1')));
-        }
-    }
-    
-    return nodeTemplates;
-}
-public  transformNodeTemplates(url, selectOptions)  {
-  var pro = new Promise(resolve => {
-    console.log(url);
-    var http = new XMLHttpRequest();
-    http.open("GET", url, true);
-    http.send();
-    
-    http.onreadystatechange = function () {
-      if (http.readyState == XMLHttpRequest.DONE) {
-        //alert(http.responseText);
-        
-        map(() => http.responseText);
-       
-        resolve(selectOptions);
+        nodeTemplates.push(new NodeTemplate(
+          nodeTemplate.id,
+          nodeTemplate.name,
+          nodeTemplate.type,
+          nodeTemplate.type.replace(/^\{(.+)\}(.+)/, '$1')));
       }
     }
-  }).then(response => { 
-        return response })// console.log("Got it", response)) 
-        var node = new NodeTemplate('', '', '', '');
-        var arr = [node] ;
-  return map(() => arr);
-}
-  
 
+    return nodeTemplates;
+  }
 
-  private encode(param: string): string {
+  public encode(param: string): string {
     return encodeURIComponent(encodeURIComponent(param));
   }
 
@@ -164,9 +132,6 @@ public  transformNodeTemplates(url, selectOptions)  {
   }
 
   getTabs(element) {
-    console.log(CustomPropsProvider.options);
-    console.log("tabs");
-    this.update2(CustomPropsProvider.options);
     return this.bpmnPropertiesProvider.getTabs(element)
       .concat({
         id: 'custom',
@@ -187,19 +152,74 @@ public  transformNodeTemplates(url, selectOptions)  {
                 description: 'NodeTemplate',
                 label: 'NodeTemplate',
                 selectOptions: function (element, values) {
+                  console.log(CustomPropsProvider.template);
                   return CustomPropsProvider.template;
                 },
                 setControlValue: true,
-                modelProperty: 'nodetemplate'
+                modelProperty: 'nodetemplate',
+                set: function (element, values, node) {
+                  console.log("das ausgewählte Element ist");
+                  console.log(values.nodetemplate);
+                  if (values.nodetemplate != undefined) {
+                    var namespace = 'http://opentosca.org/nodetypes';
+                    const url = 'nodetypes/' + encodeURIComponent(encodeURIComponent((namespace)))
+                      + '/' + encodeURIComponent(encodeURIComponent((values.nodetemplate))) + '/interfaces/';
+                    var interfaces = new Promise(resolve => {
+                      var http = new XMLHttpRequest();
+                      http.open("GET", 'http://localhost:8080/' + 'winery/' + url, true);
+                      http.send();
+                      http.onreadystatechange = function () {
+                        if (http.readyState == XMLHttpRequest.DONE) {
+                          console.log(http.responseText);
+                          var response = JSON.parse(http.responseText);
+                          CustomPropsProvider.interfaces = [];
+                          console.log('JSON PARSE');
+                          console.log(response);
+                          for (var i = 0; i < response.length; i++) {
+                            CustomPropsProvider.interfaces.push({
+                              name: response[i].name, value: response[i].name
+                            })
+
+                          }
+                          console.log(CustomPropsProvider.interfaces);
+                          element.businessObject.$attrs.interface = CustomPropsProvider.interfaces;
+                          console.log(element);
+                          resolve(CustomPropsProvider.interfaces);
+                        }
+
+                      }
+                    }).then(response => { return response })
+                    element.businessObject.$attrs.nodetemplate = values.nodetemplate;
+                    return;
+                  }
+                  return;
+                }
               }),
               EntryFactory.selectBox({
                 id: 'interface',
                 description: 'Interface',
                 label: 'Interface',
                 selectOptions: function (element, values) {
-                  var options = [{ name: 'Test', value: 'Test' }, { name: 'Test1', value: 'Test1' }];
-                  return options;
+                  return CustomPropsProvider.interfaces;
                 },
+                get: function (element, node) {
+                  console.log(element);
+                  CustomPropsProvider.interfaces = element.businessObject.$attrs.interface;
+                  console.log(node);
+                  return element;
+                },
+                set: function (element, values, node) {
+                  if (values.interface != undefined) {
+                    /** 
+                    for (var j = 0; j < response[i].length; j++) {
+                      CustomPropsProvider.operations.push({
+                        name: response[i].name.operation[j].name, value: response[i].name.operation[j].name
+                      });
+                      */
+                    }
+                    
+                    return;
+                  },
                 setControlValue: true,
                 modelProperty: 'interface'
               }),
@@ -209,7 +229,7 @@ public  transformNodeTemplates(url, selectOptions)  {
                 label: 'Operation',
                 selectOptions: function (element) {
                   var options = [{ name: 'Test', value: 'Test' }, { name: 'Test1', value: 'Test1' }];
-                  return options;
+                  return CustomPropsProvider.operations;
                 },
                 setControlValue: true,
                 modelProperty: 'operation'
@@ -219,11 +239,57 @@ public  transformNodeTemplates(url, selectOptions)  {
                 description: 'Input Parameter',
                 label: 'Input Parameter',
                 selectOptions: function (element) {
-                  var options = [{ name: 'Test', value: 'Test' }, { name: 'Test1', value: 'Test1' }];
                   return CustomPropsProvider.options;
+                },
+                set: function (element, values, node) {
+                  if (values.inputParams != undefined) {
+                    element.businessObject.$attrs.nameInput = values.inputParams;
+                    element.businessObject.$attrs.inputParams = values.inputParams;
+                    return;
+                  }
+                  return;
                 },
                 setControlValue: true,
                 modelProperty: 'inputParams'
+              }),
+              EntryFactory.textField({
+                id: 'nameInput',
+                description: 'Name of Parameter',
+                label: 'Name of Parameter',
+                modelProperty: 'nameInput',
+                validate: function (element, values) {
+                  var errorMessageP = {};
+                  if (element.businessObject.$attrs.inputParams != undefined) {
+                    element.businessObject.$attrs.nameInput = element.businessObject.$attrs.inputParams;
+                    return errorMessageP;
+
+                  } else {
+                    errorMessageP = "Please select an input parameter.";
+                    return errorMessageP;
+                  }
+                }
+              }),
+              EntryFactory.textField({
+                id: 'typeInput',
+                description: 'Type of Parameter',
+                label: 'Type of Parameter',
+                modelProperty: 'typeInput',
+                validate: function (element, values) {
+                  var errorMessageP = {};
+                  if (element.businessObject.$attrs.inputParams != undefined) {
+                    element.businessObject.$attrs.typeInput = element.businessObject.$attrs.inputParams;
+                    return errorMessageP;
+                  } else {
+                    errorMessageP = "Please select an input parameter.";
+                    return errorMessageP;
+                  }
+                }
+              }),
+              EntryFactory.textField({
+                id: 'valueInput',
+                description: 'Value of Parameter',
+                label: 'Value of Parameter',
+                modelProperty: 'valueInput'
               }),
               EntryFactory.selectBox({
                 id: 'outputParams',

@@ -76,8 +76,20 @@ export class WineryService {
         for (const key in response.nodeTemplates) {
             if (response.nodeTemplates.hasOwnProperty(key)) {
                 const nodeTemplate = response.nodeTemplates[key];
-                CustomPropsProvider.template.push({value: nodeTemplate.name, name:
-                    nodeTemplate.name})
+                var containsParam = false;
+                for (var j = 0; j < CustomPropsProvider.template.length; j++) {        
+                        if (nodeTemplate.name == CustomPropsProvider.template[j].name) {
+                          containsParam = true;
+                        }
+                }
+                if (!containsParam) {
+                    CustomPropsProvider.template.push({value: nodeTemplate.name, name:
+                        nodeTemplate.name});
+                }
+                if(CustomPropsProvider.template.length == 0){
+                    CustomPropsProvider.template.push({value: nodeTemplate.name, name:
+                        nodeTemplate.name});
+                }
                 nodeTemplates.push(new NodeTemplate(
                     nodeTemplate.id,
                     nodeTemplate.name,

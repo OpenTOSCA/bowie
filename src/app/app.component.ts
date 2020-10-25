@@ -6,7 +6,8 @@ import CustomPaletteProvider from "./props-provider/CustomPaletteProvider";
 import {WineryService} from "./services/winery.service";
 import { ActivatedRoute, Params } from '@angular/router';
 import { PageParameter } from './model/page-parameter';
-import _camundaModdleDescriptor from "camunda-bpmn-moddle/resources/camunda.json";
+import _camundaModdleDescriptor from "camunda-bpmn-moddle/resources/camunda.json";;
+//import SituationPropertiesProvider from './provider/situations/SituationPropertiesProvider';
 
 
 
@@ -47,6 +48,7 @@ export class AppComponent implements OnInit {
   s: any;
   static interfaces =  [{ name: 'Test3', value: 'Test3' }, { name: 'Test4', value: 'Test4' }];
   static param : Params;
+  static winery2: WineryService;
   
   constructor(private http: HttpClient, private route: ActivatedRoute,private wineryService: WineryService) {
   }
@@ -59,8 +61,7 @@ export class AppComponent implements OnInit {
       additionalModules: [
         PropertiesPanelModule,
         OriginalPropertiesProvider,
-
-        {[InjectionNames.bpmnPropertiesProvider]: ['type', OriginalPropertiesProvider.propertiesProvider[1]]},
+      {[InjectionNames.bpmnPropertiesProvider]: ['type', OriginalPropertiesProvider.propertiesProvider[1]]},
         {[InjectionNames.propertiesProvider]: ['type', CustomPropsProvider]},
 
         {[InjectionNames.originalPaletteProvider]: ['type', OriginalPaletteProvider]},
@@ -74,8 +75,10 @@ export class AppComponent implements OnInit {
       }
     });
     
-    this.route.queryParams.subscribe(params => {this.wineryService.setRequestParam(<PageParameter>params)
-    CustomPropsProvider.winery2 = this.wineryService});
+    this.route.queryParams.subscribe(params => {this.wineryService.setRequestParam(<PageParameter>params);
+      //AppComponent.winery2 = this.wineryService;
+    CustomPropsProvider.winery2 = this.wineryService
+  });
 
     this.initiate();
     
