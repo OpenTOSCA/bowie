@@ -24,8 +24,9 @@ export class CustomPropsProvider implements IPropertiesProvider {
   static options = [];
   static interfaces = [{name: 'none', value: 'none'}];
   static operations = [];
-  static template = [{name: 'none', value: 'none'}];
+  static template = [];
   static winery2: WineryService;
+  static tosca = [];
 
 
   // Note that names of arguments must match injected modules, see InjectionNames.
@@ -49,7 +50,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
     //console.log(selectOptions2);
 
     //CustomPropsProvider.options.concat(selectOptions2[0]);
-    console.log(CustomPropsProvider.options);
+    //console.log(CustomPropsProvider.options);
 
   }
   public async update3(selectOptions) {
@@ -154,7 +155,6 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 label: 'NodeTemplate',
                 selectOptions: function (element, values) {
                   //console.log(CustomPropsProvider.template);
-                  
                   return CustomPropsProvider.template;
                 },
                 setControlValue: true,
@@ -182,7 +182,9 @@ export class CustomPropsProvider implements IPropertiesProvider {
                           console.log('JSON PARSE');
                           console.log(response);
                           var array = [];
+                          
                           for (var i = 0; i < response.length; i++) {
+                            CustomPropsProvider.tosca.push({name: response[i].name, value: response[i].operation});
                             array.push({
                               name: response[i].name, value: response[i].name
                             });
@@ -214,6 +216,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 label: 'Interface',
                 selectOptions: function (element, values) {
                   console.log('SELECTOPTIONS')
+                  element.businessObject.$attrs.operation = [];
                   if (element.businessObject.$attrs.nodetemplate != undefined) {
                     var namespace = 'http://opentosca.org/nodetypes';
                     const url = 'nodetypes/' + encodeURIComponent(encodeURIComponent((namespace)))
@@ -260,6 +263,26 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   return window['interfaceN'];
                 
                 },
+                set: function(element, values, node){
+                  console.log(element);
+                  element.businessObject.$attrs.interface = values.interface;
+                  if(element.businessObject.$attrs.interface !=undefined){
+                    for(var i=0; i<CustomPropsProvider.tosca.length; i++){
+                      if(CustomPropsProvider.tosca[i].name == element.businessObject.$attrs.interface){
+                        console.log("DER SET VALUE");
+                        console.log(CustomPropsProvider.tosca[i].value.length);
+                        var arr = [];
+                        for(var j = 0; j< CustomPropsProvider.tosca[i].value.length; j++){
+                          CustomPropsProvider.operations.push({name: CustomPropsProvider.tosca[i].value[j].name, value:
+                            CustomPropsProvider.tosca[i].value[j].name});
+                        }
+                        
+                        element.businessObject.$attrs.operation =  CustomPropsProvider.operations;
+                        return ;
+                      }
+                    }
+                  }
+                },
                 setControlValue: true,
                 modelProperty: 'interface'
               }),
@@ -267,9 +290,31 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 id: 'operation',
                 description: 'Operation',
                 label: 'Operation',
-                selectOptions: function (element) {
-                  var options = [{ name: 'Test', value: 'Test' }, { name: 'Test1', value: 'Test1' }];
+                selectOptions: function (element, values) {
+                  console.log(element);
+                  if(element.businessObject.$attrs.interface !=undefined){
+                    for(var i=0; i<CustomPropsProvider.tosca.length; i++){
+                      if(CustomPropsProvider.tosca[i].name == element.businessObject.$attrs.interface){
+                        console.log("DER VALUE");
+                        console.log(CustomPropsProvider.tosca[i].value);
+                        var arr = [];
+                        for(var j = 0; j< CustomPropsProvider.tosca[i].value.length; j++){
+                          CustomPropsProvider.operations.push({name: CustomPropsProvider.tosca[i].value[j].name, value:
+                            CustomPropsProvider.tosca[i].value[j].name});
+                        }
+                        console.log(CustomPropsProvider.operations);
+                        
+                        element.businessObject.$attrs.operation = CustomPropsProvider.operations;
+                        console.log(element.businessObject.$attrs.operation);
+                        return CustomPropsProvider.operations;
+                      }
+                    }
+
+                  }
                   return CustomPropsProvider.operations;
+                },set: function(element, values, node){
+                  element.businessObject.$attrs.operation =values.operation;
+                  return ; 
                 },
                 setControlValue: true,
                 modelProperty: 'operation'
