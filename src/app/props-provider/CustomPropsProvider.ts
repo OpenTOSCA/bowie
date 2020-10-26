@@ -22,9 +22,9 @@ export class CustomPropsProvider implements IPropertiesProvider {
 
   static $inject = ['translate', 'bpmnPropertiesProvider'];
   static options = [];
-  static interfaces = [];
+  static interfaces = [{name: 'none', value: 'none'}];
   static operations = [];
-  static template = [];
+  static template = [{name: 'none', value: 'none'}];
   static winery2: WineryService;
 
 
@@ -44,11 +44,11 @@ export class CustomPropsProvider implements IPropertiesProvider {
     var template = await this.loadNodeTemplates(CustomPropsProvider.template);
     console.log(template);
     console.log("vor update 3");
-    var selectOptions2 = await this.update3(selectOptions);
+    //var selectOptions2 = await this.update3(selectOptions);
     console.log("nach update 3");
-    console.log(selectOptions2);
+    //console.log(selectOptions2);
 
-    CustomPropsProvider.options.concat(selectOptions2[0]);
+    //CustomPropsProvider.options.concat(selectOptions2[0]);
     console.log(CustomPropsProvider.options);
 
   }
@@ -149,22 +149,75 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 modelProperty: 'servicetemplateID'
               }),
               EntryFactory.selectBox({
-                id: 'nodetemplate',
+                id: 'NodeTemplate',
                 description: 'NodeTemplate',
                 label: 'NodeTemplate',
                 selectOptions: function (element, values) {
-                  console.log(CustomPropsProvider.template);
+                  //console.log(CustomPropsProvider.template);
+                  
                   return CustomPropsProvider.template;
                 },
                 setControlValue: true,
-                modelProperty: 'nodetemplate',
+                modelProperty: 'NodeTemplate',
                 set: function (element, values, node) {
                   console.log("das ausgewählte Element ist");
                   console.log(values.nodetemplate);
-                  if (values.nodetemplate != undefined) {
+                  console.log(element);
+                  element.businessObject.$attrs.interface = [];
+                  if (values.NodeTemplate != undefined ) {
                     var namespace = 'http://opentosca.org/nodetypes';
                     const url = 'nodetypes/' + encodeURIComponent(encodeURIComponent((namespace)))
-                      + '/' + encodeURIComponent(encodeURIComponent((values.nodetemplate))) + '/interfaces/';
+                      + '/' + encodeURIComponent(encodeURIComponent((values.NodeTemplate))) + '/interfaces/';
+                    var interfaces = new Promise(resolve => {
+                    
+                      var http = new XMLHttpRequest();
+                      http.open("GET", 'http://localhost:8080/' + 'winery/' + url, true);
+                      http.send();
+                      http.onreadystatechange = function () {
+                        if (http.readyState == XMLHttpRequest.DONE) {
+
+                          console.log(http.responseText);
+                          var response = JSON.parse(http.responseText);
+                          CustomPropsProvider.interfaces = [];
+                          console.log('JSON PARSE');
+                          console.log(response);
+                          var array = [];
+                          for (var i = 0; i < response.length; i++) {
+                            array.push({
+                              name: response[i].name, value: response[i].name
+                            });
+                            CustomPropsProvider.interfaces.push({
+                              name: response[i].name, value: response[i].name
+                            })
+                            console.log('HIER Array');
+                            console.log(array);
+                            window['interfaceN'] = array ;
+                          }
+                          
+                          console.log(CustomPropsProvider.interfaces);
+                          element.businessObject.$attrs.interface = CustomPropsProvider.interfaces;
+                          console.log(element);
+                          resolve(CustomPropsProvider.interfaces);
+                        }
+
+                      }
+                    }).then(response => { return response })
+                    element.businessObject.$attrs.NodeTemplate = values.NodeTemplate;
+                    return;
+                  }
+                  return;
+                }
+              }),
+              EntryFactory.selectBox({
+                id: 'interface',
+                description: 'Interface',
+                label: 'Interface',
+                selectOptions: function (element, values) {
+                  console.log('SELECTOPTIONS')
+                  if (element.businessObject.$attrs.nodetemplate != undefined) {
+                    var namespace = 'http://opentosca.org/nodetypes';
+                    const url = 'nodetypes/' + encodeURIComponent(encodeURIComponent((namespace)))
+                      + '/' + encodeURIComponent(encodeURIComponent((element.businessObject.$attrs.nodetemplate))) + '/interfaces/';
                     var interfaces = new Promise(resolve => {
                       var http = new XMLHttpRequest();
                       http.open("GET", 'http://localhost:8080/' + 'winery/' + url, true);
@@ -177,52 +230,36 @@ export class CustomPropsProvider implements IPropertiesProvider {
                           CustomPropsProvider.interfaces = [];
                           console.log('JSON PARSE');
                           console.log(response);
+                          var array = [];
                           for (var i = 0; i < response.length; i++) {
+                            array.push({
+                              name: response[i].name, value: response[i].name
+                            });
                             CustomPropsProvider.interfaces.push({
                               name: response[i].name, value: response[i].name
                             })
+                            console.log('HIER Array');
+                            console.log(array);
+                            window['interfaceN'] = array ;
 
 
                           }
                           console.log(CustomPropsProvider.interfaces);
-                          element.businessObject.$attrs.interface = CustomPropsProvider.interfaces;
+                          //element.businessObject.$attrs.interface = CustomPropsProvider.interfaces;
                           console.log(element);
                           resolve(CustomPropsProvider.interfaces);
                         }
 
                       }
                     }).then(response => { return response })
-                    element.businessObject.$attrs.nodetemplate = values.nodetemplate;
-                    return;
+                    //element.businessObject.$attrs.nodetemplate = values.nodetemplate;
+                    console.log(window['interfaceN']);
+                    return window['interfaceN'];
                   }
-                  return;
-                }
-              }),
-              EntryFactory.selectBox({
-                id: 'interface',
-                description: 'Interface',
-                label: 'Interface',
-                selectOptions: function (element, values) {
-                  return CustomPropsProvider.interfaces;
+                  console.log(window['interfaceN']);
+                  return window['interfaceN'];
+                
                 },
-                get: function (element, node) {
-                  console.log(element);
-                  CustomPropsProvider.interfaces = element.businessObject.$attrs.interface;
-                  console.log(node);
-                  return element;
-                },
-                set: function (element, values, node) {
-                  if (values.interface != undefined) {
-                    /** 
-                    for (var j = 0; j < response[i].length; j++) {
-                      CustomPropsProvider.operations.push({
-                        name: response[i].name.operation[j].name, value: response[i].name.operation[j].name
-                      });
-                      */
-                    }
-                    
-                    return;
-                  },
                 setControlValue: true,
                 modelProperty: 'interface'
               }),
