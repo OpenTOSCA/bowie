@@ -22,7 +22,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
 
   static $inject = ['translate', 'bpmnPropertiesProvider'];
   static options = [];
-  static interfaces = [{name: 'none', value: 'none'}];
+  static interfaces = [{ name: 'none', value: 'none' }];
   static operations = [];
   static template = [];
   static winery2: WineryService;
@@ -164,12 +164,13 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   console.log(values.nodetemplate);
                   console.log(element);
                   element.businessObject.$attrs.interface = [];
-                  if (values.NodeTemplate != undefined ) {
+                  element.businessObject.$attrs.operation = [];
+                  if (values.NodeTemplate != undefined) {
                     var namespace = 'http://opentosca.org/nodetypes';
                     const url = 'nodetypes/' + encodeURIComponent(encodeURIComponent((namespace)))
                       + '/' + encodeURIComponent(encodeURIComponent((values.NodeTemplate))) + '/interfaces/';
                     var interfaces = new Promise(resolve => {
-                    
+
                       var http = new XMLHttpRequest();
                       http.open("GET", 'http://localhost:8080/' + 'winery/' + url, true);
                       http.send();
@@ -182,9 +183,9 @@ export class CustomPropsProvider implements IPropertiesProvider {
                           console.log('JSON PARSE');
                           console.log(response);
                           var array = [];
-                          
+
                           for (var i = 0; i < response.length; i++) {
-                            CustomPropsProvider.tosca.push({name: response[i].name, value: response[i].operation});
+                            CustomPropsProvider.tosca.push({ name: response[i].name, value: response[i].operation });
                             array.push({
                               name: response[i].name, value: response[i].name
                             });
@@ -193,9 +194,9 @@ export class CustomPropsProvider implements IPropertiesProvider {
                             })
                             console.log('HIER Array');
                             console.log(array);
-                            window['interfaceN'] = array ;
+                            window['interfaceN'] = array;
                           }
-                          
+
                           console.log(CustomPropsProvider.interfaces);
                           element.businessObject.$attrs.interface = CustomPropsProvider.interfaces;
                           console.log(element);
@@ -216,7 +217,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 label: 'Interface',
                 selectOptions: function (element, values) {
                   console.log('SELECTOPTIONS')
-                  element.businessObject.$attrs.operation = [];
+                  //element.businessObject.$attrs.operation = [];
                   if (element.businessObject.$attrs.nodetemplate != undefined) {
                     var namespace = 'http://opentosca.org/nodetypes';
                     const url = 'nodetypes/' + encodeURIComponent(encodeURIComponent((namespace)))
@@ -234,6 +235,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                           console.log('JSON PARSE');
                           console.log(response);
                           var array = [];
+                          CustomPropsProvider.tosca = [];
                           for (var i = 0; i < response.length; i++) {
                             array.push({
                               name: response[i].name, value: response[i].name
@@ -243,7 +245,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                             })
                             console.log('HIER Array');
                             console.log(array);
-                            window['interfaceN'] = array ;
+                            window['interfaceN'] = array;
 
 
                           }
@@ -261,24 +263,26 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   }
                   console.log(window['interfaceN']);
                   return window['interfaceN'];
-                
+
                 },
-                set: function(element, values, node){
+                set: function (element, values, node) {
                   console.log(element);
                   element.businessObject.$attrs.interface = values.interface;
-                  if(element.businessObject.$attrs.interface !=undefined){
-                    for(var i=0; i<CustomPropsProvider.tosca.length; i++){
-                      if(CustomPropsProvider.tosca[i].name == element.businessObject.$attrs.interface){
+                  if (element.businessObject.$attrs.interface != undefined) {
+                    for (var i = 0; i < CustomPropsProvider.tosca.length; i++) {
+                      if (CustomPropsProvider.tosca[i].name == element.businessObject.$attrs.interface) {
                         console.log("DER SET VALUE");
                         console.log(CustomPropsProvider.tosca[i].value.length);
                         var arr = [];
-                        for(var j = 0; j< CustomPropsProvider.tosca[i].value.length; j++){
-                          CustomPropsProvider.operations.push({name: CustomPropsProvider.tosca[i].value[j].name, value:
-                            CustomPropsProvider.tosca[i].value[j].name});
+                        for (var j = 0; j < CustomPropsProvider.tosca[i].value.length; j++) {
+                          CustomPropsProvider.operations.push({
+                            name: CustomPropsProvider.tosca[i].value[j].name, value:
+                              CustomPropsProvider.tosca[i].value[j].name
+                          });
                         }
-                        
-                        element.businessObject.$attrs.operation =  CustomPropsProvider.operations;
-                        return ;
+
+                        element.businessObject.$attrs.operation = values.operation;
+                        return;
                       }
                     }
                   }
@@ -291,30 +295,33 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 description: 'Operation',
                 label: 'Operation',
                 selectOptions: function (element, values) {
-                  console.log(element);
-                  if(element.businessObject.$attrs.interface !=undefined){
-                    for(var i=0; i<CustomPropsProvider.tosca.length; i++){
-                      if(CustomPropsProvider.tosca[i].name == element.businessObject.$attrs.interface){
-                        console.log("DER VALUE");
-                        console.log(CustomPropsProvider.tosca[i].value);
+                  if (element.businessObject.$attrs.interface != undefined) {
+                    for (var i = 0; i < CustomPropsProvider.tosca.length; i++) {
+                      if (CustomPropsProvider.tosca[i].name == element.businessObject.$attrs.interface) {
+                        CustomPropsProvider.operations = [];
                         var arr = [];
-                        for(var j = 0; j< CustomPropsProvider.tosca[i].value.length; j++){
-                          CustomPropsProvider.operations.push({name: CustomPropsProvider.tosca[i].value[j].name, value:
-                            CustomPropsProvider.tosca[i].value[j].name});
+                        for (var j = 0; j < CustomPropsProvider.tosca[i].value.length; j++) {
+                          CustomPropsProvider.operations.push({
+                            name: CustomPropsProvider.tosca[i].value[j].name, value:
+                              CustomPropsProvider.tosca[i].value[j].name
+                          });
                         }
-                        console.log(CustomPropsProvider.operations);
-                        
-                        element.businessObject.$attrs.operation = CustomPropsProvider.operations;
-                        console.log(element.businessObject.$attrs.operation);
+                        //console.log(CustomPropsProvider.operations);
+
+                        //element.businessObject.$attrs.operation = values.operations;
+
                         return CustomPropsProvider.operations;
                       }
                     }
 
                   }
                   return CustomPropsProvider.operations;
-                },set: function(element, values, node){
-                  element.businessObject.$attrs.operation =values.operation;
-                  return ; 
+                }, set: function (element, values, node) {
+                  console.log('SEEEEEEEEEE')
+                  console.log(values.operation);
+                  element.businessObject.$attrs.operation = values.operation;
+                  console.log(element);
+                  return;
                 },
                 setControlValue: true,
                 modelProperty: 'operation'
@@ -324,11 +331,49 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 description: 'Input Parameter',
                 label: 'Input Parameter',
                 selectOptions: function (element) {
+                  console.log(element);
+                  if (element.businessObject.$attrs.interface != undefined) {
+                    for (var i = 0; i < CustomPropsProvider.tosca.length; i++) {
+                      if (CustomPropsProvider.tosca[i].name == element.businessObject.$attrs.interface) {
+                        CustomPropsProvider.options = [];
+                        var arr = [];
+                        if (element.businessObject.$attrs.operation != undefined) {
+                          for (var j = 0; j < CustomPropsProvider.tosca[i].value.length; j++) {
+                            console.log("VERGLEICH");
+                            console.log(CustomPropsProvider.tosca[i].value[j].name);
+                            console.log(element.businessObject.$attrs.operation);
+                            if (CustomPropsProvider.tosca[i].value[j].name == element.businessObject.$attrs.operation) {
+                              console.log('INPUT PARAMETER')
+                              var parameter = CustomPropsProvider.tosca[i].value[j].inputParameters.inputParameter;
+                              if (parameter != undefined) {
+                                var length = CustomPropsProvider.tosca[i].value[j].inputParameters.inputParameter.length;
+                                for (var k = 0; k < length; k++) {
+                                  CustomPropsProvider.options.push({
+                                    name: parameter[k].name, value: parameter[k].name + ',' + parameter[k].type
+                                  });
+                                }
+                              }
+                              //CustomPropsProvider.options.push({name: CustomPropsProvider.tosca[i].value[j].name, value:
+                              // CustomPropsProvider.tosca[i].value[j].name});
+                            }
+                          }
+                          console.log(CustomPropsProvider.operations);
+
+                          //element.businessObject.$attrs.operation = CustomPropsProvider.operations;
+
+                          return CustomPropsProvider.options;
+                        }
+                      }
+                    }
+
+                  }
                   return CustomPropsProvider.options;
                 },
                 set: function (element, values, node) {
                   if (values.inputParams != undefined) {
-                    element.businessObject.$attrs.nameInput = values.inputParams;
+                    var s = values.inputParams.split(',');
+                    element.businessObject.$attrs.nameInput = s[0];
+                    element.businessObject.$attrs.typeInput = s[1];
                     element.businessObject.$attrs.inputParams = values.inputParams;
                     return;
                   }
