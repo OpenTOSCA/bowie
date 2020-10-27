@@ -65,6 +65,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function(element) {
         businessObject.name = "lustige groovy ServiceTemplates";
         businessObject.scriptFormat = "groovy";
         businessObject.resource = "deployment://CreateServiceInstance.groovy";
+        businessObject.$attrs.ntype = "ServiceTemplateInstance";
         
         const shape = elementFactory.createShape({
           type: 'bpmn:ScriptTask',
@@ -95,6 +96,13 @@ CustomPaletteProvider.prototype.getPaletteEntries = function(element) {
         businessObject.name = "lustige groovy nodeinstances";
         businessObject.scriptFormat = "groovy";
         businessObject.resource = "deployment://CreateNodeInstance.groovy";
+        businessObject.$attrs.ntype = "NodeInstance";
+        
+        console.log("EXTENSION ELEMENTS");
+        console.log(businessObject.extensionElements);
+        console.log(businessObject.extensionElements.values);
+        console.log(businessObject.extensionElements.values[0].inputParameters);
+        console.log("EXTENSION ELEMENTS");
         
         const shape = elementFactory.createShape({
           type: 'bpmn:ScriptTask',
@@ -127,6 +135,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function(element) {
         businessObject.name = "lustige groovy realtionshipinstances";
         businessObject.scriptFormat = "groovy";
         businessObject.resource = "deployment://CreateRelationshipInstance.groovy";
+        businessObject.$attrs.ntype = "RelationshipInstance";
         
         const shape = elementFactory.createShape({
           type: 'bpmn:ScriptTask',
@@ -164,6 +173,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function(element) {
           businessObject.name = "lustige groovy node operations";
           businessObject.scriptFormat = "groovy";
           businessObject.resource = "deployment://CallNodeOperation.groovy";
+          businessObject.$attrs.ntype = "CallNodeOperation";
           
           const shape = elementFactory.createShape({
             type: 'bpmn:ScriptTask',
@@ -194,6 +204,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function(element) {
           businessObject.name = "lustige groovy states";
           businessObject.scriptFormat = "groovy";
           businessObject.resource = "deployment://SetState.groovy";
+          businessObject.$attrs.ntype = "StateChanger";
           
           const shape = elementFactory.createShape({
             type: 'bpmn:ScriptTask',
@@ -225,6 +236,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function(element) {
           businessObject.name = "lustige groovy properties";
           businessObject.scriptFormat = "groovy";
           businessObject.resource = "deployment://SetProperties.groovy";
+          businessObject.$attrs.ntype = "PropertiesChanger";
           
           const shape = elementFactory.createShape({
             type: 'bpmn:ScriptTask',

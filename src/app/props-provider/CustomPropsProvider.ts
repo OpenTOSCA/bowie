@@ -11,6 +11,7 @@ import { WineryService } from '../services/winery.service';
 import { HttpClient, HttpHandler } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { FindValueSubscriber } from 'rxjs/internal/operators/find';
+import { is } from 'bpmn-js/lib/util/ModelUtil';
 
 
 
@@ -199,6 +200,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
 
                           console.log(CustomPropsProvider.interfaces);
                           element.businessObject.$attrs.interface = CustomPropsProvider.interfaces;
+                          
                           console.log(element);
                           resolve(CustomPropsProvider.interfaces);
                         }
@@ -206,6 +208,16 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       }
                     }).then(response => { return response })
                     element.businessObject.$attrs.NodeTemplate = values.NodeTemplate;
+                    
+                    //inputtests
+                    if (is(element.businessObject, 'bpmn:ScriptTask')) {
+                        if (element.businessObject.$attrs.ntype === "CallNodeOperation") {
+                            element.businessObject.extensionElements.values[0].inputParameters[3].value = values.NodeTemplate;
+                        } else if (element.businessObject.$attrs.ntype === "NodeInstance") {
+                            element.businessObject.extensionElements.values[0].inputParameters[0].value = values.NodeTemplate;
+                        }
+                    }
+                    //
                     return;
                   }
                   return;
@@ -268,6 +280,12 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 set: function (element, values, node) {
                   console.log(element);
                   element.businessObject.$attrs.interface = values.interface;
+                    //inputtests hier
+                    if (is(element.businessObject, 'bpmn:ScriptTask')) {
+                        if (element.businessObject.$attrs.ntype === "CallNodeOperation") {
+                            element.businessObject.extensionElements.values[0].inputParameters[4].value = values.interface;
+                        }
+                    }
                   if (element.businessObject.$attrs.interface != undefined) {
                     for (var i = 0; i < CustomPropsProvider.tosca.length; i++) {
                       if (CustomPropsProvider.tosca[i].name == element.businessObject.$attrs.interface) {
@@ -320,6 +338,12 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   console.log('SEEEEEEEEEE')
                   console.log(values.operation);
                   element.businessObject.$attrs.operation = values.operation;
+                      //inputtests hier
+                      if (is(element.businessObject, 'bpmn:ScriptTask')) {
+                          if (element.businessObject.$attrs.ntype === "CallNodeOperation") {
+                              element.businessObject.extensionElements.values[0].inputParameters[5].value = values.operation;
+                          }
+                      }
                   console.log(element);
                   return;
                 },
