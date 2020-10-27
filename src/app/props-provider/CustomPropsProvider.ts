@@ -23,9 +23,10 @@ export class CustomPropsProvider implements IPropertiesProvider {
 
   static $inject = ['translate', 'bpmnPropertiesProvider'];
   static options = [];
+  static outputParam = [];
   static interfaces = [{ name: 'none', value: 'none' }];
   static operations = [];
-  static template = [];
+  static template = [{ name: 'none', value: 'none' }];
   static winery2: WineryService;
   static tosca = [];
 
@@ -162,11 +163,13 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 modelProperty: 'NodeTemplate',
                 set: function (element, values, node) {
                   console.log("das ausgewählte Element ist");
-                  console.log(values.nodetemplate);
+                  if(values.NodeTemplate != 'none'){
+                  element.businessObject.$attrs.NodeTemplate = values.NodeTemplate;
+                  
                   console.log(element);
                   element.businessObject.$attrs.interface = [];
                   element.businessObject.$attrs.operation = [];
-                  if (values.NodeTemplate != undefined) {
+                  if (values.NodeTemplate != undefined ) {
                     var namespace = 'http://opentosca.org/nodetypes';
                     const url = 'nodetypes/' + encodeURIComponent(encodeURIComponent((namespace)))
                       + '/' + encodeURIComponent(encodeURIComponent((values.NodeTemplate))) + '/interfaces/';
@@ -200,7 +203,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
 
                           console.log(CustomPropsProvider.interfaces);
                           element.businessObject.$attrs.interface = CustomPropsProvider.interfaces;
-                          
+
                           console.log(element);
                           resolve(CustomPropsProvider.interfaces);
                         }
@@ -208,18 +211,18 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       }
                     }).then(response => { return response })
                     element.businessObject.$attrs.NodeTemplate = values.NodeTemplate;
-                    
+
                     //inputtests
                     if (is(element.businessObject, 'bpmn:ScriptTask')) {
-                        if (element.businessObject.$attrs.ntype === "CallNodeOperation") {
-                            element.businessObject.extensionElements.values[0].inputParameters[3].value = values.NodeTemplate;
-                        } else if (element.businessObject.$attrs.ntype === "NodeInstance") {
-                            element.businessObject.extensionElements.values[0].inputParameters[0].value = values.NodeTemplate;
-                        }
+                      if (element.businessObject.$attrs.ntype === "CallNodeOperation") {
+                        element.businessObject.extensionElements.values[0].inputParameters[3].value = values.NodeTemplate;
+                      } else if (element.businessObject.$attrs.ntype === "NodeInstance") {
+                        element.businessObject.extensionElements.values[0].inputParameters[0].value = values.NodeTemplate;
+                      }
                     }
                     //
                     return;
-                  }
+                  }}
                   return;
                 }
               }),
@@ -228,12 +231,14 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 description: 'Interface',
                 label: 'Interface',
                 selectOptions: function (element, values) {
+                  console.log(values);
                   console.log('SELECTOPTIONS')
                   //element.businessObject.$attrs.operation = [];
-                  if (element.businessObject.$attrs.nodetemplate != undefined) {
+                  console.log(element.businessObject.$attrs.nodetemplate);
+                  if (element.businessObject.$attrs.NodeTemplate != undefined) {
                     var namespace = 'http://opentosca.org/nodetypes';
                     const url = 'nodetypes/' + encodeURIComponent(encodeURIComponent((namespace)))
-                      + '/' + encodeURIComponent(encodeURIComponent((element.businessObject.$attrs.nodetemplate))) + '/interfaces/';
+                      + '/' + encodeURIComponent(encodeURIComponent((element.businessObject.$attrs.NodeTemplate))) + '/interfaces/';
                     var interfaces = new Promise(resolve => {
                       var http = new XMLHttpRequest();
                       http.open("GET", 'http://localhost:8080/' + 'winery/' + url, true);
@@ -247,7 +252,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                           console.log('JSON PARSE');
                           console.log(response);
                           var array = [];
-                          CustomPropsProvider.tosca = [];
+                          //CustomPropsProvider.tosca = [];
                           for (var i = 0; i < response.length; i++) {
                             array.push({
                               name: response[i].name, value: response[i].name
@@ -261,6 +266,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
 
 
                           }
+                          console.log("INTERFACES CUSTOM")
                           console.log(CustomPropsProvider.interfaces);
                           //element.businessObject.$attrs.interface = CustomPropsProvider.interfaces;
                           console.log(element);
@@ -268,24 +274,23 @@ export class CustomPropsProvider implements IPropertiesProvider {
                         }
 
                       }
-                    }).then(response => { return response })
+                    }).then(response => { return CustomPropsProvider.interfaces })
                     //element.businessObject.$attrs.nodetemplate = values.nodetemplate;
                     console.log(window['interfaceN']);
-                    return window['interfaceN'];
+                    return CustomPropsProvider.interfaces;
                   }
-                  console.log(window['interfaceN']);
-                  return window['interfaceN'];
-
                 },
                 set: function (element, values, node) {
                   console.log(element);
+                  console.log('SET Interface');
+                  console.log(values.interface );
                   element.businessObject.$attrs.interface = values.interface;
-                    //inputtests hier
-                    if (is(element.businessObject, 'bpmn:ScriptTask')) {
-                        if (element.businessObject.$attrs.ntype === "CallNodeOperation") {
-                            element.businessObject.extensionElements.values[0].inputParameters[4].value = values.interface;
-                        }
+                  //inputtests hier
+                  if (is(element.businessObject, 'bpmn:ScriptTask')) {
+                    if (element.businessObject.$attrs.ntype === "CallNodeOperation") {
+                      element.businessObject.extensionElements.values[0].inputParameters[4].value = values.interface;
                     }
+                  }
                   if (element.businessObject.$attrs.interface != undefined) {
                     for (var i = 0; i < CustomPropsProvider.tosca.length; i++) {
                       if (CustomPropsProvider.tosca[i].name == element.businessObject.$attrs.interface) {
@@ -298,7 +303,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                               CustomPropsProvider.tosca[i].value[j].name
                           });
                         }
-
+                        
                         element.businessObject.$attrs.operation = values.operation;
                         return;
                       }
@@ -318,6 +323,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       if (CustomPropsProvider.tosca[i].name == element.businessObject.$attrs.interface) {
                         CustomPropsProvider.operations = [];
                         var arr = [];
+                        CustomPropsProvider.operations.push({name: 'none', value:'none'});
                         for (var j = 0; j < CustomPropsProvider.tosca[i].value.length; j++) {
                           CustomPropsProvider.operations.push({
                             name: CustomPropsProvider.tosca[i].value[j].name, value:
@@ -338,12 +344,12 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   console.log('SEEEEEEEEEE')
                   console.log(values.operation);
                   element.businessObject.$attrs.operation = values.operation;
-                      //inputtests hier
-                      if (is(element.businessObject, 'bpmn:ScriptTask')) {
-                          if (element.businessObject.$attrs.ntype === "CallNodeOperation") {
-                              element.businessObject.extensionElements.values[0].inputParameters[5].value = values.operation;
-                          }
-                      }
+                  //inputtests hier
+                  if (is(element.businessObject, 'bpmn:ScriptTask')) {
+                    if (element.businessObject.$attrs.ntype === "CallNodeOperation") {
+                      element.businessObject.extensionElements.values[0].inputParameters[5].value = values.operation;
+                    }
+                  }
                   console.log(element);
                   return;
                 },
@@ -370,6 +376,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                               console.log('INPUT PARAMETER')
                               var parameter = CustomPropsProvider.tosca[i].value[j].inputParameters.inputParameter;
                               if (parameter != undefined) {
+                                CustomPropsProvider.options.push({name:'none', value: 'none'});
                                 var length = CustomPropsProvider.tosca[i].value[j].inputParameters.inputParameter.length;
                                 for (var k = 0; k < length; k++) {
                                   CustomPropsProvider.options.push({
@@ -377,8 +384,6 @@ export class CustomPropsProvider implements IPropertiesProvider {
                                   });
                                 }
                               }
-                              //CustomPropsProvider.options.push({name: CustomPropsProvider.tosca[i].value[j].name, value:
-                              // CustomPropsProvider.tosca[i].value[j].name});
                             }
                           }
                           console.log(CustomPropsProvider.operations);
@@ -394,10 +399,31 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   return CustomPropsProvider.options;
                 },
                 set: function (element, values, node) {
+                  element.businessObject.$attrs.saveValueCheckbox = false;
+                  element.businessObject.$attrs.valueInput = '';
+                  console.log('SET INPUT');
+                  console.log(element);
                   if (values.inputParams != undefined) {
                     var s = values.inputParams.split(',');
                     element.businessObject.$attrs.nameInput = s[0];
                     element.businessObject.$attrs.typeInput = s[1];
+                    if(element.businessObject.$attrs.inputParameter != undefined){
+                      var param = element.businessObject.$attrs.inputParameter;
+                      var length = param.length;
+                    
+                    for (var i = 0; i < length; i++) {
+                      if (param[i].name == element.businessObject.$attrs.nameInput) {
+                        var split = param[i].value.split(',');
+                        if (split.length == 3) {
+                          element.businessObject.$attrs.valueInput = split[2];
+                        }
+                      }
+                    }}else{
+                      element.businessObject.$attrs.inputParameter = CustomPropsProvider.options;
+                      element.businessObject.$attrs.inputParams = values.inputParams;
+                      return ;
+                    }
+                    
                     element.businessObject.$attrs.inputParams = values.inputParams;
                     return;
                   }
@@ -410,34 +436,13 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 id: 'nameInput',
                 description: 'Name of Parameter',
                 label: 'Name of Parameter',
-                modelProperty: 'nameInput',
-                validate: function (element, values) {
-                  var errorMessageP = {};
-                  if (element.businessObject.$attrs.inputParams != undefined) {
-                    element.businessObject.$attrs.nameInput = element.businessObject.$attrs.inputParams;
-                    return errorMessageP;
-
-                  } else {
-                    errorMessageP = "Please select an input parameter.";
-                    return errorMessageP;
-                  }
-                }
+                modelProperty: 'nameInput'
               }),
               EntryFactory.textField({
                 id: 'typeInput',
                 description: 'Type of Parameter',
                 label: 'Type of Parameter',
-                modelProperty: 'typeInput',
-                validate: function (element, values) {
-                  var errorMessageP = {};
-                  if (element.businessObject.$attrs.inputParams != undefined) {
-                    element.businessObject.$attrs.typeInput = element.businessObject.$attrs.inputParams;
-                    return errorMessageP;
-                  } else {
-                    errorMessageP = "Please select an input parameter.";
-                    return errorMessageP;
-                  }
-                }
+                modelProperty: 'typeInput'
               }),
               EntryFactory.textField({
                 id: 'valueInput',
@@ -445,18 +450,70 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 label: 'Value of Parameter',
                 modelProperty: 'valueInput'
               }),
+              EntryFactory.checkbox({
+                id: 'saveValueCheckbox',
+                description: 'Write the value back to the corresponding input parameter.',
+                label: 'Save',
+                modelProperty: 'saveValueCheckbox',
+                validate: function (element, values) {
+                  console.log('Checkbox');
+                  console.log(element);
+                  var check = values.saveValueCheckbox;
+                  console.log('VALUE OF INPUT PARAM');
+                  console.log(values);
+                  if (element.businessObject.$attrs.valueInput != undefined && check) {
+                    if(element.businessObject.$attrs.inputParameter != undefined){
+                    var length = element.businessObject.$attrs.inputParameter.length;
+                    for (var i = 0; i < length; i++) {
+                  
+                      if (element.businessObject.$attrs.inputParameter[i].name == element.businessObject.$attrs.nameInput) {
+                        element.businessObject.$attrs.inputParameter[i].value = element.businessObject.$attrs.inputParameter[i].name + ',' +
+                          element.businessObject.$attrs.typeInput + ',' + element.businessObject.$attrs.valueInput;
+                      }
+                      console.log(CustomPropsProvider.options);
+                    }
+                    //element.businessObject.$attrs.inputParameter = CustomPropsProvider.options;
+                  }}
+                }
+              }),
               EntryFactory.selectBox({
                 id: 'outputParams',
                 description: 'Output Parameter',
                 label: 'Output Parameter',
-                selectOptions: function (element) {
-                  var options = [{ name: 'Test', value: 'Test' }, { name: 'Test1', value: 'Test1' }];
-                  return options;
+                selectOptions: function (element, values) {
+                  if (element.businessObject.$attrs.interface != undefined) {
+                    for (var i = 0; i < CustomPropsProvider.tosca.length; i++) {
+                      if (CustomPropsProvider.tosca[i].name == element.businessObject.$attrs.interface) {
+                        CustomPropsProvider.outputParam = [];
+                        var arr = [];
+                        if (element.businessObject.$attrs.operation != undefined) {
+                          for (var j = 0; j < CustomPropsProvider.tosca[i].value.length; j++) {
+                            if(element.businessObject.$attrs.operation != 'none'){
+                            if (CustomPropsProvider.tosca[i].value[j].name == element.businessObject.$attrs.operation) {
+                              console.log('OUTPUT PARAMETER')
+                              if (CustomPropsProvider.tosca[i].value[j].outputParameters != undefined) {
+                              var parameter = CustomPropsProvider.tosca[i].value[j].outputParameters.outputParameter;
+                              if (parameter != undefined) {
+                                var length = CustomPropsProvider.tosca[i].value[j].outputParameters.outputParameter.length;
+                                for (var k = 0; k < length; k++) {
+                                  CustomPropsProvider.outputParam.push({
+                                    name: parameter[k].name, value: parameter[k].name + ',' + parameter[k].type
+                                  });
+                                }
+                              }}
+                            }
+                          }}
+                          //element.businessObject.$attrs.operation = CustomPropsProvider.operations;
+                          return CustomPropsProvider.outputParam;
+                        }
+                      }
+                    }
+                  }
+                  return CustomPropsProvider.outputParam;
                 },
                 setControlValue: true,
                 modelProperty: 'outputParams'
               })
-
             ]
           }]
       })
