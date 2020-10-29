@@ -3,28 +3,34 @@ import {
 } from 'min-dash';
 import _camundaModdleDescriptor from "camunda-bpmn-moddle/resources/camunda.json";
 import BpmnModdle from 'bpmn-moddle';
+import Palette from 'diagram-js/lib/features/palette/Palette';
 
 /**
  * A palette that allows you to create BPMN _and_ custom elements.
  */
-export default function CustomPaletteProvider(palette, create, elementFactory, bpmnFactory,spaceTool, lassoTool) {
+export default function CustomPaletteProvider(palette, create, connect, elementFactory, bpmnFactory,spaceTool, lassoTool, handTool) {
 
   this._create = create;
+  this._connect = connect;
   this._elementFactory = elementFactory;
   this._spaceTool = spaceTool;
+  this._handTool = handTool;
   this._bpmnFactory = bpmnFactory;
   this._lassoTool = lassoTool;
 
   palette.registerProvider(this);
+  
 }
 
 CustomPaletteProvider.$inject = [
   'palette',
   'create',
+  'connect',
   'elementFactory',
   'bpmnFactory',
   'spaceTool',
-  'lassoTool'
+  'lassoTool',
+  'handTool'
 ];
 
 
@@ -35,10 +41,12 @@ CustomPaletteProvider.prototype.getPaletteEntries = function(element) {
 
   var actions  = {},
       create = this._create,
+      connect = this._connect,
       elementFactory = this._elementFactory,
       bpmnFactory = this._bpmnFactory,
       spaceTool = this._spaceTool,
-      lassoTool = this._lassoTool;
+      lassoTool = this._lassoTool,
+      handTool = this._handTool;
 
 
       function createRect(suitabilityScore) {
@@ -277,8 +285,12 @@ CustomPaletteProvider.prototype.getPaletteEntries = function(element) {
   function createParticipant(event, collapsed) {
     create.start(event, elementFactory.createParticipantShape(collapsed));
   }
+  function startConnect(event, element, autoActivate) {
+    connect.start(event, element, autoActivate);
+  }
 
   assign(actions, {
+    
     /*
     'custom-triangle': createAction(
       'custom:triangle', 'custom', 'icon-custom-triangle', 'triangle', ''
@@ -295,7 +307,78 @@ CustomPaletteProvider.prototype.getPaletteEntries = function(element) {
       }
     },
     */
-    'create-service-instance-task':{
+   'hand-tool': {
+    group: 'tools',
+    className: 'bpmn-icon-hand-tool',
+    title: 'Activate the hand tool',
+    action: {
+      click: function(event) {
+        handTool.activateHand(event);
+      }
+    }
+  },
+    'lasso-tool': {
+      group: 'tools',
+      className: 'bpmn-icon-lasso-tool',
+      title: 'Activate the lasso tool',
+      action: {
+        click: function(event) {
+          lassoTool.activateSelection(event);
+        }
+      }
+    },
+    'space-tool': {
+      group: 'tools',
+      className: 'bpmn-icon-space-tool',
+      title: 'Activate the create/remove space tool',
+      action: {
+        click: function(event) {
+          spaceTool.activateSelection(event);
+        }
+      }
+    },
+    'create.start-event': createAction(
+      'bpmn:StartEvent', 'event', 'bpmn-icon-start-event-none', 'StartEvent', ''
+    ),
+    'create.intermediate-event': createAction(
+      'bpmn:IntermediateThrowEvent', 'event', 'bpmn-icon-intermediate-event-none', 'IntermediateThrowEvent', ''
+    ),
+    'create.end-event': createAction(
+      'bpmn:EndEvent', 'event', 'bpmn-icon-end-event-none', 'EndEvent', ''
+    ),
+    'create.exclusive-gateway': createAction(
+      'bpmn:ExclusiveGateway', 'gateway', 'bpmn-icon-gateway-xor', 'XOR-Gateway', ''
+    ),
+    'create.task': createAction(
+      'bpmn:Task', 'activity', 'bpmn-icon-task', 'Task', ''
+    ),
+    'create.subprocess-expanded': createAction(
+      'bpmn:SubProcess', 'activity', 'bpmn-icon-subprocess-expanded', 'Create expanded SubProcess',
+      { isExpanded: true }
+    ),
+    'create.data-object': createAction(
+      'bpmn:DataObjectReference', 'activity', 'bpmn-icon-data-object', 'Create DataObjectReference', ''
+   ),
+   'create.data-store': createAction(
+     'bpmn:DataStoreReference', 'activity', 'bpmn-icon-data-store', 'Create DataStoreReference', ''
+  ),
+    'create.participant-expanded': {
+      group: 'collaboration',
+      className: 'bpmn-icon-participant',
+      title: 'Create Pool/Participant',
+      action: {
+        dragstart: createParticipant,
+        click: createParticipant
+      }
+    },
+    'create.group': createAction(
+      'bpmn:Group', 'activity', 'bpmn-icon-group', ' Create a group', ''
+    ),
+    'tool-separator': {
+      group: 'tools',
+      separator: true
+    },
+    'create.service-instance-task':{
       group: 'activity',
       className: 'bpmn-icon-task',
       title: 'Create ServiceInstance',
@@ -305,7 +388,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function(element) {
         
       }
     },
-    'create-node-instance-task':{
+    'create.node-instance-task':{
       group: 'activity',
       className: 'bpmn-icon-task',
       title: 'Create nodeInstance',
@@ -315,7 +398,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function(element) {
         
       }
     },
-    'create-relationship-instance-task':{
+    'create.relationship-instance-task':{
       group: 'activity',
       className: 'bpmn-icon-task',
       title: 'Create RelationshipInstance',
@@ -355,30 +438,6 @@ CustomPaletteProvider.prototype.getPaletteEntries = function(element) {
         
       }
     },
-    'lasso-tool': {
-      group: 'tools',
-      className: 'bpmn-icon-lasso-tool',
-      title: 'Activate the lasso tool',
-      action: {
-        click: function(event) {
-          lassoTool.activateSelection(event);
-        }
-      }
-    },
-    'space-tool': {
-      group: 'tools',
-      className: 'bpmn-icon-space-tool',
-      title: 'Activate the create/remove space tool',
-      action: {
-        click: function(event) {
-          spaceTool.activateSelection(event);
-        }
-      }
-    },
-    'tool-separator': {
-      group: 'tools',
-      separator: true
-    }
   });
 
   return actions;
