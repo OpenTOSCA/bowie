@@ -257,6 +257,99 @@ CustomPaletteProvider.prototype.getPaletteEntries = function(element) {
         
       }}
 
+    function createNodeInstanceDataObject() {
+        return function(event) {
+            const businessObject = bpmnFactory.create('bpmn:DataObjectReference', {
+                extensionElements: moddle.create('bpmn:ExtensionElements', {
+                    values: [
+                        moddle.create('camunda:InputOutput', {
+                            inputParameters: [
+                                moddle.create('camunda:InputParameter', { name: 'ServiceInstanceID' }),
+                                moddle.create('camunda:InputParameter', { name: 'CsarID' }),
+                                moddle.create('camunda:InputParameter', { name: 'ServiceTemplateID' }),
+                                moddle.create('camunda:InputParameter', { name: 'NodeTemplate' }),
+                                moddle.create('camunda:InputParameter', { name: 'Interface' }),
+                                moddle.create('camunda:InputParameter', { name: 'Operation' }),
+                                moddle.create('camunda:InputParameter', { name: 'InputParamNames' }),
+                                moddle.create('camunda:InputParameter', { name: 'InputParamValues' }),
+                                moddle.create('camunda:InputParameter', { name: 'OutputParamNames' }),
+                            ],
+                        }),
+                    ],
+                })
+            });
+
+            businessObject.name = "lustiges NodeInstanceDataObject";
+            businessObject.$attrs.dtype = "NodeInstanceDataObject";
+
+            const shape = elementFactory.createShape({
+                type: 'bpmn:DataObjectReference',
+                businessObject: businessObject
+            });
+            console.log(businessObject);
+
+            create.start(event, shape);
+            
+        }}
+
+    function createServiceInstanceDataObject() {
+        return function(event) {
+            const businessObject = bpmnFactory.create('bpmn:DataObjectReference', {
+                extensionElements: moddle.create('bpmn:ExtensionElements', {
+                    values: [
+                        moddle.create('camunda:InputOutput', {
+                            inputParameters: [
+                                moddle.create('camunda:InputParameter', { name: 'ServiceInstanceID' }),
+                                moddle.create('camunda:InputParameter', { name: 'CsarID' }),
+                                moddle.create('camunda:InputParameter', { name: 'ServiceTemplateID' }),
+                            ],
+                        }),
+                    ],
+                })
+            });
+
+            businessObject.name = "lustiges ServiceInstanceDataObject";
+            businessObject.$attrs.dtype = "ServiceInstanceDataObject";
+
+            const shape = elementFactory.createShape({
+                type: 'bpmn:DataObjectReference',
+                businessObject: businessObject
+            });
+            console.log(businessObject);
+
+            create.start(event, shape);
+
+        }}
+
+    function createRelationshipInstanceDataObject() {
+        return function(event) {
+            const businessObject = bpmnFactory.create('bpmn:DataObjectReference', {
+                extensionElements: moddle.create('bpmn:ExtensionElements', {
+                    values: [
+                        moddle.create('camunda:InputOutput', {
+                            inputParameters: [
+                                moddle.create('camunda:InputParameter', { name: 'RelationshipTemplate' }),
+                                moddle.create('camunda:InputParameter', { name: 'SourceURL' }),
+                                moddle.create('camunda:InputParameter', { name: 'TargetURL' }),
+                            ],
+                        }),
+                    ],
+                })
+            });
+
+            businessObject.name = "lustiges RelationshipInstanceDataObject";
+            businessObject.$attrs.dtype = "RelationshipInstanceDataObject";
+
+            const shape = elementFactory.createShape({
+                type: 'bpmn:DataObjectReference',
+                businessObject: businessObject
+            });
+            console.log(businessObject);
+
+            create.start(event, shape);
+
+        }}
+
   function createAction(type, group, className, title, options) {
 
     function createListener(event) {
@@ -437,7 +530,34 @@ CustomPaletteProvider.prototype.getPaletteEntries = function(element) {
         click: createPropertiesChanger()
         
       }
-    },
+    }, 
+      'node-instance-data-object': {
+          group: 'activity',
+          className: 'bpmn-icon-data-object',
+          title: 'Create NodeInstanceDataObject',
+          action: {
+              dragstart: createNodeInstanceDataObject(),
+              click: createNodeInstanceDataObject()
+          }
+      },
+      'service-instance-data-object': {
+          group: 'activity',
+          className: 'bpmn-icon-data-object',
+          title: 'Create ServiceInstanceDataObject',
+          action: {
+              dragstart: createServiceInstanceDataObject(),
+              click: createServiceInstanceDataObject()
+          }
+      },
+      'relationship-instance-data-object': {
+          group: 'activity',
+          className: 'bpmn-icon-data-object',
+          title: 'Create RelationshipInstanceDataObject',
+          action: {
+              dragstart: createRelationshipInstanceDataObject(),
+              click: createRelationshipInstanceDataObject()
+          }
+      },
   });
 
   return actions;
