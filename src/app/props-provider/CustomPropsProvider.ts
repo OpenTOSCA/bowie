@@ -157,28 +157,51 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     console.log(element);
                     console.log('DATAOBJECT');
                     var arr = [];
-
+                    arr.push({ name: 'none', value: 'none' });
+                    var saveDataObject =[]; 
                     if (element.businessObject.$parent.$type == 'bpmn:Process') {
                       var find = false;
                       // entspricht der Participant Id, indem ich mich gerade befinde.
                       var length = element.businessObject.$parent.flowElements.length;
                       var flowElement = element.businessObject.$parent.flowElements;
                       for (var i = 0; i < length; i++) {
-                        if (flowElement[i].$type == 'bpmn:DataObjectReference' && flowElement[i].$attrs.dtype == "NodeInstanceDataObject") {
-                          console.log('he');
-                          console.log(flowElement[i].id);
-                          arr.push({ name: flowElement[i].id, value: flowElement[i] });
-                          console.log(arr);
+                        if (flowElement[i].$type == 'bpmn:DataObjectReference') {
+                          arr.push({ name: flowElement[i].id, value: flowElement[i].id });
+                          console.log(flowElement[i] );
+                          saveDataObject.push({name: flowElement[i], value: flowElement[i]});
+                          console.log(flowElement[i] );
                         }
                       }
-                      console.log('hier kurz vor return');
                       console.log(arr);
-                      element.businessObject.$attrs.dataObject = arr;
+                      element.businessObject.$attrs.dataObjectV = saveDataObject;
                       return arr;
                     }
                   },
+                  set: function (element, values, node) {
+                    if (values.dataObject != 'none') {
+                      element.businessObject.$attrs.dataObject = values.dataObject;
+                      console.log("hiieer");
+                      if(element.businessObject.$attrs.dataObjectV != undefined){
+
+                        console.log("heir ist nicht non")
+                        var dataObject = element.businessObject.$attrs.dataObjectV;
+                        console.log(element.businessObject.$attrs.dataObjectV);
+                        for(var i =0; i< dataObject.length; i++){
+                          console.log(dataObject[i].name);
+                          console.log(element.businessObject.$attrs.dataObject);
+                          if(dataObject[i].name.id == element.businessObject.$attrs.dataObject){
+                            console.log(dataObject[i].value);
+                            element.businessObject.$attrs.dataObject0 = dataObject[i].value;
+                            console.log("FINAL");
+                            console.log(element.businessObject.$attrs.dataObject0);
+                          }
+                        }
+                      }
+                      return;
+                    }
+                  },
                   setControlValue: true,
-                  modelProperty: 'NodeTemplate'
+                  modelProperty: 'dataObject',
                 }),
                 EntryFactory.textBox({
                   id: 'servicetemplateID',
@@ -186,81 +209,27 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   label: 'Service Template ID',
                   modelProperty: 'servicetemplateID'
                 }),
-                EntryFactory.selectBox({
+                EntryFactory.textBox({
                   id: 'NodeTemplate',
                   description: 'NodeTemplate',
                   label: 'NodeTemplate',
-                  selectOptions: function (element, values) {
-                    //console.log(CustomPropsProvider.template);
-                    return CustomPropsProvider.template;
-                  },
                   setControlValue: true,
                   modelProperty: 'NodeTemplate',
-                  set: function (element, values, node) {
-                    console.log("das ausgewählte Element ist");
-                    if (values.NodeTemplate != 'none') {
-                      element.businessObject.$attrs.NodeTemplate = values.NodeTemplate;
-
-                      console.log(element);
-                      element.businessObject.$attrs.interface = [];
-                      element.businessObject.$attrs.operation = [];
-                      if (values.NodeTemplate != undefined) {
-                        var namespace = 'http://opentosca.org/nodetypes';
-                        const url = 'nodetypes/' + encodeURIComponent(encodeURIComponent((namespace)))
-                          + '/' + encodeURIComponent(encodeURIComponent((values.NodeTemplate))) + '/interfaces/';
-                        var interfaces = new Promise(resolve => {
-
-                          var http = new XMLHttpRequest();
-                          http.open("GET", 'http://localhost:8080/' + 'winery/' + url, true);
-                          http.send();
-                          http.onreadystatechange = function () {
-                            if (http.readyState == XMLHttpRequest.DONE) {
-
-                              console.log(http.responseText);
-                              var response = JSON.parse(http.responseText);
-                              CustomPropsProvider.interfaces = [];
-                              console.log('JSON PARSE');
-                              console.log(response);
-                              var array = [];
-
-                              for (var i = 0; i < response.length; i++) {
-                                CustomPropsProvider.tosca.push({ name: response[i].name, value: response[i].operation });
-                                array.push({
-                                  name: response[i].name, value: response[i].name
-                                });
-                                CustomPropsProvider.interfaces.push({
-                                  name: response[i].name, value: response[i].name
-                                })
-                                console.log('HIER Array');
-                                console.log(array);
-                                window['interfaceN'] = array;
-                              }
-
-                              console.log(CustomPropsProvider.interfaces);
-                              element.businessObject.$attrs.interface = CustomPropsProvider.interfaces;
-
-                              console.log(element);
-                              resolve(CustomPropsProvider.interfaces);
-                            }
-
-                          }
-                        }).then(response => { return response })
-                        element.businessObject.$attrs.NodeTemplate = values.NodeTemplate;
-
-                        //inputtests
-                        if (is(element.businessObject, 'bpmn:ScriptTask')) {
-                          if (element.businessObject.$attrs.ntype === "CallNodeOperation") {
-                            element.businessObject.extensionElements.values[0].inputParameters[3].value = values.NodeTemplate;
-                          } else if (element.businessObject.$attrs.ntype === "NodeInstance") {
-                            element.businessObject.extensionElements.values[0].inputParameters[0].value = values.NodeTemplate;
-                          }
-                        }
-                        //
-                        return;
-                      }
-                    }
-                    return;
+                  get: function(element, values){
+                    if(element.businessObject.$attrs.dataObject0 != undefined){
+                     // element.businessObject.$attrs.NodeTemplate = element.businessObject.$attrs.dataObject0.$attrs.NodeTemplate;
+                   return {
+                     NodeTemplate: element.businessObject.$attrs.dataObject0.$attrs.NodeTemplate}
+                  }else{
+                    console.log("fall2")
+                    return element;
                   }
+                  },
+                  set: function (element, values) {
+                    element.businessObject.$attrs.NodeTemplate = element.businessObject.$attrs.dataObject0.$attrs.NodeTemplate;
+                    return ;
+                  }
+
                 }),
                 EntryFactory.selectBox({
                   id: 'interface',
@@ -270,7 +239,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     console.log(values);
                     console.log('SELECTOPTIONS')
                     //element.businessObject.$attrs.operation = [];
-                    console.log(element.businessObject.$attrs.nodetemplate);
+                   
                     if (element.businessObject.$attrs.NodeTemplate != undefined) {
                       var namespace = 'http://opentosca.org/nodetypes';
                       const url = 'nodetypes/' + encodeURIComponent(encodeURIComponent((namespace)))
@@ -557,467 +526,490 @@ export class CustomPropsProvider implements IPropertiesProvider {
               ]
             }]
         })
-    } else if((element.businessObject.$type == 'bpmn:DataObjectReference') && (element.businessObject.$attrs.dtype == "NodeInstanceDataObject")) {
-        return this.bpmnPropertiesProvider.getTabs(element)
-            .concat({
-                id: 'custom',
-                label: this.translate('Properties'),
-                groups: [
-                    {
-                        id: 'opProp',
-                        label: this.translate('Data Object Properties'),
-                        entries: [
-                            EntryFactory.textBox({
-                                id: 'servicetemplateID',
-                                description: 'ServiceTemplate ID',
-                                label: 'Service Template ID',
-                                modelProperty: 'servicetemplateID'
-                            }),
-                            EntryFactory.selectBox({
-                                id: 'NodeTemplate',
-                                description: 'NodeTemplate',
-                                label: 'NodeTemplate',
-                                selectOptions: function (element, values) {
-                                    //console.log(CustomPropsProvider.template);
-                                    return CustomPropsProvider.template;
-                                },
-                                setControlValue: true,
-                                modelProperty: 'NodeTemplate',
-                                set: function (element, values, node) {
-                                    console.log("das ausgewählte Element ist");
-                                    if (values.NodeTemplate != 'none') {
-                                        element.businessObject.$attrs.NodeTemplate = values.NodeTemplate;
-
-                                        console.log(element);
-                                        element.businessObject.$attrs.interface = [];
-                                        element.businessObject.$attrs.operation = [];
-                                        if (values.NodeTemplate != undefined) {
-                                            var namespace = 'http://opentosca.org/nodetypes';
-                                            const url = 'nodetypes/' + encodeURIComponent(encodeURIComponent((namespace)))
-                                                + '/' + encodeURIComponent(encodeURIComponent((values.NodeTemplate))) + '/interfaces/';
-                                            var interfaces = new Promise(resolve => {
-
-                                                var http = new XMLHttpRequest();
-                                                http.open("GET", 'http://localhost:8080/' + 'winery/' + url, true);
-                                                http.send();
-                                                http.onreadystatechange = function () {
-                                                    if (http.readyState == XMLHttpRequest.DONE) {
-
-                                                        console.log(http.responseText);
-                                                        var response = JSON.parse(http.responseText);
-                                                        CustomPropsProvider.interfaces = [];
-                                                        console.log('JSON PARSE');
-                                                        console.log(response);
-                                                        var array = [];
-
-                                                        for (var i = 0; i < response.length; i++) {
-                                                            CustomPropsProvider.tosca.push({ name: response[i].name, value: response[i].operation });
-                                                            array.push({
-                                                                name: response[i].name, value: response[i].name
-                                                            });
-                                                            CustomPropsProvider.interfaces.push({
-                                                                name: response[i].name, value: response[i].name
-                                                            })
-                                                            console.log('HIER Array');
-                                                            console.log(array);
-                                                            window['interfaceN'] = array;
-                                                        }
-
-                                                        console.log(CustomPropsProvider.interfaces);
-                                                        element.businessObject.$attrs.interface = CustomPropsProvider.interfaces;
-
-                                                        console.log(element);
-                                                        resolve(CustomPropsProvider.interfaces);
-                                                    }
-
-                                                }
-                                            }).then(response => {
-                                                return response
-                                            })
-                                            element.businessObject.$attrs.NodeTemplate = values.NodeTemplate;
-
-                                            //inputtests
-                                            if (is(element.businessObject, 'bpmn:ScriptTask')) {
-                                                if (element.businessObject.$attrs.ntype === "CallNodeOperation") {
-                                                    element.businessObject.extensionElements.values[0].inputParameters[3].value = values.NodeTemplate;
-                                                } else if (element.businessObject.$attrs.ntype === "NodeInstance") {
-                                                    element.businessObject.extensionElements.values[0].inputParameters[0].value = values.NodeTemplate;
-                                                }
-                                            }
-                                            //
-                                            return;
-                                        }
-                                    }
-                                    return;
-                                }
-                            }),
-                            EntryFactory.selectBox({
-                                id: 'interface',
-                                description: 'Interface',
-                                label: 'Interface',
-                                selectOptions: function (element, values) {
-                                    console.log(values);
-                                    console.log('SELECTOPTIONS')
-                                    //element.businessObject.$attrs.operation = [];
-                                    console.log(element.businessObject.$attrs.nodetemplate);
-                                    if (element.businessObject.$attrs.NodeTemplate != undefined) {
-                                        var namespace = 'http://opentosca.org/nodetypes';
-                                        const url = 'nodetypes/' + encodeURIComponent(encodeURIComponent((namespace)))
-                                            + '/' + encodeURIComponent(encodeURIComponent((element.businessObject.$attrs.NodeTemplate))) + '/interfaces/';
-                                        var interfaces = new Promise(resolve => {
-                                            var http = new XMLHttpRequest();
-                                            http.open("GET", 'http://localhost:8080/' + 'winery/' + url, true);
-                                            http.send();
-                                            http.onreadystatechange = function () {
-                                                if (http.readyState == XMLHttpRequest.DONE) {
-
-                                                    console.log(http.responseText);
-                                                    var response = JSON.parse(http.responseText);
-                                                    CustomPropsProvider.interfaces = [];
-                                                    console.log('JSON PARSE');
-                                                    console.log(response);
-                                                    var array = [];
-                                                    //CustomPropsProvider.tosca = [];
-                                                    for (var i = 0; i < response.length; i++) {
-                                                        array.push({
-                                                            name: response[i].name, value: response[i].name
-                                                        });
-                                                        CustomPropsProvider.interfaces.push({
-                                                            name: response[i].name, value: response[i].name
-                                                        })
-                                                        console.log('HIER Array');
-                                                        console.log(array);
-                                                        window['interfaceN'] = array;
-
-                                                    }
-                                                    console.log("INTERFACES CUSTOM")
-                                                    console.log(CustomPropsProvider.interfaces);
-                                                    //element.businessObject.$attrs.interface = CustomPropsProvider.interfaces;
-                                                    console.log(element);
-                                                    resolve(CustomPropsProvider.interfaces);
-                                                }
-
-                                            }
-                                        }).then(response => {
-                                            return CustomPropsProvider.interfaces
-                                        })
-                                        //element.businessObject.$attrs.nodetemplate = values.nodetemplate;
-                                        console.log(window['interfaceN']);
-                                        return CustomPropsProvider.interfaces;
-                                    }
-                                },
-                                set: function (element, values, node) {
-                                    console.log(element);
-                                    console.log('SET Interface');
-                                    console.log(values.interface);
-                                    element.businessObject.$attrs.interface = values.interface;
-                                    //inputtests hier
-                                    if (is(element.businessObject, 'bpmn:ScriptTask')) {
-                                        if (element.businessObject.$attrs.ntype === "CallNodeOperation") {
-                                            element.businessObject.extensionElements.values[0].inputParameters[4].value = values.interface;
-                                        }
-                                    }
-                                    if (element.businessObject.$attrs.interface != undefined) {
-                                        for (var i = 0; i < CustomPropsProvider.tosca.length; i++) {
-                                            if (CustomPropsProvider.tosca[i].name == element.businessObject.$attrs.interface) {
-                                                console.log("DER SET VALUE");
-                                                console.log(CustomPropsProvider.tosca[i].value.length);
-                                                var arr = [];
-                                                for (var j = 0; j < CustomPropsProvider.tosca[i].value.length; j++) {
-                                                    CustomPropsProvider.operations.push({
-                                                        name: CustomPropsProvider.tosca[i].value[j].name, value:
-                                                        CustomPropsProvider.tosca[i].value[j].name
-                                                    });
-                                                }
-
-                                                element.businessObject.$attrs.operation = values.operation;
-                                                return;
-                                            }
-                                        }
-                                    }
-                                },
-                                setControlValue: true,
-                                modelProperty: 'interface'
-                            }),
-                            EntryFactory.selectBox({
-                                id: 'operation',
-                                description: 'Operation',
-                                label: 'Operation',
-                                selectOptions: function (element, values) {
-                                    if (element.businessObject.$attrs.interface != undefined) {
-                                        for (var i = 0; i < CustomPropsProvider.tosca.length; i++) {
-                                            if (CustomPropsProvider.tosca[i].name == element.businessObject.$attrs.interface) {
-                                                CustomPropsProvider.operations = [];
-                                                var arr = [];
-                                                CustomPropsProvider.operations.push({ name: 'none', value: 'none' });
-                                                for (var j = 0; j < CustomPropsProvider.tosca[i].value.length; j++) {
-                                                    CustomPropsProvider.operations.push({
-                                                        name: CustomPropsProvider.tosca[i].value[j].name, value:
-                                                        CustomPropsProvider.tosca[i].value[j].name
-                                                    });
-                                                }
-                                                //console.log(CustomPropsProvider.operations);
-
-                                                //element.businessObject.$attrs.operation = values.operations;
-
-                                                return CustomPropsProvider.operations;
-                                            }
-                                        }
-
-                                    }
-                                    return CustomPropsProvider.operations;
-                                }, set: function (element, values, node) {
-                                    console.log('SEEEEEEEEEE')
-                                    console.log(values.operation);
-                                    element.businessObject.$attrs.operation = values.operation;
-                                    //inputtests hier
-                                    if (is(element.businessObject, 'bpmn:ScriptTask')) {
-                                        if (element.businessObject.$attrs.ntype === "CallNodeOperation") {
-                                            element.businessObject.extensionElements.values[0].inputParameters[5].value = values.operation;
-                                        }
-                                    }
-                                    console.log(element);
-                                    return;
-                                },
-                                setControlValue: true,
-                                modelProperty: 'operation'
-                            }),
-                            EntryFactory.selectBox({
-                                id: 'inputParams',
-                                description: 'Input Parameter',
-                                label: 'Input Parameter',
-                                selectOptions: function (element) {
-                                    console.log(element);
-                                    if (element.businessObject.$attrs.interface != undefined) {
-                                        for (var i = 0; i < CustomPropsProvider.tosca.length; i++) {
-                                            if (CustomPropsProvider.tosca[i].name == element.businessObject.$attrs.interface) {
-                                                CustomPropsProvider.options = [];
-                                                var arr = [];
-                                                if (element.businessObject.$attrs.operation != undefined) {
-                                                    for (var j = 0; j < CustomPropsProvider.tosca[i].value.length; j++) {
-                                                        console.log("VERGLEICH");
-                                                        console.log(CustomPropsProvider.tosca[i].value[j].name);
-                                                        console.log(element.businessObject.$attrs.operation);
-                                                        if (CustomPropsProvider.tosca[i].value[j].name == element.businessObject.$attrs.operation) {
-                                                            console.log('INPUT PARAMETER')
-                                                            var parameter = CustomPropsProvider.tosca[i].value[j].inputParameters.inputParameter;
-                                                            if (parameter != undefined) {
-                                                                CustomPropsProvider.options.push({ name: 'none', value: 'none' });
-                                                                var length = CustomPropsProvider.tosca[i].value[j].inputParameters.inputParameter.length;
-                                                                for (var k = 0; k < length; k++) {
-                                                                    CustomPropsProvider.options.push({
-                                                                        name: parameter[k].name, value: parameter[k].name + ',' + parameter[k].type
-                                                                    });
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                    console.log(CustomPropsProvider.operations);
-
-                                                    //element.businessObject.$attrs.operation = CustomPropsProvider.operations;
-
-                                                    return CustomPropsProvider.options;
-                                                }
-                                            }
-                                        }
-
-                                    }
-                                    return CustomPropsProvider.options;
-                                },
-                                set: function (element, values, node) {
-                                    element.businessObject.$attrs.saveValueCheckbox = false;
-                                    element.businessObject.$attrs.valueInput = '';
-                                    console.log('SET INPUT');
-                                    console.log(element);
-                                    if (values.inputParams != undefined) {
-                                        var s = values.inputParams.split(',');
-                                        element.businessObject.$attrs.nameInput = s[0];
-                                        element.businessObject.$attrs.typeInput = s[1];
-                                        if (element.businessObject.$attrs.inputParameter != undefined) {
-                                            var param = element.businessObject.$attrs.inputParameter;
-                                            var length = param.length;
-
-                                            for (var i = 0; i < length; i++) {
-                                                if (param[i].name == element.businessObject.$attrs.nameInput) {
-                                                    var split = param[i].value.split(',');
-                                                    if (split.length == 3) {
-                                                        element.businessObject.$attrs.valueInput = split[2];
-                                                    }
-                                                }
-                                            }
-                                        } else {
-                                            element.businessObject.$attrs.inputParameter = CustomPropsProvider.options;
-                                            element.businessObject.$attrs.inputParams = values.inputParams;
-                                            return;
-                                        }
-
-                                        element.businessObject.$attrs.inputParams = values.inputParams;
-                                        return;
-                                    }
-                                    return;
-                                },
-                                setControlValue: true,
-                                modelProperty: 'inputParams'
-                            }),
-                            EntryFactory.textField({
-                                id: 'nameInput',
-                                description: 'Name of Parameter',
-                                label: 'Name of Parameter',
-                                modelProperty: 'nameInput'
-                            }),
-                            EntryFactory.textField({
-                                id: 'typeInput',
-                                description: 'Type of Parameter',
-                                label: 'Type of Parameter',
-                                modelProperty: 'typeInput'
-                            }),
-                            EntryFactory.textField({
-                                id: 'valueInput',
-                                description: 'Value of Parameter',
-                                label: 'Value of Parameter',
-                                modelProperty: 'valueInput'
-                            }),
-                            EntryFactory.checkbox({
-                                id: 'saveValueCheckbox',
-                                description: 'Write the value back to the corresponding input parameter.',
-                                label: 'Save',
-                                modelProperty: 'saveValueCheckbox',
-                                validate: function (element, values) {
-                                    console.log('Checkbox');
-                                    console.log(element);
-                                    var check = values.saveValueCheckbox;
-                                    console.log('VALUE OF INPUT PARAM');
-                                    console.log(values);
-                                    if (element.businessObject.$attrs.valueInput != undefined && check) {
-                                        if (element.businessObject.$attrs.inputParameter != undefined) {
-                                            var length = element.businessObject.$attrs.inputParameter.length;
-                                            for (var i = 0; i < length; i++) {
-
-                                                if (element.businessObject.$attrs.inputParameter[i].name == element.businessObject.$attrs.nameInput) {
-                                                    element.businessObject.$attrs.inputParameter[i].value = element.businessObject.$attrs.inputParameter[i].name + ',' +
-                                                        element.businessObject.$attrs.typeInput + ',' + element.businessObject.$attrs.valueInput;
-                                                }
-                                                console.log(CustomPropsProvider.options);
-                                            }
-                                            //element.businessObject.$attrs.inputParameter = CustomPropsProvider.options;
-                                        }
-                                    }
-                                }
-                            }),
-                            EntryFactory.selectBox({
-                                id: 'outputParams',
-                                description: 'Output Parameter',
-                                label: 'Output Parameter',
-                                selectOptions: function (element, values) {
-                                    if (element.businessObject.$attrs.interface != undefined) {
-                                        for (var i = 0; i < CustomPropsProvider.tosca.length; i++) {
-                                            if (CustomPropsProvider.tosca[i].name == element.businessObject.$attrs.interface) {
-                                                CustomPropsProvider.outputParam = [];
-                                                var arr = [];
-                                                if (element.businessObject.$attrs.operation != undefined) {
-                                                    for (var j = 0; j < CustomPropsProvider.tosca[i].value.length; j++) {
-                                                        if (element.businessObject.$attrs.operation != 'none') {
-                                                            if (CustomPropsProvider.tosca[i].value[j].name == element.businessObject.$attrs.operation) {
-                                                                console.log('OUTPUT PARAMETER')
-                                                                if (CustomPropsProvider.tosca[i].value[j].outputParameters != undefined) {
-                                                                    var parameter = CustomPropsProvider.tosca[i].value[j].outputParameters.outputParameter;
-                                                                    if (parameter != undefined) {
-                                                                        var length = CustomPropsProvider.tosca[i].value[j].outputParameters.outputParameter.length;
-                                                                        for (var k = 0; k < length; k++) {
-                                                                            CustomPropsProvider.outputParam.push({
-                                                                                name: parameter[k].name, value: parameter[k].name + ',' + parameter[k].type
-                                                                            });
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                    //element.businessObject.$attrs.operation = CustomPropsProvider.operations;
-                                                    return CustomPropsProvider.outputParam;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    return CustomPropsProvider.outputParam;
-                                },
-                                setControlValue: true,
-                                modelProperty: 'outputParams'
-                            })
-                        ]
-                    }]
-            })
-
-    }else if((element.businessObject.$type == 'bpmn:DataObjectReference') && (element.businessObject.$attrs.dtype == "ServiceInstanceDataObject")){ 
-        return this.bpmnPropertiesProvider.getTabs(element)
-            .concat({
-                id: 'custom',
-                label: this.translate('Properties'),
-                groups: [
-                    {
-                        id: 'servideInstanceProp',
-                        label: this.translate('Service Data Object Properties'),
-                        entries: [
-                            EntryFactory.textBox({
-                                id: 'serviceInstanceID',
-                                description: 'ServiceInstance ID',
-                                label: 'Service Instance ID',
-                                modelProperty: 'serviceinstanceID'
-                            }),
-                            EntryFactory.textBox({
-                                id: 'servicetemplateID',
-                                description: 'ServiceTemplate ID',
-                                label: 'Service Template ID',
-                                modelProperty: 'servicetemplateID'
-                            }),
-                            EntryFactory.textBox({
-                                id: 'CSARID',
-                                description: 'CSAR ID',
-                                label: 'CSAR ID',
-                                modelProperty: 'CSARID'
-                            }),
-                            
-                        ]}]});
-    }else if((element.businessObject.$type == 'bpmn:DataObjectReference') && (element.businessObject.$attrs.dtype == "RelationshipInstanceDataObject")){
-        return this.bpmnPropertiesProvider.getTabs(element)
-            .concat({
-                id: 'custom',
-                label: this.translate('Properties'),
-                groups: [
-                    {
-                        id: 'relationshipInstanceProp',
-                        label: this.translate('Relationship Data Object Properties'),
-                        entries: [
-                            EntryFactory.textBox({
-                                id: 'RelationshipInstanceID',
-                                description: 'RelationshipInstance ID',
-                                label: 'Relationship Instance ID',
-                                modelProperty: 'relationshipinstanceID'
-                            }),
-                            EntryFactory.textBox({
-                                id: 'SourceURL',
-                                description: 'SourceURL',
-                                label: 'SourceURL',
-                                modelProperty: 'SourceURL'
-                            }),
-                            EntryFactory.textBox({
-                                id: 'TargetURL',
-                                description: 'TargetURL',
-                                label: 'TargetURL',
-                                modelProperty: 'TargetURL'
-                            }),
-
-                        ]}]});
-    }else{
+    } else if ((element.businessObject.$type == 'bpmn:DataObjectReference') && (element.businessObject.$attrs.dtype == "NodeInstanceDataObject")) {
       return this.bpmnPropertiesProvider.getTabs(element)
-        .concat({id: 'custom',
-        label: this.translate('Properties'),
-        groups: [
-          {
-            id: 'opProp',
-            label: this.translate('OperationTask Properties'),
-            entries: [
-        ]}]});
+        .concat({
+          id: 'custom',
+          label: this.translate('Properties'),
+          groups: [
+            {
+              id: 'opProp',
+              label: this.translate('Data Object Properties'),
+              entries: [
+                EntryFactory.textBox({
+                  id: 'servicetemplateID',
+                  description: 'ServiceTemplate ID',
+                  label: 'Service Template ID',
+                  modelProperty: 'servicetemplateID'
+                }),
+                EntryFactory.selectBox({
+                  id: 'NodeTemplate',
+                  description: 'NodeTemplate',
+                  label: 'NodeTemplate',
+                  selectOptions: function (element, values) {
+                    //console.log(CustomPropsProvider.template);
+                    return CustomPropsProvider.template;
+                  },
+                  setControlValue: true,
+                  modelProperty: 'NodeTemplate',
+                  set: function (element, values, node) {
+                    console.log("das ausgewählte Element ist");
+                    if (values.NodeTemplate != 'none') {
+                      element.businessObject.$attrs.NodeTemplate = values.NodeTemplate;
+
+                      console.log(element);
+                      element.businessObject.$attrs.interface = [];
+                      element.businessObject.$attrs.operation = [];
+                      if (values.NodeTemplate != undefined) {
+                        var namespace = 'http://opentosca.org/nodetypes';
+                        const url = 'nodetypes/' + encodeURIComponent(encodeURIComponent((namespace)))
+                          + '/' + encodeURIComponent(encodeURIComponent((values.NodeTemplate))) + '/interfaces/';
+                        var interfaces = new Promise(resolve => {
+
+                          var http = new XMLHttpRequest();
+                          http.open("GET", 'http://localhost:8080/' + 'winery/' + url, true);
+                          http.send();
+                          http.onreadystatechange = function () {
+                            if (http.readyState == XMLHttpRequest.DONE) {
+
+                              console.log(http.responseText);
+                              var response = JSON.parse(http.responseText);
+                              CustomPropsProvider.interfaces = [];
+                              console.log('JSON PARSE');
+                              console.log(response);
+                              var array = [];
+
+                              for (var i = 0; i < response.length; i++) {
+                                CustomPropsProvider.tosca.push({ name: response[i].name, value: response[i].operation });
+                                array.push({
+                                  name: response[i].name, value: response[i].name
+                                });
+                                CustomPropsProvider.interfaces.push({
+                                  name: response[i].name, value: response[i].name
+                                })
+                                console.log('HIER Array');
+                                console.log(array);
+                                window['interfaceN'] = array;
+                              }
+
+                              console.log(CustomPropsProvider.interfaces);
+                              element.businessObject.$attrs.interface = CustomPropsProvider.interfaces;
+
+                              console.log(element);
+                              resolve(CustomPropsProvider.interfaces);
+                            }
+
+                          }
+                        }).then(response => {
+                          return response
+                        })
+                        element.businessObject.$attrs.NodeTemplate = values.NodeTemplate;
+
+                        //inputtests
+                        if (is(element.businessObject, 'bpmn:ScriptTask')) {
+                          if (element.businessObject.$attrs.ntype === "CallNodeOperation") {
+                            element.businessObject.extensionElements.values[0].inputParameters[3].value = values.NodeTemplate;
+                          } else if (element.businessObject.$attrs.ntype === "NodeInstance") {
+                            element.businessObject.extensionElements.values[0].inputParameters[0].value = values.NodeTemplate;
+                          }
+                        }
+                        //
+                        return;
+                      }
+                    }
+                    return;
+                  }
+                }),
+                EntryFactory.selectBox({
+                  id: 'interface',
+                  description: 'Interface',
+                  label: 'Interface',
+                  selectOptions: function (element, values) {
+                    console.log(values);
+                    console.log('SELECTOPTIONS')
+                    //element.businessObject.$attrs.operation = [];
+                    console.log(element.businessObject.$attrs.nodetemplate);
+                    if (element.businessObject.$attrs.NodeTemplate != undefined) {
+                      var namespace = 'http://opentosca.org/nodetypes';
+                      const url = 'nodetypes/' + encodeURIComponent(encodeURIComponent((namespace)))
+                        + '/' + encodeURIComponent(encodeURIComponent((element.businessObject.$attrs.NodeTemplate))) + '/interfaces/';
+                      var interfaces = new Promise(resolve => {
+                        var http = new XMLHttpRequest();
+                        http.open("GET", 'http://localhost:8080/' + 'winery/' + url, true);
+                        http.send();
+                        http.onreadystatechange = function () {
+                          if (http.readyState == XMLHttpRequest.DONE) {
+
+                            console.log(http.responseText);
+                            var response = JSON.parse(http.responseText);
+                            CustomPropsProvider.interfaces = [];
+                            console.log('JSON PARSE');
+                            console.log(response);
+                            var array = [];
+                            //CustomPropsProvider.tosca = [];
+                            for (var i = 0; i < response.length; i++) {
+                              array.push({
+                                name: response[i].name, value: response[i].name
+                              });
+                              CustomPropsProvider.interfaces.push({
+                                name: response[i].name, value: response[i].name
+                              })
+                              console.log('HIER Array');
+                              console.log(array);
+                              window['interfaceN'] = array;
+
+                            }
+                            console.log("INTERFACES CUSTOM")
+                            console.log(CustomPropsProvider.interfaces);
+                            //element.businessObject.$attrs.interface = CustomPropsProvider.interfaces;
+                            console.log(element);
+                            resolve(CustomPropsProvider.interfaces);
+                          }
+
+                        }
+                      }).then(response => {
+                        return CustomPropsProvider.interfaces
+                      })
+                      //element.businessObject.$attrs.nodetemplate = values.nodetemplate;
+                      console.log(window['interfaceN']);
+                      return CustomPropsProvider.interfaces;
+                    }
+                  },
+                  set: function (element, values, node) {
+                    console.log(element);
+                    console.log('SET Interface');
+                    console.log(values.interface);
+                    element.businessObject.$attrs.interface = values.interface;
+                    //inputtests hier
+                    if (is(element.businessObject, 'bpmn:ScriptTask')) {
+                      if (element.businessObject.$attrs.ntype === "CallNodeOperation") {
+                        element.businessObject.extensionElements.values[0].inputParameters[4].value = values.interface;
+                      }
+                    }
+                    if (element.businessObject.$attrs.interface != undefined) {
+                      for (var i = 0; i < CustomPropsProvider.tosca.length; i++) {
+                        if (CustomPropsProvider.tosca[i].name == element.businessObject.$attrs.interface) {
+                          console.log("DER SET VALUE");
+                          console.log(CustomPropsProvider.tosca[i].value.length);
+                          var arr = [];
+                          for (var j = 0; j < CustomPropsProvider.tosca[i].value.length; j++) {
+                            CustomPropsProvider.operations.push({
+                              name: CustomPropsProvider.tosca[i].value[j].name, value:
+                                CustomPropsProvider.tosca[i].value[j].name
+                            });
+                          }
+
+                          element.businessObject.$attrs.operation = values.operation;
+                          return;
+                        }
+                      }
+                    }
+                  },
+                  setControlValue: true,
+                  modelProperty: 'interface'
+                }),
+                EntryFactory.selectBox({
+                  id: 'operation',
+                  description: 'Operation',
+                  label: 'Operation',
+                  selectOptions: function (element, values) {
+                    if (element.businessObject.$attrs.interface != undefined) {
+                      for (var i = 0; i < CustomPropsProvider.tosca.length; i++) {
+                        if (CustomPropsProvider.tosca[i].name == element.businessObject.$attrs.interface) {
+                          CustomPropsProvider.operations = [];
+                          var arr = [];
+                          CustomPropsProvider.operations.push({ name: 'none', value: 'none' });
+                          for (var j = 0; j < CustomPropsProvider.tosca[i].value.length; j++) {
+                            CustomPropsProvider.operations.push({
+                              name: CustomPropsProvider.tosca[i].value[j].name, value:
+                                CustomPropsProvider.tosca[i].value[j].name
+                            });
+                          }
+                          //console.log(CustomPropsProvider.operations);
+
+                          //element.businessObject.$attrs.operation = values.operations;
+
+                          return CustomPropsProvider.operations;
+                        }
+                      }
+
+                    }
+                    return CustomPropsProvider.operations;
+                  }, set: function (element, values, node) {
+                    console.log('SEEEEEEEEEE')
+                    console.log(values.operation);
+                    element.businessObject.$attrs.operation = values.operation;
+                    //inputtests hier
+                    if (is(element.businessObject, 'bpmn:ScriptTask')) {
+                      if (element.businessObject.$attrs.ntype === "CallNodeOperation") {
+                        element.businessObject.extensionElements.values[0].inputParameters[5].value = values.operation;
+                      }
+                    }
+                    console.log(element);
+                    return;
+                  },
+                  setControlValue: true,
+                  modelProperty: 'operation'
+                }),
+                EntryFactory.selectBox({
+                  id: 'inputParams',
+                  description: 'Input Parameter',
+                  label: 'Input Parameter',
+                  selectOptions: function (element) {
+                    console.log(element);
+                    if (element.businessObject.$attrs.interface != undefined) {
+                      for (var i = 0; i < CustomPropsProvider.tosca.length; i++) {
+                        if (CustomPropsProvider.tosca[i].name == element.businessObject.$attrs.interface) {
+                          CustomPropsProvider.options = [];
+                          var arr = [];
+                          if (element.businessObject.$attrs.operation != undefined) {
+                            for (var j = 0; j < CustomPropsProvider.tosca[i].value.length; j++) {
+                              console.log("VERGLEICH");
+                              console.log(CustomPropsProvider.tosca[i].value[j].name);
+                              console.log(element.businessObject.$attrs.operation);
+                              if (CustomPropsProvider.tosca[i].value[j].name == element.businessObject.$attrs.operation) {
+                                console.log('INPUT PARAMETER')
+                                var parameter = CustomPropsProvider.tosca[i].value[j].inputParameters.inputParameter;
+                                if (parameter != undefined) {
+                                  CustomPropsProvider.options.push({ name: 'none', value: 'none' });
+                                  var length = CustomPropsProvider.tosca[i].value[j].inputParameters.inputParameter.length;
+                                  for (var k = 0; k < length; k++) {
+                                    CustomPropsProvider.options.push({
+                                      name: parameter[k].name, value: parameter[k].name + ',' + parameter[k].type
+                                    });
+                                  }
+                                }
+                              }
+                            }
+                            console.log(CustomPropsProvider.operations);
+
+                            //element.businessObject.$attrs.operation = CustomPropsProvider.operations;
+
+                            return CustomPropsProvider.options;
+                          }
+                        }
+                      }
+
+                    }
+                    return CustomPropsProvider.options;
+                  },
+                  set: function (element, values, node) {
+                    element.businessObject.$attrs.saveValueCheckbox = false;
+                    element.businessObject.$attrs.valueInput = '';
+                    console.log('SET INPUT');
+                    console.log(element);
+                    if (values.inputParams != undefined) {
+                      var s = values.inputParams.split(',');
+                      element.businessObject.$attrs.nameInput = s[0];
+                      element.businessObject.$attrs.typeInput = s[1];
+                      if (element.businessObject.$attrs.inputParameter != undefined) {
+                        var param = element.businessObject.$attrs.inputParameter;
+                        var length = param.length;
+
+                        for (var i = 0; i < length; i++) {
+                          if (param[i].name == element.businessObject.$attrs.nameInput) {
+                            var split = param[i].value.split(',');
+                            if (split.length == 3) {
+                              element.businessObject.$attrs.valueInput = split[2];
+                            }
+                          }
+                        }
+                      } else {
+                        element.businessObject.$attrs.inputParameter = CustomPropsProvider.options;
+                        element.businessObject.$attrs.inputParams = values.inputParams;
+                        return;
+                      }
+
+                      element.businessObject.$attrs.inputParams = values.inputParams;
+                      return;
+                    }
+                    return;
+                  },
+                  setControlValue: true,
+                  modelProperty: 'inputParams'
+                }),
+                EntryFactory.textField({
+                  id: 'nameInput',
+                  description: 'Name of Parameter',
+                  label: 'Name of Parameter',
+                  modelProperty: 'nameInput'
+                }),
+                EntryFactory.textField({
+                  id: 'typeInput',
+                  description: 'Type of Parameter',
+                  label: 'Type of Parameter',
+                  modelProperty: 'typeInput'
+                }),
+                EntryFactory.textField({
+                  id: 'valueInput',
+                  description: 'Value of Parameter',
+                  label: 'Value of Parameter',
+                  modelProperty: 'valueInput'
+                }),
+                EntryFactory.checkbox({
+                  id: 'saveValueCheckbox',
+                  description: 'Write the value back to the corresponding input parameter.',
+                  label: 'Save',
+                  modelProperty: 'saveValueCheckbox',
+                  validate: function (element, values) {
+                    console.log('Checkbox');
+                    console.log(element);
+                    var check = values.saveValueCheckbox;
+                    console.log('VALUE OF INPUT PARAM');
+                    console.log(values);
+                    if (element.businessObject.$attrs.valueInput != undefined && check) {
+                      if (element.businessObject.$attrs.inputParameter != undefined) {
+                        var length = element.businessObject.$attrs.inputParameter.length;
+                        for (var i = 0; i < length; i++) {
+
+                          if (element.businessObject.$attrs.inputParameter[i].name == element.businessObject.$attrs.nameInput) {
+                            element.businessObject.$attrs.inputParameter[i].value = element.businessObject.$attrs.inputParameter[i].name + ',' +
+                              element.businessObject.$attrs.typeInput + ',' + element.businessObject.$attrs.valueInput;
+                          }
+                          console.log(CustomPropsProvider.options);
+                        }
+                        //element.businessObject.$attrs.inputParameter = CustomPropsProvider.options;
+                      }
+                    }
+                  }
+                }),
+                EntryFactory.selectBox({
+                  id: 'outputParams',
+                  description: 'Output Parameter',
+                  label: 'Output Parameter',
+                  selectOptions: function (element, values) {
+                    if (element.businessObject.$attrs.interface != undefined) {
+                      for (var i = 0; i < CustomPropsProvider.tosca.length; i++) {
+                        if (CustomPropsProvider.tosca[i].name == element.businessObject.$attrs.interface) {
+                          CustomPropsProvider.outputParam = [];
+                          var arr = [];
+                          if (element.businessObject.$attrs.operation != undefined) {
+                            for (var j = 0; j < CustomPropsProvider.tosca[i].value.length; j++) {
+                              if (element.businessObject.$attrs.operation != 'none') {
+                                if (CustomPropsProvider.tosca[i].value[j].name == element.businessObject.$attrs.operation) {
+                                  console.log('OUTPUT PARAMETER')
+                                  if (CustomPropsProvider.tosca[i].value[j].outputParameters != undefined) {
+                                    var parameter = CustomPropsProvider.tosca[i].value[j].outputParameters.outputParameter;
+                                    if (parameter != undefined) {
+                                      var length = CustomPropsProvider.tosca[i].value[j].outputParameters.outputParameter.length;
+                                      for (var k = 0; k < length; k++) {
+                                        CustomPropsProvider.outputParam.push({
+                                          name: parameter[k].name, value: parameter[k].name + ',' + parameter[k].type
+                                        });
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                            //element.businessObject.$attrs.operation = CustomPropsProvider.operations;
+                            return CustomPropsProvider.outputParam;
+                          }
+                        }
+                      }
+                    }
+                    return CustomPropsProvider.outputParam;
+                  },
+                  setControlValue: true,
+                  modelProperty: 'outputParams'
+                })
+              ]
+            }]
+        })
+
+    } else if ((element.businessObject.$type == 'bpmn:DataObjectReference') && (element.businessObject.$attrs.dtype == "ServiceInstanceDataObject")) {
+      return this.bpmnPropertiesProvider.getTabs(element)
+        .concat({
+          id: 'custom',
+          label: this.translate('Properties'),
+          groups: [
+            {
+              id: 'servideInstanceProp',
+              label: this.translate('Service Data Object Properties'),
+              entries: [
+                EntryFactory.textBox({
+                  id: 'serviceInstanceID',
+                  description: 'ServiceInstance ID',
+                  label: 'Service Instance ID',
+                  modelProperty: 'serviceinstanceID'
+                }),
+                EntryFactory.textBox({
+                  id: 'servicetemplateID',
+                  description: 'ServiceTemplate ID',
+                  label: 'Service Template ID',
+                  modelProperty: 'servicetemplateID',
+                  get: function () {
+                    return {
+                      servicetemplateID: CustomPropsProvider.winery2.serviceTemplateId
+                    }
+                  },
+                  set: function (element, values) {
+                    element.businessObject.$attrs.servicetemplateID = CustomPropsProvider.winery2.serviceTemplateId;
+                  }
+                }),
+                EntryFactory.textBox({
+                  id: 'CSARID',
+                  description: 'CSAR ID',
+                  label: 'CSAR ID',
+                  modelProperty: 'CSARID',
+                  get: function () {
+                    return {
+                      CSARID: CustomPropsProvider.winery2.serviceTemplateId + '.csar'
+                    }
+                  },
+                  set: function (element, values) {
+                    element.businessObject.$attrs.CSARID = CustomPropsProvider.winery2.serviceTemplateId + '.csar';
+                  }
+                }),
+
+              ]
+            }]
+        });
+    } else if ((element.businessObject.$type == 'bpmn:DataObjectReference') && (element.businessObject.$attrs.dtype == "RelationshipInstanceDataObject")) {
+      return this.bpmnPropertiesProvider.getTabs(element)
+        .concat({
+          id: 'custom',
+          label: this.translate('Properties'),
+          groups: [
+            {
+              id: 'relationshipInstanceProp',
+              label: this.translate('Relationship Data Object Properties'),
+              entries: [
+                EntryFactory.textBox({
+                  id: 'RelationshipInstanceID',
+                  description: 'RelationshipInstance ID',
+                  label: 'Relationship Instance ID',
+                  modelProperty: 'relationshipinstanceID'
+                }),
+                EntryFactory.textBox({
+                  id: 'SourceURL',
+                  description: 'SourceURL',
+                  label: 'SourceURL',
+                  modelProperty: 'SourceURL'
+                }),
+                EntryFactory.textBox({
+                  id: 'TargetURL',
+                  description: 'TargetURL',
+                  label: 'TargetURL',
+                  modelProperty: 'TargetURL'
+                }),
+
+              ]
+            }]
+        });
+    } else {
+      return this.bpmnPropertiesProvider.getTabs(element)
+        .concat({
+          id: 'custom',
+          label: this.translate('Properties'),
+          groups: [
+            {
+              id: 'opProp',
+              label: this.translate('OperationTask Properties'),
+              entries: [
+              ]
+            }]
+        });
     }
   }
 }

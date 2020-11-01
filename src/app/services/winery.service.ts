@@ -36,7 +36,7 @@ export class WineryService {
     
     private repositoryURL: string;
     private namespace: string;
-    private serviceTemplateId: string;
+    public serviceTemplateId: string;
     private plan: string;
     static nodetemplates2 = [{ name: 'Test', value: 'Test' }, { name: 'Test1', value: 'Test1' }];
 
