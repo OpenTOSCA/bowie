@@ -138,7 +138,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
     this.update2(CustomPropsProvider.options);
     console.log("Elenebt");
     console.log(element);
-    if (element.businessObject.$type == 'bpmn:ScriptTask'&& (element.businessObject.$attrs.ntype =='NodeInstance'|| element.businessObject.$attrs.ntype === "CallNodeOperation")) {
+    if (element.businessObject.$type == 'bpmn:ScriptTask' && (element.businessObject.$attrs.ntype == 'NodeInstance' || element.businessObject.$attrs.ntype === "CallNodeOperation")) {
       return this.bpmnPropertiesProvider.getTabs(element)
         .concat({
           id: 'custom',
@@ -217,9 +217,16 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   modelProperty: 'NodeTemplate',
                   get: function (element, values) {
                     if (element.businessObject.$attrs.dataObject0 != undefined) {
-                      // element.businessObject.$attrs.NodeTemplate = element.businessObject.$attrs.dataObject0.$attrs.NodeTemplate;
-                      return {
-                        NodeTemplate: element.businessObject.$attrs.dataObject0.$attrs.NodeTemplate
+                      if (element.businessObject.$attrs.ntype === "CallNodeOperation") {
+                        element.businessObject.extensionElements.values[0].inputParameters[3].value = element.businessObject.$attrs.dataObject0.$attrs.NodeTemplate;
+                        return {
+                          NodeTemplate: element.businessObject.$attrs.dataObject0.$attrs.NodeTemplate
+                        }
+                      } else if (element.businessObject.$attrs.ntype === "NodeInstance") {
+                        element.businessObject.extensionElements.values[0].inputParameters[0].value = element.businessObject.$attrs.dataObject0.$attrs.NodeTemplate;
+                        return {
+                          NodeTemplate: element.businessObject.$attrs.dataObject0.$attrs.NodeTemplate
+                        }
                       }
                     } else {
                       console.log("fall2")
@@ -228,6 +235,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   },
                   set: function (element, values) {
                     element.businessObject.$attrs.NodeTemplate = element.businessObject.$attrs.dataObject0.$attrs.NodeTemplate;
+
                     return;
                   }
                 }),
@@ -238,6 +246,9 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   get: function (element, values) {
                     if (element.businessObject.$attrs.dataObject0 != undefined) {
                       // element.businessObject.$attrs.NodeTemplate = element.businessObject.$attrs.dataObject0.$attrs.NodeTemplate;
+                      if (element.businessObject.$attrs.ntype === "CallNodeOperation") {
+                        element.businessObject.extensionElements.values[0].inputParameters[4].value = element.businessObject.$attrs.dataObject0.$attrs.interface;
+                      }
                       return {
                         interface: element.businessObject.$attrs.dataObject0.$attrs.interface
                       }
@@ -260,6 +271,9 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   get: function (element, values) {
                     if (element.businessObject.$attrs.dataObject0 != undefined) {
                       // element.businessObject.$attrs.NodeTemplate = element.businessObject.$attrs.dataObject0.$attrs.NodeTemplate;
+                      if (element.businessObject.$attrs.ntype === "CallNodeOperation") {
+                        element.businessObject.extensionElements.values[0].inputParameters[5].value = element.businessObject.$attrs.dataObject0.$attrs.operation;
+                      }
                       return {
                         operation: element.businessObject.$attrs.dataObject0.$attrs.operation
                       }
@@ -270,6 +284,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   },
                   set: function (element, values) {
                     element.businessObject.$attrs.operation = element.businessObject.$attrs.dataObject0.$attrs.operation;
+
                     return;
                   },
                   setControlValue: true,
@@ -281,17 +296,45 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   label: 'Input Parameter',
                   selectOptions: function (element, values) {
                     if (element.businessObject.$attrs.dataObject0 != undefined) {
-                      var arr =[];
-                      for(var i=0; i< element.businessObject.$attrs.dataObject0.$attrs.inputParameter.length; i++){
-                        arr.push({name: element.businessObject.$attrs.dataObject0.$attrs.inputParameter[i].value, 
-                          value:element.businessObject.$attrs.dataObject0.$attrs.inputParameter[i].value})
+                      var arr = [];
+                      if (element.businessObject.$attrs.dataObject0.$attrs.inputParameter != undefined) {
+                        for (var i = 0; i < element.businessObject.$attrs.dataObject0.$attrs.inputParameter.length; i++) {
+                          arr.push({
+                            name: element.businessObject.$attrs.dataObject0.$attrs.inputParameter[i].value,
+                            value: element.businessObject.$attrs.dataObject0.$attrs.inputParameter[i].value
+                          })
+                        }
+
+                        if (element.businessObject.$attrs.ntype === "CallNodeOperation") {
+                          var names = [];
+                          var valuesInput = [];
+                          var param = element.businessObject.$attrs.dataObject0.$attrs.inputParameter;
+                          for (var i = 0; i < element.businessObject.$attrs.dataObject0.$attrs.inputParameter.length; i++) {
+
+                            var split = param[i].value.split(',');
+                            if (split[0] != 'none') {
+                              names.push(split[0]);
+                              if (split[2] != undefined) {
+
+                                valuesInput.push(split[2]);
+                              } 
+                            }
+
+
+                          }
+
+                          //element.businessObject.extensionElements.values[0].inputParameters[6].value = names;
+                          //element.businessObject.extensionElements.values[0].inputParameters[7].value = valuesInput;
+
+                        }
+                        return arr;
                       }
-                      return arr;
                     }
                   },
                   set: function (element, values) {
                     element.businessObject.$attrs.inputParameter = element.businessObject.$attrs.dataObject0.$attrs.inputParameter;
                     element.businessObject.$attrs.inputParams = values.inputParams;
+
                     return;
                   },
                   setControlValue: true,
@@ -385,124 +428,124 @@ export class CustomPropsProvider implements IPropertiesProvider {
               ]
             }]
         })
-    }else if (element.businessObject.$type == 'bpmn:ScriptTask'&& element.businessObject.$attrs.ntype =='ServiceTemplateInstance') {
+    } else if (element.businessObject.$type == 'bpmn:ScriptTask' && element.businessObject.$attrs.ntype == 'ServiceTemplateInstance') {
       return this.bpmnPropertiesProvider.getTabs(element)
-      .concat({
-        id: 'custom',
-        label: this.translate('Properties'),
-        groups: [
-          {
-            id: 'serviceInstanceProp',
-            label: this.translate('Service Data Object Properties'),
-            entries: [
-              EntryFactory.selectBox({
-                id: 'dataObject',
-                description: 'Data Object ID',
-                label: 'Data Object ID',
-                selectOptions: function (element, values) {
-                  //console.log(CustomPropsProvider.template);
-                  console.log(element);
-                  console.log('DATAOBJECT');
-                  var arr = [];
-                  arr.push({ name: 'none', value: 'none' });
-                  var saveDataObject = [];
-                  if (element.businessObject.$parent.$type == 'bpmn:Process') {
-                    var find = false;
-                    // entspricht der Participant Id, indem ich mich gerade befinde.
-                    var length = element.businessObject.$parent.flowElements.length;
-                    var flowElement = element.businessObject.$parent.flowElements;
-                    for (var i = 0; i < length; i++) {
-                      if (flowElement[i].$type == 'bpmn:DataObjectReference') {
-                        arr.push({ name: flowElement[i].id, value: flowElement[i].id });
-                        console.log(flowElement[i]);
-                        saveDataObject.push({ name: flowElement[i], value: flowElement[i] });
-                        console.log(flowElement[i]);
-                      }
-                    }
-                    console.log(arr);
-                    element.businessObject.$attrs.dataObjectV = saveDataObject;
-                    return arr;
-                  }
-                },
-                set: function (element, values, node) {
-                  if (values.dataObject != 'none') {
-                    element.businessObject.$attrs.dataObject = values.dataObject;
-                    console.log("hiieer");
-                    if (element.businessObject.$attrs.dataObjectV != undefined) {
-
-                      console.log("heir ist nicht non")
-                      var dataObject = element.businessObject.$attrs.dataObjectV;
-                      console.log(element.businessObject.$attrs.dataObjectV);
-                      for (var i = 0; i < dataObject.length; i++) {
-                        console.log(dataObject[i].name);
-                        console.log(element.businessObject.$attrs.dataObject);
-                        if (dataObject[i].name.id == element.businessObject.$attrs.dataObject) {
-                          console.log(dataObject[i].value);
-                          element.businessObject.$attrs.dataObject0 = dataObject[i].value;
-                          console.log("FINAL");
-                          console.log(element.businessObject.$attrs.dataObject0);
+        .concat({
+          id: 'custom',
+          label: this.translate('Properties'),
+          groups: [
+            {
+              id: 'serviceInstanceProp',
+              label: this.translate('Service Data Object Properties'),
+              entries: [
+                EntryFactory.selectBox({
+                  id: 'dataObject',
+                  description: 'Data Object ID',
+                  label: 'Data Object ID',
+                  selectOptions: function (element, values) {
+                    //console.log(CustomPropsProvider.template);
+                    console.log(element);
+                    console.log('DATAOBJECT');
+                    var arr = [];
+                    arr.push({ name: 'none', value: 'none' });
+                    var saveDataObject = [];
+                    if (element.businessObject.$parent.$type == 'bpmn:Process') {
+                      var find = false;
+                      // entspricht der Participant Id, indem ich mich gerade befinde.
+                      var length = element.businessObject.$parent.flowElements.length;
+                      var flowElement = element.businessObject.$parent.flowElements;
+                      for (var i = 0; i < length; i++) {
+                        if (flowElement[i].$type == 'bpmn:DataObjectReference') {
+                          arr.push({ name: flowElement[i].id, value: flowElement[i].id });
+                          console.log(flowElement[i]);
+                          saveDataObject.push({ name: flowElement[i], value: flowElement[i] });
+                          console.log(flowElement[i]);
                         }
                       }
+                      console.log(arr);
+                      element.businessObject.$attrs.dataObjectV = saveDataObject;
+                      return arr;
                     }
+                  },
+                  set: function (element, values, node) {
+                    if (values.dataObject != 'none') {
+                      element.businessObject.$attrs.dataObject = values.dataObject;
+                      // console.log("hiieer");
+                      if (element.businessObject.$attrs.dataObjectV != undefined) {
+
+                        //console.log("heir ist nicht non")
+                        var dataObject = element.businessObject.$attrs.dataObjectV;
+                        //console.log(element.businessObject.$attrs.dataObjectV);
+                        for (var i = 0; i < dataObject.length; i++) {
+                          //console.log(dataObject[i].name);
+                          //console.log(element.businessObject.$attrs.dataObject);
+                          if (dataObject[i].name.id == element.businessObject.$attrs.dataObject) {
+                            console.log(dataObject[i].value);
+                            element.businessObject.$attrs.dataObject0 = dataObject[i].value;
+                            //console.log("FINAL");
+                            //console.log(element.businessObject.$attrs.dataObject0);
+                          }
+                        }
+                      }
+                      return;
+                    }
+                  },
+                  setControlValue: true,
+                  modelProperty: 'dataObject',
+                }),
+                EntryFactory.textBox({
+                  id: 'serviceInstanceID',
+                  description: 'ServiceInstance ID',
+                  label: 'Service Instance ID',
+                  modelProperty: 'serviceinstanceID'
+                }),
+                EntryFactory.textBox({
+                  id: 'servicetemplateID',
+                  description: 'ServiceTemplate ID',
+                  label: 'Service Template ID',
+                  modelProperty: 'servicetemplateID',
+                  get: function (element, values) {
+                    if (element.businessObject.$attrs.dataObject0 != undefined) {
+                      // element.businessObject.$attrs.NodeTemplate = element.businessObject.$attrs.dataObject0.$attrs.NodeTemplate;
+                      return {
+                        servicetemplateID: element.businessObject.$attrs.dataObject0.$attrs.servicetemplateID
+                      }
+                    } else {
+
+                      return element;
+                    }
+                  },
+                  set: function (element, values) {
+                    element.businessObject.$attrs.servicetemplateID = element.businessObject.$attrs.dataObject0.$attrs.servicetemplateID;
                     return;
                   }
-                },
-                setControlValue: true,
-                modelProperty: 'dataObject',
-              }),
-              EntryFactory.textBox({
-                id: 'serviceInstanceID',
-                description: 'ServiceInstance ID',
-                label: 'Service Instance ID',
-                modelProperty: 'serviceinstanceID'
-              }),
-              EntryFactory.textBox({
-                id: 'servicetemplateID',
-                description: 'ServiceTemplate ID',
-                label: 'Service Template ID',
-                modelProperty: 'servicetemplateID',
-                get: function (element, values) {
-                  if (element.businessObject.$attrs.dataObject0 != undefined) {
-                    // element.businessObject.$attrs.NodeTemplate = element.businessObject.$attrs.dataObject0.$attrs.NodeTemplate;
-                    return {
-                      servicetemplateID: element.businessObject.$attrs.dataObject0.$attrs.servicetemplateID
-                    }
-                  } else {
-                    console.log("fall2")
-                    return element;
-                  }
-                },
-                set: function (element, values) {
-                  element.businessObject.$attrs.servicetemplateID = element.businessObject.$attrs.dataObject0.$attrs.servicetemplateID;
-                  return;
-                }
-              }),
-              EntryFactory.textBox({
-                id: 'CSARID',
-                description: 'CSAR ID',
-                label: 'CSAR ID',
-                modelProperty: 'CSARID',
-                get: function (element, values) {
-                  if (element.businessObject.$attrs.dataObject0 != undefined) {
-                    // element.businessObject.$attrs.NodeTemplate = element.businessObject.$attrs.dataObject0.$attrs.NodeTemplate;
-                    return {
-                      CSARID: element.businessObject.$attrs.dataObject0.$attrs.CSARID
-                    }
-                  } else {
-                    console.log("fall2")
-                    return element;
-                  }
-                },
-                set: function (element, values) {
-                  element.businessObject.$attrs.CSARID = element.businessObject.$attrs.dataObject0.$attrs.CSARID;
-                  return;
-                }
-              }),
+                }),
+                EntryFactory.textBox({
+                  id: 'CSARID',
+                  description: 'CSAR ID',
+                  label: 'CSAR ID',
+                  modelProperty: 'CSARID',
+                  get: function (element, values) {
+                    if (element.businessObject.$attrs.dataObject0 != undefined) {
+                      // element.businessObject.$attrs.NodeTemplate = element.businessObject.$attrs.dataObject0.$attrs.NodeTemplate;
+                      return {
+                        CSARID: element.businessObject.$attrs.dataObject0.$attrs.CSARID
+                      }
+                    } else {
 
-            ]
-          }]
-      });
-    
+                      return element;
+                    }
+                  },
+                  set: function (element, values) {
+                    element.businessObject.$attrs.CSARID = element.businessObject.$attrs.dataObject0.$attrs.CSARID;
+                    return;
+                  }
+                }),
+
+              ]
+            }]
+        });
+
     } else if ((element.businessObject.$type == 'bpmn:ScriptTask') && (element.businessObject.$attrs.ntype == "RelationshipInstance")) {
       return this.bpmnPropertiesProvider.getTabs(element)
         .concat({
@@ -545,7 +588,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   set: function (element, values, node) {
                     if (values.dataObject != 'none') {
                       element.businessObject.$attrs.dataObject = values.dataObject;
-                      console.log("hiieer");
+                      //console.log("hiieer");
                       if (element.businessObject.$attrs.dataObjectV != undefined) {
 
                         console.log("heir ist nicht non")
@@ -590,7 +633,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
               ]
             }]
         });
-    }else if ((element.businessObject.$type == 'bpmn:DataObjectReference') && (element.businessObject.$attrs.dtype == "NodeInstanceDataObject")) {
+    } else if ((element.businessObject.$type == 'bpmn:DataObjectReference') && (element.businessObject.$attrs.dtype == "NodeInstanceDataObject")) {
       return this.bpmnPropertiesProvider.getTabs(element)
         .concat({
           id: 'custom',
@@ -672,6 +715,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                         //inputtests
                         if (is(element.businessObject, 'bpmn:ScriptTask')) {
                           if (element.businessObject.$attrs.ntype === "CallNodeOperation") {
+                            console.log("DAS IST SETZT DAS ")
                             element.businessObject.extensionElements.values[0].inputParameters[3].value = values.NodeTemplate;
                           } else if (element.businessObject.$attrs.ntype === "NodeInstance") {
                             element.businessObject.extensionElements.values[0].inputParameters[0].value = values.NodeTemplate;
