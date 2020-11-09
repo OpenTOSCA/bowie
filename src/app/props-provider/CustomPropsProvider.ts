@@ -29,6 +29,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
   static template = [{ name: 'none', value: 'none' }];
   static winery2: WineryService;
   static tosca = [];
+  static opt = [{name: 'CREATED', value: 'CREATED'}, {name: 'CREATING', value: 'CREATING'}, {name: 'DELETED', value: 'DELETED'}];
 
 
   // Note that names of arguments must match injected modules, see InjectionNames.
@@ -319,12 +320,15 @@ export class CustomPropsProvider implements IPropertiesProvider {
                                 valuesInput.push(split[2]);
                               } 
                             }
-
-
+                            
                           }
-
-                          //element.businessObject.extensionElements.values[0].inputParameters[6].value = names;
-                          //element.businessObject.extensionElements.values[0].inputParameters[7].value = valuesInput;
+                          
+                            if (is(element.businessObject, 'bpmn:ScriptTask')) {
+                                if (element.businessObject.$attrs.ntype === "CallNodeOperation") {
+                                    element.businessObject.extensionElements.values[0].inputParameters[6].value = names.toString();
+                                    element.businessObject.extensionElements.values[0].inputParameters[7].value = valuesInput.toString();
+                                }
+                            }
 
                         }
                         return arr;
@@ -1078,37 +1082,83 @@ export class CustomPropsProvider implements IPropertiesProvider {
             }]
         });
     } else if ((element.businessObject.$type == 'bpmn:DataObjectReference') && (element.businessObject.$attrs.dtype == "RelationshipInstanceDataObject")) {
-      return this.bpmnPropertiesProvider.getTabs(element)
-        .concat({
-          id: 'custom',
-          label: this.translate('Properties'),
-          groups: [
-            {
-              id: 'relationshipInstanceProp',
-              label: this.translate('Relationship Data Object Properties'),
-              entries: [
-                EntryFactory.textBox({
-                  id: 'RelationshipInstanceID',
-                  description: 'RelationshipInstance ID',
-                  label: 'Relationship Instance ID',
-                  modelProperty: 'relationshipinstanceID'
-                }),
-                EntryFactory.textBox({
-                  id: 'SourceURL',
-                  description: 'SourceURL',
-                  label: 'SourceURL',
-                  modelProperty: 'SourceURL'
-                }),
-                EntryFactory.textBox({
-                  id: 'TargetURL',
-                  description: 'TargetURL',
-                  label: 'TargetURL',
-                  modelProperty: 'TargetURL'
-                }),
+        return this.bpmnPropertiesProvider.getTabs(element)
+            .concat({
+                id: 'custom',
+                label: this.translate('Properties'),
+                groups: [
+                    {
+                        id: 'relationshipInstanceProp',
+                        label: this.translate('Relationship Data Object Properties'),
+                        entries: [
+                            EntryFactory.selectBox({
+                                id: 'RelationshipInstanceID',
+                                description: 'RelationshipInstance ID',
+                                label: 'Relationship Instance ID',
+                                modelProperty: 'relationshipinstanceID'
+                            }),
+                            EntryFactory.textBox({
+                                id: 'SourceURL',
+                                description: 'SourceURL',
+                                label: 'SourceURL',
+                                modelProperty: 'SourceURL'
+                            }),
+                            EntryFactory.textBox({
+                                id: 'TargetURL',
+                                description: 'TargetURL',
+                                label: 'TargetURL',
+                                modelProperty: 'TargetURL'
+                            }),
 
-              ]
-            }]
-        });
+                        ]
+                    }]
+            });
+    } else if ((element.businessObject.$type == 'bpmn:ScriptTask') && (element.businessObject.$attrs.ntype == "StateChanger")) {
+            return this.bpmnPropertiesProvider.getTabs(element)
+                .concat({
+                    id: 'custom',
+                    label: this.translate('Properties'),
+                    groups: [
+                        {
+                            id: 'SetStateProp',
+                            label: this.translate('SetState Properties'),
+                            entries: [
+                                EntryFactory.selectBox({
+                                    id: 'State',
+                                    description: 'State',
+                                    label: 'State',
+                                    selectOptions: function(element, values) {
+                                        if (values.selectedOptions.length > 0 && (values.selectedOptions[0] != undefined)) {
+                                            // Set changed value
+                                            if (is(element.businessObject, 'bpmn:ScriptTask')) {
+                                                if (element.businessObject.$attrs.ntype === "StateChanger") {
+                                                    element.businessObject.extensionElements.values[0].inputParameters[0].value = values.selectedOptions[0].value;
+                                                }
+                                            }
+                                        } else if (values.selectedOptions[0] === undefined) {
+                                            // Set default value
+                                            if (is(element.businessObject, 'bpmn:ScriptTask')) {
+                                                if (element.businessObject.$attrs.ntype === "StateChanger") {
+                                                    element.businessObject.extensionElements.values[0].inputParameters[0].value = CustomPropsProvider.opt[0].value;
+                                                }
+                                            }
+                                        }
+                                        return CustomPropsProvider.opt;
+                                        
+                                    },
+                                    setControlValue: true,
+                                    modelProperty: 'State'
+                                }),
+                                EntryFactory.textBox({
+                                    id: 'RelationshipInstanceID',
+                                    description: 'RelationshipInstance ID',
+                                    label: 'Relationship Instance ID',
+                                    modelProperty: 'relationshipinstanceID'
+                                }),
+
+                            ]
+                        }]
+                });
     } else {
       return this.bpmnPropertiesProvider.getTabs(element)
         .concat({
