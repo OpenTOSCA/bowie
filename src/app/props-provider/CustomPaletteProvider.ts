@@ -8,7 +8,7 @@ import Palette from 'diagram-js/lib/features/palette/Palette';
 /**
  * A palette that allows you to create BPMN _and_ custom elements.
  */
-export default function CustomPaletteProvider(palette, create, connect, elementFactory, bpmnFactory,spaceTool, lassoTool, handTool) {
+export default function CustomPaletteProvider(palette, create, connect, elementFactory, bpmnFactory, spaceTool, lassoTool, handTool) {
 
   this._create = create;
   this._connect = connect;
@@ -19,7 +19,7 @@ export default function CustomPaletteProvider(palette, create, connect, elementF
   this._lassoTool = lassoTool;
 
   palette.registerProvider(this);
-  
+
 }
 
 CustomPaletteProvider.$inject = [
@@ -34,321 +34,331 @@ CustomPaletteProvider.$inject = [
 ];
 
 
-const moddle = new BpmnModdle({camunda: _camundaModdleDescriptor});
+const moddle = new BpmnModdle({ camunda: _camundaModdleDescriptor });
 
 
-CustomPaletteProvider.prototype.getPaletteEntries = function(element) {
+CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
 
-  var actions  = {},
-      create = this._create,
-      connect = this._connect,
-      elementFactory = this._elementFactory,
-      bpmnFactory = this._bpmnFactory,
-      spaceTool = this._spaceTool,
-      lassoTool = this._lassoTool,
-      handTool = this._handTool;
+  var actions = {},
+    create = this._create,
+    connect = this._connect,
+    elementFactory = this._elementFactory,
+    bpmnFactory = this._bpmnFactory,
+    spaceTool = this._spaceTool,
+    lassoTool = this._lassoTool,
+    handTool = this._handTool;
 
 
-      function createRect(suitabilityScore) {
-        return function(event) {
-          const businessObject = bpmnFactory.create('bpmn:ServiceTask');
-    
-          const shape = elementFactory.createShape({
-            type: 'bpmn:ServiceTask',
-            businessObject: businessObject
-          });
-      
-          create.start(event, shape); 
-  
-        
-      }}
-      
-    // danke internet https://forum.bpmn.io/t/proper-way-to-create-and-update-activities-in-bpmn-js-modeler/4696
+  function createRect(suitabilityScore) {
+    return function (event) {
+      const businessObject = bpmnFactory.create('bpmn:ServiceTask');
 
-    function createServiceTemplateInstance() {
-      return function(event) {
-        const businessObject = bpmnFactory.create('bpmn:ScriptTask');
+      const shape = elementFactory.createShape({
+        type: 'bpmn:ServiceTask',
+        businessObject: businessObject
+      });
 
-        businessObject.resultVariable = "ServiceInstanceURL";
-        businessObject.name = "lustige groovy ServiceTemplates";
-        businessObject.scriptFormat = "groovy";
-        businessObject.resource = "deployment://CreateServiceInstance.groovy";
-        businessObject.$attrs.ntype = "ServiceTemplateInstance";
-        
-        const shape = elementFactory.createShape({
-          type: 'bpmn:ScriptTask',
-          businessObject: businessObject
-        });
-        console.log(businessObject);
+      create.start(event, shape);
 
-        create.start(event, shape); 
 
-      
-    }}
+    }
+  }
 
-    function createNodeInstance() {
-      return function(event) {
-        const businessObject = bpmnFactory.create('bpmn:ScriptTask', {
-          extensionElements: moddle.create('bpmn:ExtensionElements', {
-            values: [
-              moddle.create('camunda:InputOutput', {
-                inputParameters: [
-                  moddle.create('camunda:InputParameter', { name: 'NodeTemplate' }),
-                ],
-              }),
-            ],
-          })
-        });
+  // danke internet https://forum.bpmn.io/t/proper-way-to-create-and-update-activities-in-bpmn-js-modeler/4696
 
-        businessObject.resultVariable = "NodeInstanceURL (Für jedes Template anders!)";
-        businessObject.name = "lustige groovy nodeinstances";
-        businessObject.scriptFormat = "groovy";
-        businessObject.resource = "deployment://CreateNodeInstance.groovy";
-        businessObject.$attrs.ntype = "NodeInstance";
-        
-        console.log("EXTENSION ELEMENTS");
-        console.log(businessObject.extensionElements);
-        console.log(businessObject.extensionElements.values);
-        console.log(businessObject.extensionElements.values[0].inputParameters);
-        console.log("EXTENSION ELEMENTS");
-        
-        const shape = elementFactory.createShape({
-          type: 'bpmn:ScriptTask',
-          businessObject: businessObject
-        });
-        console.log(businessObject);
+  function createServiceTemplateInstance() {
+    return function (event) {
+      const businessObject = bpmnFactory.create('bpmn:ScriptTask');
 
-        create.start(event, shape); 
+      businessObject.resultVariable = "ServiceInstanceURL";
+      businessObject.name = "lustige groovy ServiceTemplates";
+      businessObject.scriptFormat = "groovy";
+      businessObject.resource = "deployment://CreateServiceInstance.groovy";
+      businessObject.$attrs.ntype = "ServiceTemplateInstance";
 
-      
-    }}
+      const shape = elementFactory.createShape({
+        type: 'bpmn:ScriptTask',
+        businessObject: businessObject
+      });
+      console.log(businessObject);
 
-    function createRelationshipInstance() {
-      return function(event) {
-        const businessObject = bpmnFactory.create('bpmn:ScriptTask', {
-          extensionElements: moddle.create('bpmn:ExtensionElements', {
-            values: [
-              moddle.create('camunda:InputOutput', {
-                inputParameters: [
-                  moddle.create('camunda:InputParameter', { name: 'RelationshipTemplate' }),
-                  moddle.create('camunda:InputParameter', { name: 'SourceURL' }),
-                  moddle.create('camunda:InputParameter', { name: 'TargetURL' }),
-                ],
-              }),
-            ],
-          })
-        });
+      create.start(event, shape);
 
-        businessObject.resultVariable = "RealtionshipInstanceURL (Für jedes Template anders!)";
-        businessObject.name = "lustige groovy realtionshipinstances";
-        businessObject.scriptFormat = "groovy";
-        businessObject.resource = "deployment://CreateRelationshipInstance.groovy";
-        businessObject.$attrs.ntype = "RelationshipInstance";
-        
-        const shape = elementFactory.createShape({
-          type: 'bpmn:ScriptTask',
-          businessObject: businessObject
-        });
-        console.log(businessObject);
 
-        create.start(event, shape); 
+    }
+  }
 
-      
-    }}
-
-	  function createCallNodeOperation(suitabilityScore) {
-        return function(event) {
-          const businessObject = bpmnFactory.create('bpmn:ScriptTask', {
-            extensionElements: moddle.create('bpmn:ExtensionElements', {
-              values: [
-                moddle.create('camunda:InputOutput', {
-                  inputParameters: [
-                    moddle.create('camunda:InputParameter', { name: 'ServiceInstanceID' }),
-                    moddle.create('camunda:InputParameter', { name: 'CsarID' }),
-                    moddle.create('camunda:InputParameter', { name: 'ServiceTemplateID' }),
-                    moddle.create('camunda:InputParameter', { name: 'NodeTemplate' }),
-                    moddle.create('camunda:InputParameter', { name: 'Interface' }),
-                    moddle.create('camunda:InputParameter', { name: 'Operation' }),
-                    moddle.create('camunda:InputParameter', { name: 'InputParamNames' }),
-                    moddle.create('camunda:InputParameter', { name: 'InputParamValues' }),
-                    moddle.create('camunda:InputParameter', { name: 'OutputParamNames' }),
-                  ],
-                }),
+  function createNodeInstance() {
+    return function (event) {
+      const businessObject = bpmnFactory.create('bpmn:ScriptTask', {
+        extensionElements: moddle.create('bpmn:ExtensionElements', {
+          values: [
+            moddle.create('camunda:InputOutput', {
+              inputParameters: [
+                moddle.create('camunda:InputParameter', { name: 'NodeTemplate' }),
               ],
-            })
-          });
+            }),
+          ],
+        })
+      });
 
-          businessObject.name = "lustige groovy node operations";
-          businessObject.scriptFormat = "groovy";
-          businessObject.resource = "deployment://CallNodeOperation.groovy";
-          businessObject.$attrs.ntype = "CallNodeOperation";
-          
-          const shape = elementFactory.createShape({
-            type: 'bpmn:ScriptTask',
-            businessObject: businessObject
-          });
-          console.log(businessObject);
+      businessObject.resultVariable = "NodeInstanceURL (Für jedes Template anders!)";
+      businessObject.name = "lustige groovy nodeinstances";
+      businessObject.scriptFormat = "groovy";
+      businessObject.resource = "deployment://CreateNodeInstance.groovy";
+      businessObject.$attrs.ntype = "NodeInstance";
 
-          create.start(event, shape); 
-  
-        
-      }}
+      console.log("EXTENSION ELEMENTS");
+      console.log(businessObject.extensionElements);
+      console.log(businessObject.extensionElements.values);
+      console.log(businessObject.extensionElements.values[0].inputParameters);
+      console.log("EXTENSION ELEMENTS");
 
-      function createStateChanger() {
-        return function(event) {
-          const businessObject = bpmnFactory.create('bpmn:ScriptTask', {
-            extensionElements: moddle.create('bpmn:ExtensionElements', {
-              values: [
-                moddle.create('camunda:InputOutput', {
-                  inputParameters: [
-                    moddle.create('camunda:InputParameter', { name: 'Status' }),
-                    moddle.create('camunda:InputParameter', { name: 'InstanceURL' }),
-                  ],
-                }),
+      const shape = elementFactory.createShape({
+        type: 'bpmn:ScriptTask',
+        businessObject: businessObject
+      });
+      console.log(businessObject);
+
+      create.start(event, shape);
+
+
+    }
+  }
+
+  function createRelationshipInstance() {
+    return function (event) {
+      const businessObject = bpmnFactory.create('bpmn:ScriptTask', {
+        extensionElements: moddle.create('bpmn:ExtensionElements', {
+          values: [
+            moddle.create('camunda:InputOutput', {
+              inputParameters: [
+                moddle.create('camunda:InputParameter', { name: 'RelationshipTemplate' }),
+                moddle.create('camunda:InputParameter', { name: 'SourceURL' }),
+                moddle.create('camunda:InputParameter', { name: 'TargetURL' }),
               ],
-            })
-          });
+            }),
+          ],
+        })
+      });
 
-          businessObject.name = "lustige groovy states";
-          businessObject.scriptFormat = "groovy";
-          businessObject.resource = "deployment://SetState.groovy";
-          businessObject.$attrs.ntype = "StateChanger";
-          
-          const shape = elementFactory.createShape({
-            type: 'bpmn:ScriptTask',
-            businessObject: businessObject
-          });
-          console.log(businessObject);
+      businessObject.resultVariable = "RealtionshipInstanceURL (Für jedes Template anders!)";
+      businessObject.name = "lustige groovy realtionshipinstances";
+      businessObject.scriptFormat = "groovy";
+      businessObject.resource = "deployment://CreateRelationshipInstance.groovy";
+      businessObject.$attrs.ntype = "RelationshipInstance";
 
-          create.start(event, shape); 
-  
-        
-      }}
+      const shape = elementFactory.createShape({
+        type: 'bpmn:ScriptTask',
+        businessObject: businessObject
+      });
+      console.log(businessObject);
 
-      function createPropertiesChanger() {
-        return function(event) {
-          const businessObject = bpmnFactory.create('bpmn:ScriptTask', {
-            extensionElements: moddle.create('bpmn:ExtensionElements', {
-              values: [
-                moddle.create('camunda:InputOutput', {
-                  inputParameters: [
-                    moddle.create('camunda:InputParameter', { name: 'InstanceURL' }),
-                    moddle.create('camunda:InputParameter', { name: 'Properties' }),
-                    moddle.create('camunda:InputParameter', { name: 'Values' }),
-                  ],
-                }),
+      create.start(event, shape);
+
+
+    }
+  }
+
+  function createCallNodeOperation(suitabilityScore) {
+    return function (event) {
+      const businessObject = bpmnFactory.create('bpmn:ScriptTask', {
+        extensionElements: moddle.create('bpmn:ExtensionElements', {
+          values: [
+            moddle.create('camunda:InputOutput', {
+              inputParameters: [
+                moddle.create('camunda:InputParameter', { name: 'ServiceInstanceID' }),
+                moddle.create('camunda:InputParameter', { name: 'CsarID' }),
+                moddle.create('camunda:InputParameter', { name: 'ServiceTemplateID' }),
+                moddle.create('camunda:InputParameter', { name: 'NodeTemplate' }),
+                moddle.create('camunda:InputParameter', { name: 'Interface' }),
+                moddle.create('camunda:InputParameter', { name: 'Operation' }),
+                moddle.create('camunda:InputParameter', { name: 'InputParamNames' }),
+                moddle.create('camunda:InputParameter', { name: 'InputParamValues' }),
+                moddle.create('camunda:InputParameter', { name: 'OutputParamNames' }),
               ],
-            })
-          });
+            }),
+          ],
+        })
+      });
 
-          businessObject.name = "lustige groovy properties";
-          businessObject.scriptFormat = "groovy";
-          businessObject.resource = "deployment://SetProperties.groovy";
-          businessObject.$attrs.ntype = "PropertiesChanger";
-          
-          const shape = elementFactory.createShape({
-            type: 'bpmn:ScriptTask',
-            businessObject: businessObject
-          });
-          console.log(businessObject);
+      businessObject.name = "lustige groovy node operations";
+      businessObject.scriptFormat = "groovy";
+      businessObject.resource = "deployment://CallNodeOperation.groovy";
+      businessObject.$attrs.ntype = "CallNodeOperation";
 
-          create.start(event, shape); 
-  
-        
-      }}
+      const shape = elementFactory.createShape({
+        type: 'bpmn:ScriptTask',
+        businessObject: businessObject
+      });
+      console.log(businessObject);
 
-    function createNodeInstanceDataObject() {
-        return function(event) {
-            const businessObject = bpmnFactory.create('bpmn:DataObjectReference', {
-                extensionElements: moddle.create('bpmn:ExtensionElements', {
-                    values: [
-                        moddle.create('camunda:InputOutput', {
-                            inputParameters: [
-                                moddle.create('camunda:InputParameter', { name: 'ServiceInstanceID' }),
-                                moddle.create('camunda:InputParameter', { name: 'CsarID' }),
-                                moddle.create('camunda:InputParameter', { name: 'ServiceTemplateID' }),
-                                moddle.create('camunda:InputParameter', { name: 'NodeTemplate' }),
-                                moddle.create('camunda:InputParameter', { name: 'Interface' }),
-                                moddle.create('camunda:InputParameter', { name: 'Operation' }),
-                                moddle.create('camunda:InputParameter', { name: 'InputParamNames' }),
-                                moddle.create('camunda:InputParameter', { name: 'InputParamValues' }),
-                                moddle.create('camunda:InputParameter', { name: 'OutputParamNames' }),
-                            ],
-                        }),
-                    ],
-                })
-            });
+      create.start(event, shape);
 
-            businessObject.name = "lustiges NodeInstanceDataObject";
-            businessObject.$attrs.dtype = "NodeInstanceDataObject";
 
-            const shape = elementFactory.createShape({
-                type: 'bpmn:DataObjectReference',
-                businessObject: businessObject
-            });
-            console.log(businessObject);
+    }
+  }
 
-            create.start(event, shape);
-            
-        }}
+  function createStateChanger() {
+    return function (event) {
+      const businessObject = bpmnFactory.create('bpmn:ScriptTask', {
+        extensionElements: moddle.create('bpmn:ExtensionElements', {
+          values: [
+            moddle.create('camunda:InputOutput', {
+              inputParameters: [
+                moddle.create('camunda:InputParameter', { name: 'Status' }),
+                moddle.create('camunda:InputParameter', { name: 'InstanceURL' }),
+              ],
+            }),
+          ],
+        })
+      });
 
-    function createServiceInstanceDataObject() {
-        return function(event) {
-            const businessObject = bpmnFactory.create('bpmn:DataObjectReference', {
-                extensionElements: moddle.create('bpmn:ExtensionElements', {
-                    values: [
-                        moddle.create('camunda:InputOutput', {
-                            inputParameters: [
-                                moddle.create('camunda:InputParameter', { name: 'ServiceInstanceID' }),
-                                moddle.create('camunda:InputParameter', { name: 'CsarID' }),
-                                moddle.create('camunda:InputParameter', { name: 'ServiceTemplateID' }),
-                            ],
-                        }),
-                    ],
-                })
-            });
+      businessObject.name = "lustige groovy states";
+      businessObject.scriptFormat = "groovy";
+      businessObject.resource = "deployment://SetState.groovy";
+      businessObject.$attrs.ntype = "StateChanger";
 
-            businessObject.name = "lustiges ServiceInstanceDataObject";
-            businessObject.$attrs.dtype = "ServiceInstanceDataObject";
+      const shape = elementFactory.createShape({
+        type: 'bpmn:ScriptTask',
+        businessObject: businessObject
+      });
+      console.log(businessObject);
 
-            const shape = elementFactory.createShape({
-                type: 'bpmn:DataObjectReference',
-                businessObject: businessObject
-            });
-            console.log(businessObject);
+      create.start(event, shape);
 
-            create.start(event, shape);
 
-        }}
+    }
+  }
 
-    function createRelationshipInstanceDataObject() {
-        return function(event) {
-            const businessObject = bpmnFactory.create('bpmn:DataObjectReference', {
-                extensionElements: moddle.create('bpmn:ExtensionElements', {
-                    values: [
-                        moddle.create('camunda:InputOutput', {
-                            inputParameters: [
-                                moddle.create('camunda:InputParameter', { name: 'RelationshipTemplate' }),
-                                moddle.create('camunda:InputParameter', { name: 'SourceURL' }),
-                                moddle.create('camunda:InputParameter', { name: 'TargetURL' }),
-                            ],
-                        }),
-                    ],
-                })
-            });
+  function createPropertiesChanger() {
+    return function (event) {
+      const businessObject = bpmnFactory.create('bpmn:ScriptTask', {
+        extensionElements: moddle.create('bpmn:ExtensionElements', {
+          values: [
+            moddle.create('camunda:InputOutput', {
+              inputParameters: [
+                moddle.create('camunda:InputParameter', { name: 'InstanceURL' }),
+                moddle.create('camunda:InputParameter', { name: 'Properties' }),
+                moddle.create('camunda:InputParameter', { name: 'Values' }),
+              ],
+            }),
+          ],
+        })
+      });
 
-            businessObject.name = "lustiges RelationshipInstanceDataObject";
-            businessObject.$attrs.dtype = "RelationshipInstanceDataObject";
+      businessObject.name = "lustige groovy properties";
+      businessObject.scriptFormat = "groovy";
+      businessObject.resource = "deployment://SetProperties.groovy";
+      businessObject.$attrs.ntype = "PropertiesChanger";
 
-            const shape = elementFactory.createShape({
-                type: 'bpmn:DataObjectReference',
-                businessObject: businessObject
-            });
-            console.log(businessObject);
+      const shape = elementFactory.createShape({
+        type: 'bpmn:ScriptTask',
+        businessObject: businessObject
+      });
+      console.log(businessObject);
 
-            create.start(event, shape);
+      create.start(event, shape);
 
-        }}
+
+    }
+  }
+
+  function createNodeInstanceDataObject() {
+    return function (event) {
+      const businessObject = bpmnFactory.create('bpmn:DataObjectReference', {
+        extensionElements: moddle.create('bpmn:ExtensionElements', {
+          values: [
+            moddle.create('camunda:InputOutput', {
+              inputParameters: [
+                moddle.create('camunda:InputParameter', { name: 'ServiceInstanceID' }),
+                moddle.create('camunda:InputParameter', { name: 'CsarID' }),
+                moddle.create('camunda:InputParameter', { name: 'ServiceTemplateID' }),
+                moddle.create('camunda:InputParameter', { name: 'NodeTemplate' }),
+                moddle.create('camunda:InputParameter', { name: 'Interface' }),
+                moddle.create('camunda:InputParameter', { name: 'Operation' }),
+                moddle.create('camunda:InputParameter', { name: 'InputParamNames' }),
+                moddle.create('camunda:InputParameter', { name: 'InputParamValues' }),
+                moddle.create('camunda:InputParameter', { name: 'OutputParamNames' }),
+              ],
+            }),
+          ],
+        })
+      });
+
+      businessObject.name = "lustiges NodeInstanceDataObject";
+      businessObject.$attrs.dtype = "NodeInstanceDataObject";
+
+      const shape = elementFactory.createShape({
+        type: 'bpmn:DataObjectReference',
+        businessObject: businessObject
+      });
+      console.log(businessObject);
+
+      create.start(event, shape);
+
+    }
+  }
+
+  function createServiceInstanceDataObject() {
+    return function (event) {
+      const businessObject = bpmnFactory.create('bpmn:DataObjectReference', {
+        extensionElements: moddle.create('bpmn:ExtensionElements', {
+          values: [
+            moddle.create('camunda:InputOutput', {
+              inputParameters: [
+                moddle.create('camunda:InputParameter', { name: 'ServiceInstanceID' }),
+                moddle.create('camunda:InputParameter', { name: 'CsarID' }),
+                moddle.create('camunda:InputParameter', { name: 'ServiceTemplateID' }),
+              ],
+            }),
+          ],
+        })
+      });
+
+      businessObject.name = "lustiges ServiceInstanceDataObject";
+      businessObject.$attrs.dtype = "ServiceInstanceDataObject";
+
+      const shape = elementFactory.createShape({
+        type: 'bpmn:DataObjectReference',
+        businessObject: businessObject
+      });
+      console.log(businessObject);
+
+      create.start(event, shape);
+
+    }
+  }
+
+  function createRelationshipInstanceDataObject() {
+    return function (event) {
+      const businessObject = bpmnFactory.create('bpmn:DataObjectReference', {
+        extensionElements: moddle.create('bpmn:ExtensionElements', {
+          values: [
+            moddle.create('camunda:InputOutput', {
+              inputParameters: [
+                moddle.create('camunda:InputParameter', { name: 'RelationshipTemplate' }),
+                moddle.create('camunda:InputParameter', { name: 'SourceURL' }),
+                moddle.create('camunda:InputParameter', { name: 'TargetURL' }),
+              ],
+            }),
+          ],
+        })
+      });
+
+      businessObject.name = "lustiges RelationshipInstanceDataObject";
+      businessObject.$attrs.dtype = "RelationshipInstanceDataObject";
+
+      const shape = elementFactory.createShape({
+        type: 'bpmn:DataObjectReference',
+        businessObject: businessObject
+      });
+      console.log(businessObject);
+
+      create.start(event, shape);
+
+    }
+  }
 
   function createAction(type, group, className, title, options) {
 
@@ -383,7 +393,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function(element) {
   }
 
   assign(actions, {
-    
+
     /*
     'custom-triangle': createAction(
       'custom:triangle', 'custom', 'icon-custom-triangle', 'triangle', ''
@@ -400,22 +410,22 @@ CustomPaletteProvider.prototype.getPaletteEntries = function(element) {
       }
     },
     */
-   'hand-tool': {
-    group: 'tools',
-    className: 'bpmn-icon-hand-tool',
-    title: 'Activate the hand tool',
-    action: {
-      click: function(event) {
-        handTool.activateHand(event);
+    'hand-tool': {
+      group: 'tools',
+      className: 'bpmn-icon-hand-tool',
+      title: 'Activate the hand tool',
+      action: {
+        click: function (event) {
+          handTool.activateHand(event);
+        }
       }
-    }
-  },
+    },
     'lasso-tool': {
       group: 'tools',
       className: 'bpmn-icon-lasso-tool',
       title: 'Activate the lasso tool',
       action: {
-        click: function(event) {
+        click: function (event) {
           lassoTool.activateSelection(event);
         }
       }
@@ -425,7 +435,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function(element) {
       className: 'bpmn-icon-space-tool',
       title: 'Activate the create/remove space tool',
       action: {
-        click: function(event) {
+        click: function (event) {
           spaceTool.activateSelection(event);
         }
       }
@@ -451,10 +461,10 @@ CustomPaletteProvider.prototype.getPaletteEntries = function(element) {
     ),
     'create.data-object': createAction(
       'bpmn:DataObjectReference', 'activity', 'bpmn-icon-data-object', 'Create DataObjectReference', ''
-   ),
-   'create.data-store': createAction(
-     'bpmn:DataStoreReference', 'activity', 'bpmn-icon-data-store', 'Create DataStoreReference', ''
-  ),
+    ),
+    'create.data-store': createAction(
+      'bpmn:DataStoreReference', 'activity', 'bpmn-icon-data-store', 'Create DataStoreReference', ''
+    ),
     'create.participant-expanded': {
       group: 'collaboration',
       className: 'bpmn-icon-participant',
@@ -471,93 +481,102 @@ CustomPaletteProvider.prototype.getPaletteEntries = function(element) {
       group: 'tools',
       separator: true
     },
-    'create.service-instance-task':{
-      group: 'activity',
-      className: 'bpmn-icon-task',
-      title: 'Create ServiceInstance',
+    'tool-separator2': {
+      group: 'activity2',
+      separator: true
+    },
+    'node-instance-data-object': {
+      group: 'activity2',
+      className: 'bpmn-icon-data-object blue',
+      title: 'Create NodeInstanceDataObject',
       action: {
-        dragstart: createServiceTemplateInstance(),
-        click: createServiceTemplateInstance()
-        
+        dragstart: createNodeInstanceDataObject(),
+        click: createNodeInstanceDataObject()
       }
     },
-    'create.node-instance-task':{
-      group: 'activity',
-      className: 'bpmn-icon-task',
+    'service-instance-data-object': {
+      group: 'activity2',
+      className: 'bpmn-icon-data-object yellow',
+      title: 'Create ServiceInstanceDataObject',
+      action: {
+        dragstart: createServiceInstanceDataObject(),
+        click: createServiceInstanceDataObject()
+      }
+    },
+    'relationship-instance-data-object': {
+      group: 'activity2',
+      className: 'bpmn-icon-data-object red',
+      title: 'Create RelationshipInstanceDataObject',
+      action: {
+        dragstart: createRelationshipInstanceDataObject(),
+        click: createRelationshipInstanceDataObject()
+      }
+    },
+    'tool-separator3': {
+      group: 'activity1',
+      separator: true
+    },
+    'create.node-instance-task': {
+      group: 'activity1',
+      className: 'bpmn-icon-task blue',
       title: 'Create nodeInstance',
       action: {
         dragstart: createNodeInstance(),
         click: createNodeInstance()
-        
+
       }
     },
-    'create.relationship-instance-task':{
-      group: 'activity',
-      className: 'bpmn-icon-task',
-      title: 'Create RelationshipInstance',
-      action: {
-        dragstart: createRelationshipInstance(),
-        click: createRelationshipInstance()
-        
-      }
-    },
-	  'call-node-operation-task':{
-      group: 'activity',
-      className: 'bpmn-icon-task',
+    'call-node-operation-task': {
+      group: 'activity1',
+      className: 'bpmn-icon-task blue',
       title: 'Create CallNodeOperation',
       action: {
         dragstart: createCallNodeOperation('60'),
         click: createCallNodeOperation('60')
-        
+
       }
     },
-    'set-state-task':{
-      group: 'activity',
+    'create.service-instance-task': {
+      group: 'activity1',
+      className: 'bpmn-icon-task yellow',
+      title: 'Create ServiceInstance',
+      action: {
+        dragstart: createServiceTemplateInstance(),
+        click: createServiceTemplateInstance()
+
+      }
+    },
+    'create.relationship-instance-task': {
+      group: 'activity1',
+      className: 'bpmn-icon-task red',
+      title: 'Create RelationshipInstance',
+      action: {
+        dragstart: createRelationshipInstance(),
+        click: createRelationshipInstance()
+
+      }
+    },
+    'set-state-task': {
+      group: 'activity1',
       className: 'bpmn-icon-task',
       title: 'Create SetStateTask',
       action: {
         dragstart: createStateChanger(),
         click: createStateChanger()
-        
+
       }
     },
-    'set-properties-task':{
-      group: 'activity',
+    'set-properties-task': {
+      group: 'activity1',
       className: 'bpmn-icon-task',
       title: 'Create SetPropertiesTask',
       action: {
         dragstart: createPropertiesChanger(),
         click: createPropertiesChanger()
-        
+
       }
-    }, 
-      'node-instance-data-object': {
-          group: 'activity',
-          className: 'bpmn-icon-data-object',
-          title: 'Create NodeInstanceDataObject',
-          action: {
-              dragstart: createNodeInstanceDataObject(),
-              click: createNodeInstanceDataObject()
-          }
-      },
-      'service-instance-data-object': {
-          group: 'activity',
-          className: 'bpmn-icon-data-object',
-          title: 'Create ServiceInstanceDataObject',
-          action: {
-              dragstart: createServiceInstanceDataObject(),
-              click: createServiceInstanceDataObject()
-          }
-      },
-      'relationship-instance-data-object': {
-          group: 'activity',
-          className: 'bpmn-icon-data-object',
-          title: 'Create RelationshipInstanceDataObject',
-          action: {
-              dragstart: createRelationshipInstanceDataObject(),
-              click: createRelationshipInstanceDataObject()
-          }
-      },
+    },
+
   });
 
   return actions;

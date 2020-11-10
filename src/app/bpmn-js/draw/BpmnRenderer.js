@@ -1062,7 +1062,7 @@ export default function BpmnRenderer(
       if(element.businessObject.$attrs.ntype === "ServiceTemplateInstance"){
         drawPath(parentGfx, pathData, {
           strokeWidth: 1,
-          stroke: 'green'
+          stroke: 'yellow'
         });
   
         return task;
@@ -1539,7 +1539,7 @@ export default function BpmnRenderer(
       var elementObject = drawPath(parentGfx, pathData, {
         fill: getFillColor(element, defaultFillColor),
         fillOpacity: DEFAULT_FILL_OPACITY,
-        stroke: 'green'
+        stroke: 'yellow'
       });
 
       var semantic = getSemantic(element);

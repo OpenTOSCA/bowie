@@ -1,2 +1,26 @@
 $fa-font-path: "../node_modules/font-awesome/fonts";
 @import "~font-awesome/scss/font-awesome.scss";
+
+.bpmn-icon-task.red {
+    color: #cc0000 !important;
+  }
+
+  .bpmn-icon-task.blue {
+    color: #0300cc !important;
+  }
+
+  .bpmn-icon-task.yellow {
+    color: #ffc800 !important;
+  }
+
+  .bpmn-icon-data-object.red {
+    color: #cc0000 !important;
+  }
+
+  .bpmn-icon-data-object.blue {
+    color: #0300cc !important;
+  }
+
+  .bpmn-icon-data-object.yellow {
+    color: #ffc800 !important;
+  }
