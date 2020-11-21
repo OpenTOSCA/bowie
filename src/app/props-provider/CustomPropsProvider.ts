@@ -222,7 +222,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                         //inputtests
                         if (is(element.businessObject, 'bpmn:ScriptTask')) {
                           if (element.businessObject.$attrs.ntype === "CallNodeOperation") {
-                            console.log("DAS IST SETZT DAS ")
+                            console.log("DAS IST SETZT DAS ");
                             element.businessObject.extensionElements.values[0].inputParameters[3].value = values.NodeTemplate;
                           } else if (element.businessObject.$attrs.ntype === "NodeInstance") {
                             element.businessObject.extensionElements.values[0].inputParameters[0].value = values.NodeTemplate;
@@ -1629,7 +1629,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     var saveTask = [];
                     if (element.businessObject.$attrs.task != undefined) {
                       console.log('CHECK fjfjfjjffjj');
-                      console.log(element)
+                      console.log(element);
                       var task = element.businessObject.$attrs.dataObject0;
                       if (element.businessObject.$attrs.dataObject0 != undefined) {
                         var outputParam = task.$attrs.outputParams;

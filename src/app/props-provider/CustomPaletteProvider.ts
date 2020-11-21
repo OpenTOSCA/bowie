@@ -3,6 +3,8 @@ import {
 } from 'min-dash';
 import _camundaModdleDescriptor from "camunda-bpmn-moddle/resources/camunda.json";
 import BpmnModdle from 'bpmn-moddle';
+import modeltest from '../../docs/modeltest.json';
+import BpmnModeler from 'bpmn-js/lib/Modeler';
 import Palette from 'diagram-js/lib/features/palette/Palette';
 
 /**
@@ -34,7 +36,7 @@ CustomPaletteProvider.$inject = [
 ];
 
 
-const moddle = new BpmnModdle({ camunda: _camundaModdleDescriptor });
+const moddle = new BpmnModdle({ camunda: _camundaModdleDescriptor , qa: modeltest});
 
 
 CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
@@ -68,13 +70,27 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
 
   function createServiceTemplateInstance() {
     return function (event) {
+        let modeling = BpmnModeler.get('modeling');
       const businessObject = bpmnFactory.create('bpmn:ScriptTask');
-
+/*
+        const businessObject = bpmnFactory.create('bpmn:ScriptTask', {
+            extensionElements: moddle.create('bpmn:ExtensionElements', {
+                values: [
+                    moddle.create('qa:ntypetest', { 
+                        name: 'ntype' 
+                    }),
+                ],
+            })
+        });
+*/
       businessObject.resultVariable = "ServiceInstanceURL";
       businessObject.name = "lustige groovy ServiceTemplates";
       businessObject.scriptFormat = "groovy";
       businessObject.resource = "deployment://CreateServiceInstance.groovy";
-      businessObject.$attrs.ntype = "ServiceTemplateInstance";
+      //businessObject.ntype = "ServiceTemplateInstance";
+        modeling.updateProperties(element, {
+            ntype: "funktioniere!!!!"
+        });
 
       const shape = elementFactory.createShape({
         type: 'bpmn:ScriptTask',
