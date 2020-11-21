@@ -53,7 +53,7 @@ export class WineryService {
         this.plan = queryParams.plan;
 
         if (this.repositoryURL) {
-            this.loadPlan();
+            //this.loadPlan();
         }
     }
 

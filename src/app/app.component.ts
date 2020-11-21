@@ -110,21 +110,13 @@ export class AppComponent implements OnInit {
   }
 
   load(){
-    console.log(this.wineryService);
-    this.wineryService.loadNodeTemplates();
-    this.s = this.wineryService.loadNodeTemplates();
-
-    let namespace = "http://opentosca.org/nodetypes";
-    this.wineryService.loadNodeTemplateInterfaces(namespace,'MyTinyToDoDockerContainer');
-
-    //this.wineryService.loadPlan2(this.modeler);
-    
+    this.wineryService.loadPlan2(this.modeler);
   }
 
   save(): void {
     this.modeler.saveXML((err: any, xml: any) => {console.log('Result of saving XML: ', err, xml);
     let temp = JSON.stringify(xml);
-   // this.wineryService.save(temp);
+   this.wineryService.save(temp);
   });
     
     
