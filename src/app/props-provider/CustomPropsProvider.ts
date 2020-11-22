@@ -29,6 +29,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
   static template = [{ name: 'none', value: 'none' }];
   static winery2: WineryService;
   static tosca = [];
+  static modeling;
   static opt = [{ name: 'INITIAL', value: 'INITIAL' }, { name: 'CREATING', value: 'CREATING' }, { name: 'CREATED', value: 'CREATED' }, { name: 'CONFIGURING', value: 'CONFIGURING' },
   { name: 'STARTING', value: 'STARTING' }, { name: 'STARTED', value: 'STARTED' }, { name: 'STOPPING', value: 'STOPPING' }, { name: 'STOPPED', value: 'STOPPED' }, { name: 'DELETING', value: 'DELETING' },
   { name: 'DELETED', value: 'DELETED' }, { name: 'ERROR', value: 'ERROR' }, { name: 'MIGRATED', value: 'MIGRATED' }];
@@ -47,6 +48,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
 
   public async update2(selectOptions) {
     console.log(CustomPropsProvider.winery2);
+    console.log(CustomPropsProvider.modeling);
     var template = await this.loadNodeTemplates(CustomPropsProvider.template);
     console.log(template);
     console.log("vor update 3");
@@ -139,7 +141,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
 
   getTabs(element) {
     this.update2(CustomPropsProvider.options);
-
+     console.log(CustomPropsProvider.modeling);
     if (element.businessObject.$type == 'bpmn:ScriptTask' && (element.businessObject.$attrs.ntype == 'NodeInstance' || element.businessObject.$attrs.ntype === "CallNodeOperation")) {
       return this.bpmnPropertiesProvider.getTabs(element)
         .concat({
@@ -161,6 +163,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   description: 'NodeTemplate',
                   label: 'NodeTemplate',
                   selectOptions: function (element, values) {
+    
                     //console.log(CustomPropsProvider.template);
                     return CustomPropsProvider.template;
                   },
@@ -835,6 +838,11 @@ export class CustomPropsProvider implements IPropertiesProvider {
         })
         */
     } else if (element.businessObject.$type == 'bpmn:ScriptTask' && element.businessObject.$attrs.ntype == 'ServiceTemplateInstance') {
+      console.log(element);
+      CustomPropsProvider.modeling.updateProperties(element, {
+        'qa:ntype': 'ServiceTemplateInstance'
+      });
+      delete element.businessObject.$attrs['ntype'];
       return this.bpmnPropertiesProvider.getTabs(element)
         .concat({
           id: 'custom',

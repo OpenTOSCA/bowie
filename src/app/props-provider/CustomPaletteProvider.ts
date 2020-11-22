@@ -6,6 +6,9 @@ import BpmnModdle from 'bpmn-moddle';
 import modeltest from '../../docs/modeltest.json';
 import BpmnModeler from 'bpmn-js/lib/Modeler';
 import Palette from 'diagram-js/lib/features/palette/Palette';
+import { AppComponent } from '../app.component';
+import { NG_MODEL_WITH_FORM_CONTROL_WARNING } from '@angular/forms/src/directives';
+
 
 /**
  * A palette that allows you to create BPMN _and_ custom elements.
@@ -19,6 +22,7 @@ export default function CustomPaletteProvider(palette, create, connect, elementF
   this._handTool = handTool;
   this._bpmnFactory = bpmnFactory;
   this._lassoTool = lassoTool;
+  this._modeling = AppComponent.modeling;
 
   palette.registerProvider(this);
 
@@ -39,8 +43,8 @@ CustomPaletteProvider.$inject = [
 const moddle = new BpmnModdle({ camunda: _camundaModdleDescriptor , qa: modeltest});
 
 
-CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
 
+CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
   var actions = {},
     create = this._create,
     connect = this._connect,
@@ -48,8 +52,8 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
     bpmnFactory = this._bpmnFactory,
     spaceTool = this._spaceTool,
     lassoTool = this._lassoTool,
+    modeling = this._modeling,
     handTool = this._handTool;
-
 
   function createRect(suitabilityScore) {
     return function (event) {
@@ -69,8 +73,8 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
   // danke internet https://forum.bpmn.io/t/proper-way-to-create-and-update-activities-in-bpmn-js-modeler/4696
 
   function createServiceTemplateInstance() {
+
     return function (event) {
-        let modeling = BpmnModeler.get('modeling');
       const businessObject = bpmnFactory.create('bpmn:ScriptTask');
 /*
         const businessObject = bpmnFactory.create('bpmn:ScriptTask', {
@@ -88,9 +92,6 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
       businessObject.scriptFormat = "groovy";
       businessObject.resource = "deployment://CreateServiceInstance.groovy";
       //businessObject.ntype = "ServiceTemplateInstance";
-        modeling.updateProperties(element, {
-            ntype: "funktioniere!!!!"
-        });
 
       const shape = elementFactory.createShape({
         type: 'bpmn:ScriptTask',

@@ -8,7 +8,7 @@ import {WineryService} from "./services/winery.service";
 import { ActivatedRoute, Params } from '@angular/router';
 import { PageParameter } from './model/page-parameter';
 import _camundaModdleDescriptor from "camunda-bpmn-moddle/resources/camunda.json";
-import modeltest from '../docs/modeltest.json';
+import modeltest from "../docs/modeltest.json";
 //import SituationPropertiesProvider from './provider/situations/SituationPropertiesProvider';
 
 
@@ -51,6 +51,7 @@ export class AppComponent implements OnInit {
   static interfaces =  [{ name: 'Test3', value: 'Test3' }, { name: 'Test4', value: 'Test4' }];
   static param : Params;
   static winery2: WineryService;
+  static modeling;
   
   constructor(private http: HttpClient, private route: ActivatedRoute,private wineryService: WineryService) {
   }
@@ -77,13 +78,17 @@ export class AppComponent implements OnInit {
       },
       moddleExtensions: {
         custom: _camundaModdleDescriptor,
-        qa: modeltest   
+        qa: modeltest
       }
     });
+    let modeling2 = this.modeler.get('modeling');
+    AppComponent.modeling = modeling2;
     
     this.route.queryParams.subscribe(params => {this.wineryService.setRequestParam(<PageParameter>params);
       //AppComponent.winery2 = this.wineryService;
-    CustomPropsProvider.winery2 = this.wineryService
+    CustomPropsProvider.winery2 = this.wineryService;
+    CustomPropsProvider.modeling = AppComponent.modeling;
+    
   });
 
     this.initiate();
