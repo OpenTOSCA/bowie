@@ -1050,7 +1050,7 @@ export default function BpmnRenderer(
         }
       });
 
-      if(element.businessObject.$attrs.ntype === "CallNodeOperation" || element.businessObject.$attrs.ntype === "NodeInstance"){
+      if(element.businessObject.$attrs['qa:ntype'] === "CallNodeOperation" || element.businessObject.$attrs['qa:ntype'] === "NodeInstance"){
         drawPath(parentGfx, pathData, {
           strokeWidth: 1,
           stroke: 'blue'
@@ -1059,7 +1059,7 @@ export default function BpmnRenderer(
         return task;
       }
 
-      if(element.businessObject.$attrs.ntype === "ServiceTemplateInstance"){
+      if(element.businessObject.$attrs['qa:ntype'] === "ServiceTemplateInstance"){
         drawPath(parentGfx, pathData, {
           strokeWidth: 1,
           stroke: 'yellow'
@@ -1068,7 +1068,7 @@ export default function BpmnRenderer(
         return task;
       }
 
-      if(element.businessObject.$attrs.ntype === "RelationshipInstance"){
+      if(element.businessObject.$attrs['qa:ntype'] === "RelationshipInstance"){
         drawPath(parentGfx, pathData, {
           strokeWidth: 1,
           stroke: 'red'
@@ -1518,7 +1518,7 @@ export default function BpmnRenderer(
         }
       });
       
-      if(element.businessObject.$attrs.dtype === "NodeInstanceDataObject"){
+      if(element.businessObject.$attrs['qa:dtype'] === "NodeInstanceDataObject"){
 
       var elementObject = drawPath(parentGfx, pathData, {
         fill: getFillColor(element, defaultFillColor),
@@ -1534,7 +1534,7 @@ export default function BpmnRenderer(
 
       return elementObject;
     }
-    if(element.businessObject.$attrs.dtype === "ServiceInstanceDataObject"){
+    if(element.businessObject.$attrs['qa:dtype'] === "ServiceInstanceDataObject"){
 
       var elementObject = drawPath(parentGfx, pathData, {
         fill: getFillColor(element, defaultFillColor),
@@ -1550,7 +1550,7 @@ export default function BpmnRenderer(
 
       return elementObject;
     }
-    if(element.businessObject.$attrs.dtype === "RelationshipInstanceDataObject"){
+    if(element.businessObject.$attrs['qa:dtype'] === "RelationshipInstanceDataObject"){
 
       var elementObject = drawPath(parentGfx, pathData, {
         fill: getFillColor(element, defaultFillColor),

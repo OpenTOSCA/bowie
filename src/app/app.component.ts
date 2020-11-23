@@ -7,7 +7,8 @@ import CustomRenderer from "./props-provider/CustomRenderer";
 import {WineryService} from "./services/winery.service";
 import { ActivatedRoute, Params } from '@angular/router';
 import { PageParameter } from './model/page-parameter';
-import _camundaModdleDescriptor from "camunda-bpmn-moddle/resources/camunda.json";;
+import _camundaModdleDescriptor from "camunda-bpmn-moddle/resources/camunda.json";
+import moddle from '../docs/moddle.json';
 //import SituationPropertiesProvider from './provider/situations/SituationPropertiesProvider';
 
 
@@ -75,7 +76,8 @@ export class AppComponent implements OnInit {
         parent: '#properties'
       },
       moddleExtensions: {
-        custom: _camundaModdleDescriptor
+        custom: _camundaModdleDescriptor,
+        qa: moddle
       }
     });
     

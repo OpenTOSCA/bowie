@@ -74,7 +74,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
       businessObject.name = "lustige groovy ServiceTemplates";
       businessObject.scriptFormat = "groovy";
       businessObject.resource = "deployment://CreateServiceInstance.groovy";
-      businessObject.$attrs.ntype = "ServiceTemplateInstance";
+      businessObject.$attrs['qa:ntype'] = "ServiceTemplateInstance";
 
       const shape = elementFactory.createShape({
         type: 'bpmn:ScriptTask',
@@ -106,7 +106,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
       businessObject.name = "lustige groovy nodeinstances";
       businessObject.scriptFormat = "groovy";
       businessObject.resource = "deployment://CreateNodeInstance.groovy";
-      businessObject.$attrs.ntype = "NodeInstance";
+      businessObject.$attrs['qa:ntype'] = "NodeInstance";
 
       console.log("EXTENSION ELEMENTS");
       console.log(businessObject.extensionElements);
@@ -146,7 +146,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
       businessObject.name = "lustige groovy realtionshipinstances";
       businessObject.scriptFormat = "groovy";
       businessObject.resource = "deployment://CreateRelationshipInstance.groovy";
-      businessObject.$attrs.ntype = "RelationshipInstance";
+      businessObject.$attrs['qa:ntype'] = "RelationshipInstance";
 
       const shape = elementFactory.createShape({
         type: 'bpmn:ScriptTask',
@@ -185,7 +185,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
       businessObject.name = "lustige groovy node operations";
       businessObject.scriptFormat = "groovy";
       businessObject.resource = "deployment://CallNodeOperation.groovy";
-      businessObject.$attrs.ntype = "CallNodeOperation";
+      businessObject.$attrs['qa:ntype'] = "CallNodeOperation";
 
       const shape = elementFactory.createShape({
         type: 'bpmn:ScriptTask',
@@ -217,7 +217,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
       businessObject.name = "lustige groovy states";
       businessObject.scriptFormat = "groovy";
       businessObject.resource = "deployment://SetState.groovy";
-      businessObject.$attrs.ntype = "StateChanger";
+      businessObject.$attrs['qa:ntype'] = "StateChanger";
 
       const shape = elementFactory.createShape({
         type: 'bpmn:ScriptTask',
@@ -250,7 +250,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
       businessObject.name = "lustige groovy properties";
       businessObject.scriptFormat = "groovy";
       businessObject.resource = "deployment://SetProperties.groovy";
-      businessObject.$attrs.ntype = "PropertiesChanger";
+      businessObject.$attrs['qa:ntype'] = "PropertiesChanger";
 
       const shape = elementFactory.createShape({
         type: 'bpmn:ScriptTask',
@@ -287,7 +287,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
       });
 
       businessObject.name = "lustiges NodeInstanceDataObject";
-      businessObject.$attrs.dtype = "NodeInstanceDataObject";
+      businessObject.$attrs['qa:dtype'] = "NodeInstanceDataObject";
 
       const shape = elementFactory.createShape({
         type: 'bpmn:DataObjectReference',
@@ -317,7 +317,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
       });
 
       businessObject.name = "lustiges ServiceInstanceDataObject";
-      businessObject.$attrs.dtype = "ServiceInstanceDataObject";
+      businessObject.$attrs['qa:dtype'] = "ServiceInstanceDataObject";
 
       const shape = elementFactory.createShape({
         type: 'bpmn:DataObjectReference',
@@ -347,7 +347,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
       });
 
       businessObject.name = "lustiges RelationshipInstanceDataObject";
-      businessObject.$attrs.dtype = "RelationshipInstanceDataObject";
+      businessObject.$attrs['qa:dtype'] = "RelationshipInstanceDataObject";
 
       const shape = elementFactory.createShape({
         type: 'bpmn:DataObjectReference',
