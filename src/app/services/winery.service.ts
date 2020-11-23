@@ -26,6 +26,8 @@ import { ToscaInterface } from '../model/toscaInterface';
 import JSZip from 'jszip';
 import { AppComponent } from '../app.component';
 import { CustomPropsProvider } from '../props-provider/CustomPropsProvider';
+import { HttpClient } from '@angular/common/http';
+import { isNullOrUndefined } from 'util';
 
 /**
  * WineryService
@@ -41,7 +43,8 @@ export class WineryService {
     static nodetemplates2 = [{ name: 'Test', value: 'Test' }, { name: 'Test1', value: 'Test1' }];
 
     constructor(private broadcastService: BroadcastService,
-                public httpService: HttpService) {
+                public httpService: HttpService,
+                public http: HttpClient) {
         this.broadcastService.saveEvent$.subscribe(data => this.save(data));
         
     }
@@ -97,7 +100,7 @@ export class WineryService {
                     nodeTemplate.type.replace(/^\{(.+)\}(.+)/, '$1')));
             }
         }
-        console.log("NODETEM")
+        console.log("NODETEM");
         console.log(nodeTemplates);
         return nodeTemplates;
     }
@@ -105,13 +108,64 @@ export class WineryService {
     public loadNodeTemplateInterfaces(namespace: string, nodeType: string): Observable<ToscaInterface[]> {
         const url = 'nodetypes/' + this.encode(namespace)
             + '/' + this.encode(nodeType) + '/interfaces/';
-            console.log('Interface')
+            console.log('Interface');
         console.log(this.httpService.get(this.getFullUrl(url)));
         return this.httpService.get(this.getFullUrl(url));
     }
-
+    
+    handleError(err: any) {
+        if (err) {
+            console.warn('Ups, error: ', err);
+        }
+    }
+    
+    public testsave(xml: string): void {
+        var zip2 = new JSZip();
+        let count = 0;
+        const url2 = [
+            "../../assets/SetState.groovy", 
+            "../../assets/SetProperties.groovy", 
+            "../../assets/CreateServiceInstance.groovy",
+            "../../assets/CreateRelationshipInstance.groovy",
+            "../../assets/CreateNodeInstance.groovy",
+            "../../assets/CallNodeOperation.groovy"];
+        url2.forEach((urlll) => {
+            const filename = urlll.split('/')[urlll.split('/').length - 1];
+            
+          this.http.get(urlll, {
+              headers: {observe: 'response'}, responseType: 'text'
+          }).subscribe(
+              (y: any) => {
+                  next: zip2.file(filename, y);
+                  count++;
+                  if (count === url2.length) {
+                      zip2.file("insertplannamehere.bpmn", xml);
+                      zip2.generateAsync({ type: "blob" })
+                          .then(function (content) {
+                              // see FileSaver.js
+                              saveAs(content, "example.zip");
+                          });
+                  }
+                  error: this.handleError(y);
+              });
+        });
+    }
 
     public save(data: string) {
+        var zip = new JSZip();
+        //let data2;
+        
+        
+        //const url2 = "../../assets/SetState.groovy";
+        /*
+        this.http.get(url2, {
+            headers: {observe: 'response'}, responseType: 'text'
+        }).subscribe(
+            (y: any) => {
+                next: data2 = y;
+                error: this.handleError(y);
+            });
+        */
         const url = 'servicetemplates/' + this.encode(this.namespace)
             + '/' + this.encode(this.serviceTemplateId) + '/plans/' + this.encode(this.plan) + '/file';
         console.log(url);
@@ -119,13 +173,21 @@ export class WineryService {
             + 'Content-Disposition: form-data; name=\"file\"; filename=\"example.zip\"\r\n'
             + 'Content-type: application/zip\r\n\r\n'
             + data + '\r\n-----------------------------7da24f2e50046--\r\n';
-            var zip = new JSZip();
             zip.file("file.json", requestData);
-            zip.generateAsync({type:"blob"})
+            
+            /*
+            console.log("mach was");
+            let dataaa = this.getsomedata();
+            console.log(dataaa);
+            zip.file("SetState.groovy", dataaa);
+            */
+            // zip.file("SetState.groovy", "../../assets/SetState.groovy");
+            zip.generateAsync({type: "blob"})
             .then(function(content) {
                 // see FileSaver.js
                 saveAs(content, "example.zip");
             });
+            
         const headers = new HttpHeaders({ 'Content-Type': 'multipart/form-data; boundary=---------------------------7da24f2e50046' });
        
         this.httpService.put(this.getFullUrl(url), requestData, { headers: headers })
