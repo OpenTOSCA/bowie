@@ -1549,14 +1549,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                           element.businessObject.extensionElements.values[0].inputParameters[0].value = values.selectedOptions[0].value;
                         }
                       }
-                    } else if (values.selectedOptions[0] === undefined) {
-                      // Set default value
-                      if (is(element.businessObject, 'bpmn:ScriptTask')) {
-                        if (element.businessObject.$attrs['qa:ntype'] === "StateChanger") {
-                          element.businessObject.extensionElements.values[0].inputParameters[0].value = CustomPropsProvider.opt[0].value;
-                        }
-                      }
-                    }
+                    } 
                     return CustomPropsProvider.opt;
 
                   },
