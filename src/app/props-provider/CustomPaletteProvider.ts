@@ -22,7 +22,7 @@ export default function CustomPaletteProvider(palette, create, connect, elementF
   this._handTool = handTool;
   this._bpmnFactory = bpmnFactory;
   this._lassoTool = lassoTool;
-  this._modeling = AppComponent.modeling;
+  
 
   palette.registerProvider(this);
 
