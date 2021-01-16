@@ -204,7 +204,6 @@ export class CustomPropsProvider implements IPropertiesProvider {
                                 CustomPropsProvider.interfaces.push({
                                   name: response[i].name, value: response[i].name
                                 })
-                                console.log('HIER Array');
                                 window['interfaceN'] = array;
                               }
 
@@ -302,9 +301,6 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     }
                     if (element.businessObject.$attrs.interface != undefined) {
                       for (var i = 0; i < CustomPropsProvider.tosca.length; i++) {
-                        if (CustomPropsProvider.tosca[i].name == element.businessObject.$attrs.interface) {
-                          console.log("DER SET VALUE");
-                          console.log(CustomPropsProvider.tosca[i].value.length);
                         if (CustomPropsProvider.tosca[i].name == element.businessObject.$attrs['qa:interface']) {
 
                           var arr = [];
@@ -377,6 +373,8 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       for (var i = 0; i < CustomPropsProvider.tosca.length; i++) {
                         if (CustomPropsProvider.tosca[i].name == element.businessObject.$attrs.interface) {
                           CustomPropsProvider.options = [];
+                          var names = [];
+                          var valuesOfParam = [];
                           if (element.businessObject.$attrs['qa:operation'] != undefined) {
                             for (var j = 0; j < CustomPropsProvider.tosca[i].value.length; j++) {
 
@@ -428,6 +426,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                         for (var i = 0; i < length; i++) {
                           console.log(param[i].name == element.businessObject.$attrs['qa:nameInput']);
                           console.log(element.businessObject.$attrs['qa:inputParameter']);
+                          if (param[i].name == element.businessObject.$attrs['qa:nameInput']) {
 
                             var split = param[i].value.split(',');
                             console.log(split);
