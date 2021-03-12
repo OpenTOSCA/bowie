@@ -201,7 +201,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                                 CustomPropsProvider.interfaces.push({
                                   name: response[i].name, value: response[i].name
                                 })
-        
+
                                 window['interfaceN'] = array;
                               }
                               element.businessObject.$attrs['qa:interface'] = CustomPropsProvider.interfaces;
@@ -212,7 +212,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                         }).then(response => {
                           return response
                         })
-                        element.businessObject.$attrs['qa:NodeTemplate']= values['qa:NodeTemplate'];
+                        element.businessObject.$attrs['qa:NodeTemplate'] = values['qa:NodeTemplate'];
 
                         //inputtests
                         if (is(element.businessObject, 'bpmn:ScriptTask')) {
@@ -234,7 +234,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   description: 'Interface',
                   label: 'Interface',
                   selectOptions: function (element, values) {
-                   
+
                     if (element.businessObject.$attrs['qa:NodeTemplate'] != undefined) {
                       var namespace = 'http://opentosca.org/nodetypes';
                       const url = 'nodetypes/' + encodeURIComponent(encodeURIComponent((namespace)))
@@ -286,7 +286,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     if (element.businessObject.$attrs['qa:interface'] != undefined) {
                       for (var i = 0; i < CustomPropsProvider.tosca.length; i++) {
                         if (CustomPropsProvider.tosca[i].name == element.businessObject.$attrs['qa:interface']) {
-                          
+
                           var arr = [];
                           for (var j = 0; j < CustomPropsProvider.tosca[i].value.length; j++) {
                             CustomPropsProvider.operations.push({
@@ -332,7 +332,6 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     }
                     return CustomPropsProvider.operations;
                   }, set: function (element, values, node) {
-                    console.log('SEEEEEEEEEE')
                     console.log(values['qa:operation']);
                     element.businessObject.$attrs['qa:operation'] = values['qa:operation'];
                     //inputtests hier
@@ -360,7 +359,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                           var arr = [];
                           if (element.businessObject.$attrs['qa:operation'] != undefined) {
                             for (var j = 0; j < CustomPropsProvider.tosca[i].value.length; j++) {
-                              
+
                               if (CustomPropsProvider.tosca[i].value[j].name == element.businessObject.$attrs['qa:operation']) {
                                 console.log('INPUT PARAMETER')
                                 var parameter = CustomPropsProvider.tosca[i].value[j].inputParameters.inputParameter;
@@ -390,7 +389,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   set: function (element, values, node) {
                     element.businessObject.$attrs['qa:saveValueCheckbox'] = false;
                     element.businessObject.$attrs['qa:valueInput'] = '';
- 
+
                     if (values['qa:inputParams'] != undefined) {
                       var s = values['qa:inputParams'].split(',');
                       element.businessObject.$attrs['qa:nameInput'] = s[0];
@@ -453,14 +452,14 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     console.log(check);
                     console.log(element.businessObject.$attrs['qa:valueInput']);
                     console.log(element.businessObject.$attrs['qa:inputParameter']);
-                    
+
                     if (element.businessObject.$attrs['qa:valueInput'] != undefined && check) {
 
                       if (element.businessObject.$attrs['qa:inputParameter'] != undefined) {
                         var length = element.businessObject.$attrs['qa:inputParameter'].length;
                         for (var i = 0; i < length; i++) {
                           console.log(element.businessObject.$attrs['qa:inputParameter'][i].name);
-                          console.log( element.businessObject.$attrs['qa:nameInput']);
+                          console.log(element.businessObject.$attrs['qa:nameInput']);
                           if (element.businessObject.$attrs['qa:inputParameter'][i].name == element.businessObject.$attrs['qa:nameInput']) {
                             element.businessObject.$attrs['qa:inputParameter'][i].value = element.businessObject.$attrs['qa:inputParameter'][i].name + ',' +
                               element.businessObject.$attrs['qa:typeInput'] + ',' + element.businessObject.$attrs['qa:valueInput'];
@@ -1264,7 +1263,6 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     }
                     return CustomPropsProvider.operations;
                   }, set: function (element, values, node) {
-                    console.log('SEEEEEEEEEE')
                     console.log(values['qa:operation']);
                     element.businessObject.$attrs['qa:operation'] = values['qa:operation'];
                     //inputtests hier
@@ -1549,20 +1547,45 @@ export class CustomPropsProvider implements IPropertiesProvider {
                           element.businessObject.extensionElements.values[0].inputParameters[0].value = values.selectedOptions[0].value;
                         }
                       }
-                    } 
+                    }
                     return CustomPropsProvider.opt;
 
                   },
                   setControlValue: true,
                   modelProperty: 'qa:State'
                 }),
-                EntryFactory.textBox({
+                EntryFactory.selectBox({
                   id: 'InstanceID',
                   description: 'Instance ID',
                   label: 'Instance ID',
+                  selectOptions: function (element, values) {
+                    if (element.businessObject.$parent.$type == 'bpmn:Process') {
+                      var find = false;
+                      // entspricht der Participant Id, indem ich mich gerade befinde.
+                      var length = element.businessObject.$parent.flowElements.length;
+                      var flowElement = element.businessObject.$parent.flowElements;
+                      var arr = [];
+                      arr.push({ name: undefined, value: undefined });
+                      for (var i = 0; i < length; i++) {
+                        if (flowElement[i].$type == 'bpmn:ScriptTask' && flowElement[i].resultVariable != undefined) {
+                          arr.push({ name: flowElement[i].resultVariable, value: flowElement[i].resultVariable });
+                        }
+                      }
+                      return arr;
+                    }
+                  },
+                  set: function (element, values, node) {
+                      if (is(element.businessObject, 'bpmn:ScriptTask')) {
+                        if (element.businessObject.$attrs['qa:ntype'] === "StateChanger") {
+                          element.businessObject.$attrs['qa:instanceID'] = values['qa:instanceID'];
+                          element.businessObject.extensionElements.values[0].inputParameters[1].value = values['qa:instanceID'];
+                        }
+                      }
+                    return;
+                  },
+                  setControlValue: true,
                   modelProperty: 'qa:instanceID'
-                }),
-
+                })
               ]
             }]
         });
@@ -1633,7 +1656,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     arr.push({ name: 'none', value: 'none' });
                     var saveTask = [];
                     if (element.businessObject.$attrs['qa:task'] != undefined) {
-                
+
                       var task = element.businessObject.$attrs['qa:dataObject0'];
                       if (element.businessObject.$attrs['qa:dataObject0'] != undefined) {
                         var outputParam = task.$attrs['qa:outputParams'];

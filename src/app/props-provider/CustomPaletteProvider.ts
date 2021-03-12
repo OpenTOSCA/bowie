@@ -102,7 +102,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
         })
       });
 
-      businessObject.resultVariable = "NodeInstanceURL (Für jedes Template anders!)";
+      businessObject.resultVariable = businessObject.id+"NodeInstanceURL";
       businessObject.name = "lustige groovy nodeinstances";
       businessObject.scriptFormat = "groovy";
       businessObject.resource = "deployment://CreateNodeInstance.groovy";
@@ -142,8 +142,8 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
         })
       });
 
-      businessObject.resultVariable = "RealtionshipInstanceURL (Für jedes Template anders!)";
-      businessObject.name = "lustige groovy realtionshipinstances";
+      businessObject.resultVariable = businessObject.id+"RelationshipInstanceURL";
+      businessObject.name = "lustige groovy relationshipinstances";
       businessObject.scriptFormat = "groovy";
       businessObject.resource = "deployment://CreateRelationshipInstance.groovy";
       businessObject.$attrs['qa:ntype'] = "RelationshipInstance";
