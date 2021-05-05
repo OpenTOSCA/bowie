@@ -1,6 +1,7 @@
-import { EntryFactory, IPropertiesProvider } from '../bpmn-js/bpmn-js';
+import { EntryFactory, IPropertiesProvider, CreateHelper, BpmnFactory} from '../bpmn-js/bpmn-js';
+import _camundaModdleDescriptor from "camunda-bpmn-moddle/resources/camunda.json";
 import { $, jQuery } from "jquery";
-
+import BpmnModdle from 'bpmn-moddle';
 import { Observable, pipe } from 'rxjs/Rx';
 import { HttpService } from '../util/http.service';
 import { ToscaInterface } from '../model/toscaInterface';
@@ -12,6 +13,7 @@ import { HttpClient, HttpHandler } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { FindValueSubscriber } from 'rxjs/internal/operators/find';
 import { is } from 'bpmn-js/lib/util/ModelUtil';
+import { ElementHelper } from '../bpmn-js/ElementHelper.js';
 
 
 
@@ -32,7 +34,8 @@ export class CustomPropsProvider implements IPropertiesProvider {
   static opt = [{ name: 'INITIAL', value: 'INITIAL' }, { name: 'CREATING', value: 'CREATING' }, { name: 'CREATED', value: 'CREATED' }, { name: 'CONFIGURING', value: 'CONFIGURING' },
   { name: 'STARTING', value: 'STARTING' }, { name: 'STARTED', value: 'STARTED' }, { name: 'STOPPING', value: 'STOPPING' }, { name: 'STOPPED', value: 'STOPPED' }, { name: 'DELETING', value: 'DELETING' },
   { name: 'DELETED', value: 'DELETED' }, { name: 'ERROR', value: 'ERROR' }, { name: 'MIGRATED', value: 'MIGRATED' }];
-
+  static types  = [{ name: 'VALUE', value: 'VALUE' }, { name: 'String', value: 'String' }, { name: 'DA', value: 'DA' }];
+  static DA =[{ name: 'none', value: 'none' }];
 
   // Note that names of arguments must match injected modules, see InjectionNames.
   constructor(private translate, private bpmnPropertiesProvider, private httpService: HttpService, private winery: WineryService) {
@@ -137,6 +140,22 @@ export class CustomPropsProvider implements IPropertiesProvider {
     return 'http://localhost:8080' + relativePath;
   }
 
+  add(element){
+    return this.bpmnPropertiesProvider.getTabs(element)
+      .concat({
+        id: 'custom2',
+        label: this.translate('Properties'),
+        groups: [
+          {
+            id: 'opProp2',
+            label: this.translate('Data Object Properties'),
+            entries: [EntryFactory.textField({
+                      id: 'valueOutput',
+                      description: 'Value of Output Parameter',
+                      label: 'Value of Output Parameter',
+                      modelProperty: 'qa:valueOutput'
+  })]}]})}
+
   getTabs(element) {
     this.update2(CustomPropsProvider.options);
 
@@ -154,7 +173,10 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   id: 'servicetemplateID',
                   description: 'ServiceTemplate ID',
                   label: 'Service Template ID',
-                  modelProperty: 'qa:servicetemplateID'
+                  modelProperty: 'qa:servicetemplateID',
+                  hidden: function(element, node){
+                    return true;
+                  } 
                 }),
                 EntryFactory.selectBox({
                   id: 'NodeTemplate',
@@ -168,19 +190,30 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   modelProperty: 'qa:NodeTemplate',
                   set: function (element, values, node) {
                     console.log("das ausgewählte Element ist");
+                    var arr = element.businessObject.extensionElements;
+                    let moddle = new BpmnModdle();
+                    console.log(moddle);
+                    
+                    //moddle.values[0].inputParameters.push(moddle.values[0].inputParameters[0])
+                    console.log(moddle);
+                    
+                    //CreateHelper.createInputParameter('', 'Test', BpmnFactory);
+                    console.log(arr);
                     if (values['qa:NodeTemplate'] != 'none') {
                       element.businessObject.$attrs['qa:NodeTemplate'] = values['qa:NodeTemplate'];
-
+                      
                       console.log(element);
                       element.businessObject.$attrs['qa:interface'] = [];
                       element.businessObject.$attrs['qa:operation'] = [];
                       if (values['qa:NodeTemplate'] != undefined) {
+                        var nodetemplate = values['qa:NodeTemplate'].split('_')[0];
                         var namespace = 'http://opentosca.org/nodetypes';
                         const url = 'nodetypes/' + encodeURIComponent(encodeURIComponent((namespace)))
-                          + '/' + encodeURIComponent(encodeURIComponent((values['qa:NodeTemplate']))) + '/interfaces/';
+                          + '/' + encodeURIComponent(encodeURIComponent((nodetemplate))) + '/interfaces/';
                         var interfaces = new Promise(resolve => {
 
                           var http = new XMLHttpRequest();
+                          console.log('http://localhost:8080/' + 'winery/' + url);
                           http.open("GET", 'http://localhost:8080/' + 'winery/' + url, true);
                           http.send();
                           http.onreadystatechange = function () {
@@ -430,11 +463,49 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   label: 'Name of Parameter',
                   modelProperty: 'qa:nameInput'
                 }),
+                /**
                 EntryFactory.textField({
                   id: 'typeInput',
                   description: 'Type of Parameter',
                   label: 'Type of Parameter',
                   modelProperty: 'qa:typeInput'
+                }),
+                 */
+                EntryFactory.selectBox({
+                  id: 'typeInput',
+                  description: 'Type of Parameter',
+                  label: 'Type of Parameter',
+                  selectOptions: function (element, values) {
+                    element.businessObject.$attrs['qa:typeInput'] = CustomPropsProvider.types;
+                    return CustomPropsProvider.types;
+                  },
+                  set: function (element, values, node) {
+                    if (values['qa:typeInput'] != 'none') {
+                      console.log("TESTST");
+                      console.log(values);
+                      element.businessObject.$attrs['qa:typeInput'] = values['qa:typeInput'];
+                  
+                      return;
+                      
+                    }
+                    return;
+                  },
+                  setControlValue: true,
+                  isHidden: true,
+                  modelProperty: 'qa:typeInput'
+                }),
+                EntryFactory.selectBox({
+                  id: 'deploymentArtifact',
+                  description: 'Deployment Artifact',
+                  label: 'Deployment Artifact',
+                  selectOptions: function (element, values) {
+                    //element.businessObject.$attrs['qa:deploymentArtifact'] = CustomPropsProvider.DA;
+                    return CustomPropsProvider.DA;
+                  },
+                  setControlValue: true,
+                  isHidden: false,
+                  isDisabled: true, 
+                  modelProperty: 'qa:deploymentArtifact'
                 }),
                 EntryFactory.textField({
                   id: 'valueInput',
@@ -1688,7 +1759,20 @@ export class CustomPropsProvider implements IPropertiesProvider {
               ]
             }]
         })
-    } else {
+    } if(element.businessObject.$type == 'bpmn:ScriptTask' && element.businessObject.$attrs['qa:ntype'] === "CallNodeOperation" && element.businessObject.$attrs['qa:typeInput'] === "VALUE") {
+        return this.bpmnPropertiesProvider.getTabs(element)
+          .concat({
+            id: 'custom',
+            label: this.translate('Properties'),
+            groups: [
+              {
+                id: 'opProp',
+                label: this.translate('OperationTask Properties'),
+                entries: [
+                ]
+              }]
+          });
+      }else {
       return this.bpmnPropertiesProvider.getTabs(element)
         .concat({
           id: 'custom',
@@ -1702,5 +1786,6 @@ export class CustomPropsProvider implements IPropertiesProvider {
             }]
         });
     }
-  }
+    }
+  
 }
