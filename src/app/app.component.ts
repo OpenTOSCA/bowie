@@ -116,10 +116,20 @@ export class AppComponent implements OnInit {
   }
 
   save(): void {
-    this.modeler.saveXML((err: any, xml: any) => {console.log('Result of saving XML: ', err, xml);
-    let temp = JSON.stringify(xml);
-   this.wineryService.save(temp);
-  });
+        this.modeler.saveXML((err: any, xml: any) => {
+            console.log('Result of saving XML: ', err, xml);
+            let temp = JSON.stringify(xml);
+            this.wineryService.save(temp);
+        });
+    }
+
+    testsave(): void {
+        this.modeler.saveXML((err: any, xml: any) => {
+            console.log('Result of saving XML: ', err, xml);
+            //let temp2 = JSON.stringify(xml);
+            this.wineryService.testsave(xml);
+        });
+    }
     
     
 }}
