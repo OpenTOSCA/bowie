@@ -34,7 +34,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
   static opt = [{ name: 'INITIAL', value: 'INITIAL' }, { name: 'CREATING', value: 'CREATING' }, { name: 'CREATED', value: 'CREATED' }, { name: 'CONFIGURING', value: 'CONFIGURING' },
   { name: 'STARTING', value: 'STARTING' }, { name: 'STARTED', value: 'STARTED' }, { name: 'STOPPING', value: 'STOPPING' }, { name: 'STOPPED', value: 'STOPPED' }, { name: 'DELETING', value: 'DELETING' },
   { name: 'DELETED', value: 'DELETED' }, { name: 'ERROR', value: 'ERROR' }, { name: 'MIGRATED', value: 'MIGRATED' }];
-  static types  = [{ name: 'VALUE', value: 'VALUE' }, { name: 'String', value: 'String' }, { name: 'DA', value: 'DA' }];
+  static types  = [{name: 'none', value: 'none'}, {name: 'VALUE', value: 'VALUE' }, { name: 'String', value: 'String' }, { name: 'DA', value: 'DA' }];
   static DA =[{ name: 'none', value: 'none' }];
 
   // Note that names of arguments must match injected modules, see InjectionNames.
@@ -151,7 +151,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
             label: this.translate('Data Object Properties'),
             entries: [EntryFactory.textField({
                       id: 'valueOutput',
-                      description: 'Value of Output Parameter',
+                      //description: 'Value of Output Parameter',
                       label: 'Value of Output Parameter',
                       modelProperty: 'qa:valueOutput'
   })]}]})}
@@ -171,16 +171,13 @@ export class CustomPropsProvider implements IPropertiesProvider {
               entries: [
                 EntryFactory.textBox({
                   id: 'servicetemplateID',
-                  description: 'ServiceTemplate ID',
+                  //description: 'ServiceTemplate ID',
                   label: 'Service Template ID',
                   modelProperty: 'qa:servicetemplateID',
-                  hidden: function(element, node){
-                    return true;
-                  } 
                 }),
                 EntryFactory.selectBox({
                   id: 'NodeTemplate',
-                  description: 'NodeTemplate',
+                  //description: 'NodeTemplate',
                   label: 'NodeTemplate',
                   selectOptions: function (element, values) {
                     //console.log(CustomPropsProvider.template);
@@ -198,7 +195,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     console.log(moddle);
                     
                     //CreateHelper.createInputParameter('', 'Test', BpmnFactory);
-                    console.log(arr);
+                    //console.log(arr.values[0].inputParamters[moddle.create()]);
                     if (values['qa:NodeTemplate'] != 'none') {
                       element.businessObject.$attrs['qa:NodeTemplate'] = values['qa:NodeTemplate'];
                       
@@ -260,11 +257,11 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       }
                     }
                     return;
-                  }
+                  }, 
                 }),
                 EntryFactory.selectBox({
                   id: 'interface',
-                  description: 'Interface',
+                  //description: 'Interface',
                   label: 'Interface',
                   selectOptions: function (element, values) {
 
@@ -339,7 +336,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 }),
                 EntryFactory.selectBox({
                   id: 'operation',
-                  description: 'Operation',
+                  //description: 'Operation',
                   label: 'Operation',
                   selectOptions: function (element, values) {
                     if (element.businessObject.$attrs['qa:interface'] != undefined) {
@@ -381,7 +378,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 }),
                 EntryFactory.selectBox({
                   id: 'inputParams',
-                  description: 'Input Parameter',
+                  //description: 'Input Parameter',
                   label: 'Input Parameter',
                   selectOptions: function (element) {
                     console.log(element);
@@ -459,7 +456,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 }),
                 EntryFactory.textField({
                   id: 'nameInput',
-                  description: 'Name of Parameter',
+                  //description: 'Name of Parameter',
                   label: 'Name of Parameter',
                   modelProperty: 'qa:nameInput'
                 }),
@@ -473,20 +470,18 @@ export class CustomPropsProvider implements IPropertiesProvider {
                  */
                 EntryFactory.selectBox({
                   id: 'typeInput',
-                  description: 'Type of Parameter',
+                  //description: 'Type of Parameter',
                   label: 'Type of Parameter',
                   selectOptions: function (element, values) {
-                    element.businessObject.$attrs['qa:typeInput'] = CustomPropsProvider.types;
+                    //element.businessObject.$attrs['qa:typeInput'] = CustomPropsProvider.types;
                     return CustomPropsProvider.types;
                   },
                   set: function (element, values, node) {
+                    // element.businessObject.$attrs['qa:typeInput']
                     if (values['qa:typeInput'] != 'none') {
-                      console.log("TESTST");
-                      console.log(values);
+                      element.businessObject.$attrs['qa:type2Input'] = values['qa:typeInput'];
                       element.businessObject.$attrs['qa:typeInput'] = values['qa:typeInput'];
-                  
                       return;
-                      
                     }
                     return;
                   },
@@ -496,22 +491,108 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 }),
                 EntryFactory.selectBox({
                   id: 'deploymentArtifact',
-                  description: 'Deployment Artifact',
+                  //description: 'Deployment Artifact',
                   label: 'Deployment Artifact',
                   selectOptions: function (element, values) {
                     //element.businessObject.$attrs['qa:deploymentArtifact'] = CustomPropsProvider.DA;
                     return CustomPropsProvider.DA;
                   },
                   setControlValue: true,
-                  isHidden: false,
-                  isDisabled: true, 
-                  modelProperty: 'qa:deploymentArtifact'
+                  //isHidden: false,
+                  //isDisabled: true, 
+                  modelProperty: 'qa:deploymentArtifact',
+                  hidden: function(element, node){
+                    console.log(element.businessObject.$attrs['qa:type2Input']);
+                    if(element.businessObject.$attrs['qa:type2Input']=='DA'){
+                      return false;
+                    }else{
+                      return true;
+                    }
+                  }
+                }),
+                EntryFactory.selectBox({
+                  id: 'dataObject',
+                  //description: 'Data Object ID',
+                  label: 'Data Object ID',
+                  selectOptions: function (element, values) {
+                    //console.log(CustomPropsProvider.template);
+                    var arr = [];
+                    arr.push({ name: 'none', value: 'none' });
+                    var saveDataObject = [];
+                    if (element.businessObject.$parent.$type == 'bpmn:Process') {
+                      var find = false;
+                      // entspricht der Participant Id, indem ich mich gerade befinde.
+                      var length = element.businessObject.$parent.flowElements.length;
+                      var flowElement = element.businessObject.$parent.flowElements;
+                      for (var i = 0; i < length; i++) {
+                        if (flowElement[i].$type == 'bpmn:DataObjectReference') {
+                          arr.push({ name: flowElement[i].id, value: flowElement[i].id });
+                          saveDataObject.push({ name: flowElement[i], value: flowElement[i] });
+                        }
+                      }
+                      element.businessObject.$attrs['qa:dataObjectV'] = saveDataObject;
+                      return arr;
+                    }
+                  },
+                  set: function (element, values, node) {
+                    if (values['qa:dataObject'] != 'none') {
+                      element.businessObject.$attrs['qa:dataObject'] = values['qa:dataObject'];
+                      if (element.businessObject.$attrs['qa:dataObjectV'] != undefined) {
+                        var dataObject = element.businessObject.$attrs['qa:dataObjectV'];
+                        for (var i = 0; i < dataObject.length; i++) {
+                          if (dataObject[i].name.id == element.businessObject.$attrs['qa:dataObject']) {
+                            element.businessObject.$attrs['qa:dataObject0'] = dataObject[i].value;
+                          }
+                        }
+                      }
+                      return;
+                    }
+                  },
+                  setControlValue: true,
+                  hidden: function(element, node){
+                    if(element.businessObject.$attrs['qa:type2Input']=='VALUE'){
+                      return false;
+                    }else{
+                      return true;
+                    }
+                  },
+                  modelProperty: 'qa:dataObject',
+                }),
+                EntryFactory.selectBox({
+                  id: 'dataObjectProperties',
+                  //description: 'Data Object ID',
+                  label: 'Data Object Properties',
+                  selectOptions: function (element, values) {
+                    console.log("DATATATS")
+                    console.log(element.businessObject.$attrs['qa:dataObjectV'])
+                    return ;
+                  },
+                  set: function (element, values, node) {
+                    return;
+                  },
+                  setControlValue: true,
+                  hidden: function(element, node){
+                    console.log(element.businessObject.$attrs['qa:dataObject']);
+                    if(element.businessObject.$attrs['qa:dataObject']!='none' && element.businessObject.$attrs['qa:dataObject']!= undefined){
+                      return false;
+                    }else{
+                      return true;
+                    }
+                  },
+                  modelProperty: 'qa:dataObjectProperties',
                 }),
                 EntryFactory.textField({
                   id: 'valueInput',
-                  description: 'Value of Parameter',
+                  //description: 'Value of Parameter',
                   label: 'Value of Parameter',
-                  modelProperty: 'qa:valueInput'
+                  modelProperty: 'qa:valueInput',
+                  hidden: function(element, node){
+                    if(element.businessObject.$attrs['qa:type2Input']=='String'){
+                      return false;
+                    }else{
+                      return true;
+                    }
+                  },
                 }),
                 EntryFactory.checkbox({
                   id: 'saveValueCheckbox',
@@ -545,7 +626,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 }),
                 EntryFactory.selectBox({
                   id: 'outputParams',
-                  description: 'Output Parameter',
+                  //description: 'Output Parameter',
                   label: 'Output Parameter',
                   selectOptions: function (element, values) {
                     if (element.businessObject.$attrs['qa:interface'] != undefined) {
@@ -901,7 +982,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
               entries: [
                 EntryFactory.selectBox({
                   id: 'NodeTemplate',
-                  description: 'NodeTemplate',
+                  //description: 'NodeTemplate',
                   label: 'NodeTemplate',
                   selectOptions: function (element, values) {
                     //console.log(CustomPropsProvider.template);
@@ -945,7 +1026,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
               entries: [
                 EntryFactory.selectBox({
                   id: 'dataObject',
-                  description: 'Data Object ID',
+                  //description: 'Data Object ID',
                   label: 'Data Object ID',
                   selectOptions: function (element, values) {
                     //console.log(CustomPropsProvider.template);
@@ -986,13 +1067,13 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 }),
                 EntryFactory.textBox({
                   id: 'serviceInstanceID',
-                  description: 'ServiceInstance ID',
+                  //description: 'ServiceInstance ID',
                   label: 'Service Instance ID',
                   modelProperty: 'qa:serviceinstanceID'
                 }),
                 EntryFactory.textBox({
                   id: 'servicetemplateID',
-                  description: 'ServiceTemplate ID',
+                  //description: 'ServiceTemplate ID',
                   label: 'Service Template ID',
                   modelProperty: 'qa:servicetemplateID',
                   get: function (element, values) {
@@ -1013,7 +1094,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 }),
                 EntryFactory.textBox({
                   id: 'CSARID',
-                  description: 'CSAR ID',
+                  //description: 'CSAR ID',
                   label: 'CSAR ID',
                   modelProperty: 'qa:CSARID',
                   get: function (element, values) {
@@ -1048,7 +1129,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
               entries: [
                 EntryFactory.selectBox({
                   id: 'dataObject',
-                  description: 'Data Object ID',
+                  //description: 'Data Object ID',
                   label: 'Data Object ID',
                   selectOptions: function (element, values) {
                     //console.log(CustomPropsProvider.template);
@@ -1103,19 +1184,19 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 }),
                 EntryFactory.textBox({
                   id: 'RelationshipInstanceID',
-                  description: 'RelationshipInstance ID',
+                  //description: 'RelationshipInstance ID',
                   label: 'Relationship Instance ID',
                   modelProperty: 'qa:relationshipinstanceID'
                 }),
                 EntryFactory.textBox({
                   id: 'SourceURL',
-                  description: 'SourceURL',
+                  //description: 'SourceURL',
                   label: 'SourceURL',
                   modelProperty: 'qa:SourceURL'
                 }),
                 EntryFactory.textBox({
                   id: 'TargetURL',
-                  description: 'TargetURL',
+                  //description: 'TargetURL',
                   label: 'TargetURL',
                   modelProperty: 'qa:TargetURL'
                 }),
@@ -1135,13 +1216,13 @@ export class CustomPropsProvider implements IPropertiesProvider {
               entries: [
                 EntryFactory.textBox({
                   id: 'servicetemplateID',
-                  description: 'ServiceTemplate ID',
+                  //description: 'ServiceTemplate ID',
                   label: 'Service Template ID',
                   modelProperty: 'qa:servicetemplateID'
                 }),
                 EntryFactory.selectBox({
                   id: 'NodeTemplate',
-                  description: 'NodeTemplate',
+                  //description: 'NodeTemplate',
                   label: 'NodeTemplate',
                   selectOptions: function (element, values) {
                     //console.log(CustomPropsProvider.template);
@@ -1220,7 +1301,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 }),
                 EntryFactory.selectBox({
                   id: 'interface',
-                  description: 'Interface',
+                  //description: 'Interface',
                   label: 'Interface',
                   selectOptions: function (element, values) {
                     console.log(values);
@@ -1308,7 +1389,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 }),
                 EntryFactory.selectBox({
                   id: 'operation',
-                  description: 'Operation',
+                  //description: 'Operation',
                   label: 'Operation',
                   selectOptions: function (element, values) {
                     if (element.businessObject.$attrs['qa:interface'] != undefined) {
@@ -1350,7 +1431,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 }),
                 EntryFactory.selectBox({
                   id: 'inputParams',
-                  description: 'Input Parameter',
+                  //description: 'Input Parameter',
                   label: 'Input Parameter',
                   selectOptions: function (element) {
                     console.log(element);
@@ -1427,19 +1508,19 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 }),
                 EntryFactory.textField({
                   id: 'nameInput',
-                  description: 'Name of Parameter',
+                  //description: 'Name of Parameter',
                   label: 'Name of Parameter',
                   modelProperty: 'qa:nameInput'
                 }),
                 EntryFactory.textField({
                   id: 'typeInput',
-                  description: 'Type of Parameter',
+                  //description: 'Type of Parameter',
                   label: 'Type of Parameter',
                   modelProperty: 'qa:typeInput'
                 }),
                 EntryFactory.textField({
                   id: 'valueInput',
-                  description: 'Value of Parameter',
+                  //description: 'Value of Parameter',
                   label: 'Value of Parameter',
                   modelProperty: 'qa:valueInput'
                 }),
@@ -1472,7 +1553,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 }),
                 EntryFactory.selectBox({
                   id: 'outputParams',
-                  description: 'Output Parameter',
+                  //description: 'Output Parameter',
                   label: 'Output Parameter',
                   selectOptions: function (element, values) {
                     if (element.businessObject.$attrs['qa:interface'] != undefined) {
@@ -1526,13 +1607,13 @@ export class CustomPropsProvider implements IPropertiesProvider {
               entries: [
                 EntryFactory.textBox({
                   id: 'serviceInstanceID',
-                  description: 'ServiceInstance ID',
+                  //description: 'ServiceInstance ID',
                   label: 'Service Instance ID',
                   modelProperty: 'qa:serviceinstanceID'
                 }),
                 EntryFactory.textBox({
                   id: 'servicetemplateID',
-                  description: 'ServiceTemplate ID',
+                  //description: 'ServiceTemplate ID',
                   label: 'Service Template ID',
                   modelProperty: 'qa:servicetemplateID',
                   get: function () {
@@ -1547,7 +1628,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 }),
                 EntryFactory.textBox({
                   id: 'CSARID',
-                  description: 'CSAR ID',
+                  //description: 'CSAR ID',
                   label: 'CSAR ID',
                   modelProperty: 'qa:CSARID',
                   get: function () {
@@ -1576,19 +1657,19 @@ export class CustomPropsProvider implements IPropertiesProvider {
               entries: [
                 EntryFactory.selectBox({
                   id: 'RelationshipInstanceID',
-                  description: 'RelationshipInstance ID',
+                  //description: 'RelationshipInstance ID',
                   label: 'Relationship Instance ID',
                   modelProperty: 'qa:relationshipinstanceID'
                 }),
                 EntryFactory.textBox({
                   id: 'SourceURL',
-                  description: 'SourceURL',
+                  //description: 'SourceURL',
                   label: 'SourceURL',
                   modelProperty: 'qa:SourceURL'
                 }),
                 EntryFactory.textBox({
                   id: 'TargetURL',
-                  description: 'TargetURL',
+                  //description: 'TargetURL',
                   label: 'TargetURL',
                   modelProperty: 'qa:TargetURL'
                 }),
@@ -1608,7 +1689,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
               entries: [
                 EntryFactory.selectBox({
                   id: 'State',
-                  description: 'State',
+                  //description: 'State',
                   label: 'State',
                   selectOptions: function (element, values) {
                     if (values.selectedOptions.length > 0 && (values.selectedOptions[0] != undefined)) {
@@ -1627,7 +1708,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 }),
                 EntryFactory.selectBox({
                   id: 'InstanceID',
-                  description: 'Instance ID',
+                  //description: 'Instance ID',
                   label: 'Instance ID',
                   selectOptions: function (element, values) {
                     if (element.businessObject.$parent.$type == 'bpmn:Process') {
@@ -1672,7 +1753,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
               entries: [
                 EntryFactory.selectBox({
                   id: 'task',
-                  description: 'Task ID',
+                  //description: 'Task ID',
                   label: 'Task ID',
                   selectOptions: function (element, values) {
                     //console.log(CustomPropsProvider.template);
@@ -1719,7 +1800,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 }),
                 EntryFactory.selectBox({
                   id: 'outputParamTask',
-                  description: 'Task ID',
+                  //description: 'Task ID',
                   label: 'Task ID',
                   selectOptions: function (element, values) {
                     //console.log(CustomPropsProvider.template);
@@ -1752,7 +1833,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                 }),
                 EntryFactory.textField({
                   id: 'valueOutput',
-                  description: 'Value of Output Parameter',
+                  //description: 'Value of Output Parameter',
                   label: 'Value of Output Parameter',
                   modelProperty: 'qa:valueOutput'
                 }),
