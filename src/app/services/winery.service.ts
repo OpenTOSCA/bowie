@@ -81,17 +81,32 @@ export class WineryService {
                 const nodeTemplate = response.nodeTemplates[key];
                 var containsParam = false;
                 for (var j = 0; j < CustomPropsProvider.template.length; j++) {        
-                        if (nodeTemplate.name == CustomPropsProvider.template[j].name) {
+                    if (nodeTemplate.id == CustomPropsProvider.template[j].name) {
                           containsParam = true;
                         }
                 }
                 if (!containsParam) {
-                    CustomPropsProvider.template.push({value: nodeTemplate.name, name:
-                        nodeTemplate.name});
+                    CustomPropsProvider.template.push({value: nodeTemplate.id, name:
+                        nodeTemplate.id});
+                        if(nodeTemplate.deploymentArtifacts != undefined){
+                            for(var k = 0; k < nodeTemplate.deploymentArtifacts.deploymentArtifact.length; k++){
+                                let ref = nodeTemplate.deploymentArtifacts.deploymentArtifact[k].artifactRef
+                                let index = ref.indexOf("}");
+                                let temp = ref.substring(index+1);
+                                CustomPropsProvider.DA.push({value: temp, name:
+                                    temp});
+                            }
+                        }
                 }
                 if(CustomPropsProvider.template.length == 0){
-                    CustomPropsProvider.template.push({value: nodeTemplate.name, name:
-                        nodeTemplate.name});
+                    CustomPropsProvider.template.push({value: nodeTemplate.id, name:
+                        nodeTemplate.id});
+                        if(nodeTemplate.deploymentArtifacts != undefined){
+                            for(var k = 0; k < nodeTemplate.deploymentArtifacts.length; k++){
+                                CustomPropsProvider.DA.push({value: nodeTemplate.deploymentArtifacts.deploymentArtifact[k].artifactRef, name:
+                                    nodeTemplate.deploymentArtifacts.deploymentArtifact[k].artifactRef});
+                            }
+                        }
                 }
                 nodeTemplates.push(new NodeTemplate(
                     nodeTemplate.id,
