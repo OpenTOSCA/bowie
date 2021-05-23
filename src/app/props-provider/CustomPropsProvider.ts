@@ -36,6 +36,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
   { name: 'DELETED', value: 'DELETED' }, { name: 'ERROR', value: 'ERROR' }, { name: 'MIGRATED', value: 'MIGRATED' }];
   static types  = [{name: 'none', value: 'none'}, {name: 'VALUE', value: 'VALUE' }, { name: 'String', value: 'String' }, { name: 'DA', value: 'DA' }];
   static DA =[{ name: 'none', value: 'none' }];
+  static moddle = new BpmnModdle({ camunda: _camundaModdleDescriptor });
 
   // Note that names of arguments must match injected modules, see InjectionNames.
   constructor(private translate, private bpmnPropertiesProvider, private httpService: HttpService, private winery: WineryService) {
@@ -617,6 +618,35 @@ export class CustomPropsProvider implements IPropertiesProvider {
                               element.businessObject.$attrs['qa:typeInput'] + ',' + element.businessObject.$attrs['qa:valueInput'];
                             console.log(element.businessObject.$attrs['qa:inputParameter'][i].value);
                           }
+						  
+						  // ---------------------------------------------------------------------------------------------------------------------
+                              
+                              const inputParameter = CustomPropsProvider.moddle.create('camunda:InputParameter', {
+                                  name: 'Input_' + element.businessObject.$attrs['qa:inputParameter'][i].name,
+                                  value: element.businessObject.$attrs['qa:inputParameter'][i].value.split(',')[4]
+                                  // mhm warum hat value objekte drin? der eigentliche input ist hinten angehängt...
+                              });
+                              // console.log('ist es hier?');
+                              // console.log(element.businessObject.extensionElements.values[0].inputParameters);
+                              
+                              let addinput = true;
+                              for (let o = 0; o < element.businessObject.extensionElements.values[0].inputParameters.length; o++ ) {
+                                  if (inputParameter.name === element.businessObject.extensionElements.values[0].inputParameters[o].name) {
+                                      // updates den Wert bei Veränderung, übernimmt aber keine Änderungen aus dem Inputvariabelfeld
+                                      element.businessObject.extensionElements.values[0].inputParameters[o].value = 
+                                          element.businessObject.$attrs['qa:inputParameter'][i].value.split(',')[4];
+                                      addinput = false;
+                                  }
+                              }
+                              // verhindert das es immer wieder neue doppelte inputparameter erstellt
+                              if (addinput) {
+                                  element.businessObject.extensionElements.values[0].inputParameters.push(inputParameter);
+                              } else {
+                                  addinput = true;
+                              }
+                              
+                              // -------------------------------------------------------------------------------------------------------------------
+						  
                           console.log(CustomPropsProvider.options);
                         }
                         //element.businessObject.$attrs.inputParameter = CustomPropsProvider.options;
