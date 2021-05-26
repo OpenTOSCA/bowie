@@ -88,6 +88,7 @@ export class WineryService {
                 if (!containsParam) {
                     CustomPropsProvider.template.push({value: nodeTemplate.id, name:
                         nodeTemplate.id});
+                    CustomPropsProvider.properties.push(nodeTemplate);
                         if(nodeTemplate.deploymentArtifacts != undefined){
                             for(var k = 0; k < nodeTemplate.deploymentArtifacts.deploymentArtifact.length; k++){
                                 let ref = nodeTemplate.deploymentArtifacts.deploymentArtifact[k].artifactRef
@@ -101,6 +102,7 @@ export class WineryService {
                 if(CustomPropsProvider.template.length == 0){
                     CustomPropsProvider.template.push({value: nodeTemplate.id, name:
                         nodeTemplate.id});
+                    CustomPropsProvider.properties.push(nodeTemplate);
                         if(nodeTemplate.deploymentArtifacts != undefined){
                             for(var k = 0; k < nodeTemplate.deploymentArtifacts.length; k++){
                                 CustomPropsProvider.DA.push({value: nodeTemplate.deploymentArtifacts.deploymentArtifact[k].artifactRef, name:

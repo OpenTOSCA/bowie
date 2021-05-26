@@ -239,6 +239,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
             moddle.create('camunda:InputOutput', {
               inputParameters: [
                 moddle.create('camunda:InputParameter', { name: 'InstanceURL' }),
+                moddle.create('camunda:InputParameter', { name: 'NodeTemplate' }),
                 moddle.create('camunda:InputParameter', { name: 'Properties' }),
                 moddle.create('camunda:InputParameter', { name: 'Values' }),
               ],

@@ -14,6 +14,8 @@ import { Injectable } from '@angular/core';
 import { FindValueSubscriber } from 'rxjs/internal/operators/find';
 import { is } from 'bpmn-js/lib/util/ModelUtil';
 import { ElementHelper } from '../bpmn-js/ElementHelper.js';
+import { isFactory } from '@angular/core/src/render3/interfaces/injector';
+import { temporaryAllocator } from '@angular/compiler/src/render3/view/util';
 
 
 
@@ -37,13 +39,13 @@ export class CustomPropsProvider implements IPropertiesProvider {
   static types  = [{name: 'none', value: 'none'}, {name: 'VALUE', value: 'VALUE' }, { name: 'String', value: 'String' }, { name: 'DA', value: 'DA' }];
   static DA =[{ name: 'none', value: 'none' }];
   static moddle = new BpmnModdle({ camunda: _camundaModdleDescriptor });
-
+  static properties =[];
   // Note that names of arguments must match injected modules, see InjectionNames.
   constructor(private translate, private bpmnPropertiesProvider, private httpService: HttpService, private winery: WineryService) {
     this.update2(CustomPropsProvider.options);
     //this.loadNodeTemplates('http://opentosca.org/servicetemplates', 'MyTinyToDo_Bare_Docker', CustomPropsProvider.template);
-    const url = 'servicetemplates/' + this.encode('http://opentosca.org/servicetemplates')
-      + '/' + this.encode('MyTinyToDo_Bare_Docker') + '/topologytemplate/';//this.loadNodeTemplateInterfaces('http://opentosca.org/nodetypes', 'http://opentosca.org/nodetypes', CustomPropsProvider.interfaces);
+    //const url = 'servicetemplates/' + this.encode('http://opentosca.org/servicetemplates')
+    //  + '/' + this.encode(CustomPropsProvider.winery2.serviceTemplateId) + '/topologytemplate/';//this.loadNodeTemplateInterfaces('http://opentosca.org/nodetypes', 'http://opentosca.org/nodetypes', CustomPropsProvider.interfaces);
 
 
 
@@ -52,50 +54,8 @@ export class CustomPropsProvider implements IPropertiesProvider {
   public async update2(selectOptions) {
     console.log(CustomPropsProvider.winery2);
     var template = await this.loadNodeTemplates(CustomPropsProvider.template);
-    console.log(template);
-    console.log("vor update 3");
-    //var selectOptions2 = await this.update3(selectOptions);
-    console.log("nach update 3");
-    //console.log(selectOptions2);
-
-    //CustomPropsProvider.options.concat(selectOptions2[0]);
-    //console.log(CustomPropsProvider.options);
-
   }
-  public async update3(selectOptions) {
-
-    return new Promise(resolve => {
-      var http = new XMLHttpRequest();
-      http.open("GET", "http://localhost:8080/winery/nodetypes/http%253A%252F%252Fopentosca.org%252Fnodetypes/MyTinyToDoDockerContainer/interfaces/", true);
-      http.send();
-
-      http.onreadystatechange = function () {
-        if (http.readyState == XMLHttpRequest.DONE) {
-          //alert(http.responseText);
-          var si = JSON.parse(http.responseText);
-          console.log(si[0].operation[0].inputParameters.inputParameter);
-          var length = si[0].operation[0].inputParameters.inputParameter.length;
-          var counter = 0; //test
-          var containsParam = false;
-          for (var i = 0; i < length; i++) {
-            for (var j = 0; j < selectOptions.length; j++) {
-              if (si[0].operation[0].inputParameters.inputParameter[i].name == selectOptions[j].name) {
-                containsParam = true;
-              }
-            }
-            if (!containsParam) {
-              selectOptions.push({
-                value: si[0].operation[0].inputParameters.inputParameter[i].name, name:
-                  si[0].operation[0].inputParameters.inputParameter[i].name
-              })
-            }
-          }
-          resolve(selectOptions);
-        }
-      }
-    }).then(response => { return response })// console.log("Got it", response)) 
-  }
-
+ 
   public async loadNodeTemplates(options) {
     if (CustomPropsProvider.winery2 != undefined) {
       CustomPropsProvider.winery2.loadNodeTemplates();
@@ -140,22 +100,6 @@ export class CustomPropsProvider implements IPropertiesProvider {
   private getFullUrl(relativePath: string) {
     return 'http://localhost:8080' + relativePath;
   }
-
-  add(element){
-    return this.bpmnPropertiesProvider.getTabs(element)
-      .concat({
-        id: 'custom2',
-        label: this.translate('Properties'),
-        groups: [
-          {
-            id: 'opProp2',
-            label: this.translate('Data Object Properties'),
-            entries: [EntryFactory.textField({
-                      id: 'valueOutput',
-                      //description: 'Value of Output Parameter',
-                      label: 'Value of Output Parameter',
-                      modelProperty: 'qa:valueOutput'
-  })]}]})}
 
   getTabs(element) {
     this.update2(CustomPropsProvider.options);
@@ -205,9 +149,11 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       element.businessObject.$attrs['qa:operation'] = [];
                       if (values['qa:NodeTemplate'] != undefined) {
                         var nodetemplate = values['qa:NodeTemplate'].split('_')[0];
+                        console.log(nodetemplate);
                         var namespace = 'http://opentosca.org/nodetypes';
                         const url = 'nodetypes/' + encodeURIComponent(encodeURIComponent((namespace)))
                           + '/' + encodeURIComponent(encodeURIComponent((nodetemplate))) + '/interfaces/';
+                        console.log(url)
                         var interfaces = new Promise(resolve => {
 
                           var http = new XMLHttpRequest();
@@ -216,7 +162,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                           http.send();
                           http.onreadystatechange = function () {
                             if (http.readyState == XMLHttpRequest.DONE) {
-
+console.log('http://localhost:8080/' + 'winery/' + url);
                               console.log(http.responseText);
                               var response = JSON.parse(http.responseText);
                               CustomPropsProvider.interfaces = [];
@@ -268,8 +214,9 @@ export class CustomPropsProvider implements IPropertiesProvider {
 
                     if (element.businessObject.$attrs['qa:NodeTemplate'] != undefined) {
                       var namespace = 'http://opentosca.org/nodetypes';
+                      var nodetemplate = element.businessObject.$attrs['qa:NodeTemplate'].split('_')[0];
                       const url = 'nodetypes/' + encodeURIComponent(encodeURIComponent((namespace)))
-                        + '/' + encodeURIComponent(encodeURIComponent((element.businessObject.$attrs['qa:NodeTemplate']))) + '/interfaces/';
+                        + '/' + encodeURIComponent(encodeURIComponent((nodetemplate))) + '/interfaces/';
                       var interfaces = new Promise(resolve => {
                         var http = new XMLHttpRequest();
                         http.open("GET", 'http://localhost:8080/' + 'winery/' + url, true);
@@ -640,7 +587,13 @@ export class CustomPropsProvider implements IPropertiesProvider {
                               }
                               // verhindert das es immer wieder neue doppelte inputparameter erstellt
                               if (addinput) {
-                                  element.businessObject.extensionElements.values[0].inputParameters.push(inputParameter);
+                                console.log("HCHHC");
+                                console.log(inputParameter);
+                                console.log(element.businessObject.extensionElements.values[0].inputParameters);
+                                element.businessObject.extensionElements.values[0].inputParameters.push(inputParameter);
+                                console.log(element.businessObject.extensionElements.values[0].inputParameters);
+                                 
+                                  
                               } else {
                                   addinput = true;
                               }
@@ -648,6 +601,22 @@ export class CustomPropsProvider implements IPropertiesProvider {
                               // -------------------------------------------------------------------------------------------------------------------
 						  
                           console.log(CustomPropsProvider.options);
+                        }
+                        for(var i=0; i<element.businessObject.extensionElements.values[0].inputParameters.length; i++){
+                          console.log(element.businessObject.extensionElements.values[0].inputParameters[i].name);
+                          if(element.businessObject.extensionElements.values[0].inputParameters[i].name=='Input_'+element.businessObject.$attrs['qa:nameInput']){
+                            let type = element.businessObject.$attrs['qa:typeInput'];
+                            if(type =='DA'){
+                              let deploymentArtifact =element.businessObject.$attrs['qa:deploymentArtifact'];
+                              element.businessObject.extensionElements.values[0].inputParameters[i].value = type + ";"+ deploymentArtifact;
+                            }else if(type=='VALUE'){
+                              let propertyofDataObject = '';
+                              element.businessObject.extensionElements.values[0].inputParameters[i].value = type + '' + propertyofDataObject;
+                            }else{
+                              element.businessObject.extensionElements.values[0].inputParameters[i].value= type + ';' + element.businessObject.$attrs['qa:valueInput'];
+                            }
+                            
+                          }
                         }
                         //element.businessObject.$attrs.inputParameter = CustomPropsProvider.options;
                       }
@@ -1771,7 +1740,133 @@ export class CustomPropsProvider implements IPropertiesProvider {
               ]
             }]
         });
-    } else if (element.businessObject.$type == 'bpmn:DataObjectReference') {
+    } else if(element.businessObject.$type == 'bpmn:ScriptTask' && element.businessObject.$attrs['qa:ntype'] === "PropertiesChanger") {
+      return this.bpmnPropertiesProvider.getTabs(element)
+        .concat({
+          id: 'custom',
+          label: this.translate('Properties'),
+          groups: [
+            {
+              id: 'opProp',
+              label: this.translate('OperationTask Properties'),
+              entries: [
+                EntryFactory.selectBox({
+                  id: 'InstanceID',
+                  //description: 'Instance ID',
+                  label: 'Instance ID',
+                  selectOptions: function (element, values) {
+                    if (element.businessObject.$parent.$type == 'bpmn:Process') {
+                      var find = false;
+                      // entspricht der Participant Id, indem ich mich gerade befinde.
+                      var length = element.businessObject.$parent.flowElements.length;
+                      var flowElement = element.businessObject.$parent.flowElements;
+                      var arr = [];
+                      arr.push({ name: undefined, value: undefined });
+                      for (var i = 0; i < length; i++) {
+                        if (flowElement[i].$type == 'bpmn:ScriptTask' && flowElement[i].resultVariable != undefined) {
+                          arr.push({ name: flowElement[i].resultVariable, value: flowElement[i].resultVariable });
+                        }
+                      }
+                      return arr;
+                    }
+                  },
+                  set: function (element, values, node) {
+                      if (is(element.businessObject, 'bpmn:ScriptTask')) {
+                        if (element.businessObject.$attrs['qa:ntype'] === "PropertiesChanger") {
+                          element.businessObject.$attrs['qa:instanceID'] = values['qa:instanceID'];
+                          element.businessObject.extensionElements.values[0].inputParameters[1].value = values['qa:instanceID'];
+                        }
+                      }
+                    return;
+                  },
+                  setControlValue: true,
+                  modelProperty: 'qa:instanceID'
+                }),
+                EntryFactory.selectBox({
+                  id: 'NodeTemplate',
+                  //description: 'NodeTemplate',
+                  label: 'NodeTemplate',
+                  selectOptions: function (element, values) {
+                    //console.log(CustomPropsProvider.template);
+                    return CustomPropsProvider.template;
+                  },
+                  setControlValue: true,
+                  modelProperty: 'qa:NodeTemplate',
+                  set: function (element, values, node) {
+                    if (values['qa:NodeTemplate'] != 'none') {
+                      element.businessObject.$attrs['qa:NodeTemplate'] = values['qa:NodeTemplate'];
+                        if (is(element.businessObject, 'bpmn:ScriptTask')) {
+                          if (element.businessObject.$attrs['qa:ntype'] === "PropertiesChanger") {
+                            element.businessObject.extensionElements.values[0].inputParameters[1].value = values['qa:NodeTemplate'];
+                          } 
+                        }
+                        return;
+                    }
+                    return;
+                  }, 
+                }),
+                EntryFactory.selectBox({
+                  id: 'properties',
+                  //description: 'NodeTemplate',
+                  label: 'Properties',
+                  selectOptions: function (element, values) {
+                    //console.log(CustomPropsProvider.template);
+                    //return CustomPropsProvider.properties;
+                    console.log(CustomPropsProvider.properties);
+                    for(let i = 0; i<CustomPropsProvider.properties.length; i++){
+                      var nodetemplate = element.businessObject.$attrs['qa:NodeTemplate']
+                      if(CustomPropsProvider.properties[i].id ==nodetemplate){
+                        var options = [{ name: 'none', value: 'none' }];
+                        let properties = CustomPropsProvider.properties[i].properties.kvproperties;
+                        properties = JSON.stringify(properties).split(",");
+                        
+                        for(let j=0; j<properties.length; j++){
+                          let property = properties[j].split(':')[0].replace("{","");
+                         if(property.startsWith("\"") && property.endsWith("\"")){
+                           property = property.substring(1, property.length-1);
+                         }
+                         options.push({name:property, value: property})
+                        }
+                        //options.push({name: , value: });
+                        
+                      
+                      }
+                    }
+                    return options;
+                  },
+                  setControlValue: true,
+                  modelProperty: 'qa:Properties',
+                  set: function (element, values, node) {
+                    if (values['qa:Properties'] != 'none') {
+                      element.businessObject.$attrs['qa:Properties'] = values['qa:Properties'];
+                        if (is(element.businessObject, 'bpmn:ScriptTask')) {
+                          if (element.businessObject.$attrs['qa:ntype'] === "PropertiesChanger") {
+                            element.businessObject.extensionElements.values[0].inputParameters[1].value = values['qa:Properties'];
+                          } 
+                        }
+                        return;
+                    }
+                    return;
+                  }, 
+                }),
+                EntryFactory.textField({
+                  id: 'valueInput',
+                  //description: 'Value of Parameter',
+                  label: 'Value of Property',
+                  modelProperty: 'qa:valueProp',
+                  hidden: function(element, node){
+                    console.log(element.businessObject.$attrs['qa:Property']);
+                    if(element.businessObject.$attrs['qa:Properties']=='none' || element.businessObject.$attrs['qa:Properties']==undefined ){
+                      return true;
+                    }else{
+                      return false;
+                    }
+                  },
+                }),
+              ]
+            }]
+      })}
+      else if (element.businessObject.$type == 'bpmn:DataObjectReference') {
       return this.bpmnPropertiesProvider.getTabs(element)
         .concat({
           id: 'custom',
@@ -1870,19 +1965,6 @@ export class CustomPropsProvider implements IPropertiesProvider {
               ]
             }]
         })
-    } if(element.businessObject.$type == 'bpmn:ScriptTask' && element.businessObject.$attrs['qa:ntype'] === "CallNodeOperation" && element.businessObject.$attrs['qa:typeInput'] === "VALUE") {
-        return this.bpmnPropertiesProvider.getTabs(element)
-          .concat({
-            id: 'custom',
-            label: this.translate('Properties'),
-            groups: [
-              {
-                id: 'opProp',
-                label: this.translate('OperationTask Properties'),
-                entries: [
-                ]
-              }]
-          });
       }else {
       return this.bpmnPropertiesProvider.getTabs(element)
         .concat({
