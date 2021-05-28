@@ -1,4 +1,4 @@
-import { EntryFactory, IPropertiesProvider, CreateHelper, BpmnFactory } from '../bpmn-js/bpmn-js';
+import { EntryFactory, IPropertiesProvider, } from '../bpmn-js/bpmn-js';
 import _camundaModdleDescriptor from "camunda-bpmn-moddle/resources/camunda.json";
 import { $, jQuery } from "jquery";
 import BpmnModdle from 'bpmn-moddle';
@@ -13,7 +13,6 @@ import { HttpClient, HttpHandler } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { FindValueSubscriber } from 'rxjs/internal/operators/find';
 import { is } from 'bpmn-js/lib/util/ModelUtil';
-import { ElementHelper } from '../bpmn-js/ElementHelper.js';
 import { isFactory } from '@angular/core/src/render3/interfaces/injector';
 import { temporaryAllocator } from '@angular/compiler/src/render3/view/util';
 
@@ -104,7 +103,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
   getTabs(element) {
     this.update2(CustomPropsProvider.options);
 
-    if (element.businessObject.$type == 'bpmn:ScriptTask' && element.businessObject.$attrs['qa:ntype'] === "CallNodeOperation") {
+    if (element.businessObject.$type == 'bpmn:ScriptTask' && element.businessObject.$attrs['qa:ntype'] == "CallNodeOperation") {
       return this.bpmnPropertiesProvider.getTabs(element)
         .concat({
           id: 'custom',
@@ -570,7 +569,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
 
                           const inputParameter = CustomPropsProvider.moddle.create('camunda:InputParameter', {
                             name: 'Input_' + element.businessObject.$attrs['qa:inputParameter'][i].name,
-                            value: element.businessObject.$attrs['qa:inputParameter'][i].value.split(',')[4]
+                            value: element.businessObject.$attrs['qa:valueInput']
                             // mhm warum hat value objekte drin? der eigentliche input ist hinten angehängt...
                           });
                           // console.log('ist es hier?');
@@ -580,8 +579,8 @@ export class CustomPropsProvider implements IPropertiesProvider {
                           for (let o = 0; o < element.businessObject.extensionElements.values[0].inputParameters.length; o++) {
                             if (inputParameter.name === element.businessObject.extensionElements.values[0].inputParameters[o].name) {
                               // updates den Wert bei Veränderung, übernimmt aber keine Änderungen aus dem Inputvariabelfeld
-                              element.businessObject.extensionElements.values[0].inputParameters[o].value =
-                                element.businessObject.$attrs['qa:inputParameter'][i].value.split(',')[4];
+                              element.businessObject.extensionElements.values[0].inputParameters[o].value = ''
+                                //element.businessObject.$attrs['qa:inputParameter'][i].value.split(',')[4];
                               addinput = false;
                             }
                           }
@@ -1204,161 +1203,186 @@ export class CustomPropsProvider implements IPropertiesProvider {
             }]
         });
     } else if ((element.businessObject.$type == 'bpmn:DataObjectReference') && (element.businessObject.$attrs['qa:dtype'] == "NodeInstanceDataObject")) {
-      { return this.bpmnPropertiesProvider.getTabs(element)
-        .concat({
-          id: 'custom',
-          label: this.translate('Properties'),
-          groups: [
-            {
-              id: 'opProp',
-              label: this.translate('OperationTask Properties'),
-              entries: [
-                EntryFactory.selectBox({
-                  id: 'InstanceID',
-                  //description: 'Instance ID',
-                  label: 'Instance ID',
-                  selectOptions: function (element, values) {
-                    if (element.businessObject.$parent.$type == 'bpmn:Process') {
-                      var find = false;
-                      // entspricht der Participant Id, indem ich mich gerade befinde.
-                      var length = element.businessObject.$parent.flowElements.length;
-                      var flowElement = element.businessObject.$parent.flowElements;
-                      var arr = [];
-                      arr.push({ name: undefined, value: undefined });
-                      for (var i = 0; i < length; i++) {
-                        if (flowElement[i].$type == 'bpmn:ScriptTask' && flowElement[i].resultVariable != undefined) {
-                          arr.push({ name: flowElement[i].resultVariable, value: flowElement[i].resultVariable });
+      {
+        return this.bpmnPropertiesProvider.getTabs(element)
+          .concat({
+            id: 'custom',
+            label: this.translate('Properties'),
+            groups: [
+              {
+                id: 'nodeinstanceDataObject',
+                label: this.translate('OperationTask Properties'),
+                entries: [
+                  EntryFactory.selectBox({
+                    id: 'InstanceID',
+                    //description: 'Instance ID',
+                    label: 'Instance ID',
+                    selectOptions: function (element, values) {
+                      if (element.businessObject.$parent.$type == 'bpmn:Process') {
+                        var find = false;
+                        // entspricht der Participant Id, indem ich mich gerade befinde.
+                        var length = element.businessObject.$parent.flowElements.length;
+                        var flowElement = element.businessObject.$parent.flowElements;
+                        console.log("FLOWELEMENT");
+                        console.log(flowElement)
+                        var arr = [];
+                        arr.push({ name: undefined, value: undefined });
+                        for (var i = 0; i < length; i++) {
+                          console.log(flowElement[i].ntype)
+                          if (flowElement[i].$type == 'bpmn:ScriptTask' && flowElement[i].$attrs['qa:ntype'] == 'NodeInstance' && flowElement[i].resultVariable != undefined) {
+                            arr.push({ name: flowElement[i].resultVariable, value: flowElement[i].resultVariable });
+                          }
                         }
+                        return arr;
                       }
-                      return arr;
-                    }
-                  },
-                  set: function (element, values, node) {
-                    if (is(element.businessObject, 'bpmn:ScriptTask')) {
-                      if (element.businessObject.$attrs['qa:ntype'] === "PropertiesChanger") {
-                        element.businessObject.$attrs['qa:instanceID'] = values['qa:instanceID'];
-                        element.businessObject.extensionElements.values[0].inputParameters[1].value = values['qa:instanceID'];
-                      }
-                    }
-                    return;
-                  },
-                  setControlValue: true,
-                  modelProperty: 'qa:instanceID'
-                }),
-                EntryFactory.selectBox({
-                  id: 'NodeTemplate',
-                  //description: 'NodeTemplate',
-                  label: 'NodeTemplate',
-                  selectOptions: function (element, values) {
-                    //console.log(CustomPropsProvider.template);
-                    return CustomPropsProvider.template;
-                  },
-                  setControlValue: true,
-                  modelProperty: 'qa:NodeTemplate',
-                  set: function (element, values, node) {
-                    if (values['qa:NodeTemplate'] != 'none') {
-                      element.businessObject.$attrs['qa:NodeTemplate'] = values['qa:NodeTemplate'];
-                      if (is(element.businessObject, 'bpmn:ScriptTask')) {
-                        if (element.businessObject.$attrs['qa:ntype'] === "PropertiesChanger") {
-                          element.businessObject.extensionElements.values[0].inputParameters[1].value = values['qa:NodeTemplate'];
+                    },
+                    set: function (element, values, node) {
+                      if (is(element.businessObject, 'bpmn:DataObjectReference')) {
+                        if (element.businessObject.$attrs['qa:dtype'] === "NodeInstanceDataObject") {
+                          element.businessObject.$attrs['qa:instanceID'] = values['qa:instanceID'];
+                          element.businessObject.extensionElements.values[0].inputParameters[0].value = values['qa:instanceID'];
                         }
                       }
                       return;
-                    }
-                    return;
-                  },
-                }),
-                EntryFactory.selectBox({
-                  id: 'properties',
-                  //description: 'NodeTemplate',
-                  label: 'Properties',
-                  selectOptions: function (element, values) {
-                    //console.log(CustomPropsProvider.template);
-                    //return CustomPropsProvider.properties;
-                    console.log(CustomPropsProvider.properties);
-                    for (let i = 0; i < CustomPropsProvider.properties.length; i++) {
-                      var nodetemplate = element.businessObject.$attrs['qa:NodeTemplate']
-                      if (CustomPropsProvider.properties[i].id == nodetemplate) {
-                        var options = [{ name: 'none', value: 'none' }];
-                        let properties = CustomPropsProvider.properties[i].properties.kvproperties;
-                        properties = JSON.stringify(properties).split(",");
+                    },
+                    setControlValue: true,
+                    modelProperty: 'qa:instanceID'
+                  }),
+                  EntryFactory.selectBox({
+                    id: 'NodeTemplate',
+                    //description: 'NodeTemplate',
+                    label: 'NodeTemplate',
+                    selectOptions: function (element, values) {
+                      //console.log(CustomPropsProvider.template);
+                      return CustomPropsProvider.template;
+                    },
+                    setControlValue: true,
+                    modelProperty: 'qa:NodeTemplate',
+                    set: function (element, values, node) {
+                      if (values['qa:NodeTemplate'] != 'none') {
+                        element.businessObject.$attrs['qa:NodeTemplate'] = values['qa:NodeTemplate'];
 
-                        for (let j = 0; j < properties.length; j++) {
-                          let property = properties[j].split(':')[0].replace("{", "");
-                          if (property.startsWith("\"") && property.endsWith("\"")) {
-                            property = property.substring(1, property.length - 1);
-                          }
-                          options.push({ name: property, value: property })
-                        }
-                        //options.push({name: , value: });
-
-
-                      }
-                    }
-                    return options;
-                  },
-                  setControlValue: true,
-                  modelProperty: 'qa:Properties',
-                  set: function (element, values, node) {
-                    if (values['qa:Properties'] != 'none') {
-                      element.businessObject.$attrs['qa:Properties'] = values['qa:Properties'];
-                      if (is(element.businessObject, 'bpmn:ScriptTask')) {
-                        if (element.businessObject.$attrs['qa:ntype'] === "PropertiesChanger") {
-                          element.businessObject.extensionElements.values[0].inputParameters[1].value = values['qa:Properties'];
-                        }
-                      }
-                      return;
-                    }
-                    return;
-                  },
-                }),
-                EntryFactory.textField({
-                  id: 'valueInput',
-                  //description: 'Value of Parameter',
-                  label: 'Value of Property',
-                  modelProperty: 'qa:valueProp',
-                  hidden: function (element, node) {
-                    console.log(element.businessObject.$attrs['qa:Property']);
-                    if (element.businessObject.$attrs['qa:Properties'] == 'none' || element.businessObject.$attrs['qa:Properties'] == undefined) {
-                      return true;
-                    } else {
-                      return false;
-                    }
-                  }, set: function (element, values) {
-                    var propertyName = element.businessObject.$attrs['qa:Properties'];
-                    if (propertyName != '') {
-                      if (values['qa:valueProps'] != undefined || values['qa:valueProps'] != '') {
-                        console.log(propertyName);
-                        const inputParameter = CustomPropsProvider.moddle.create('camunda:InputParameter', {
-                          name: 'Input_' + propertyName,
-                          value: values['qa:valueProp']
-                        });
-                        let addinput = true;
-                        for (let o = 0; o < element.businessObject.extensionElements.values[0].inputParameters.length; o++) {
-                          if (inputParameter.name === element.businessObject.extensionElements.values[0].inputParameters[o].name) {
-                            // updates den Wert bei Veränderung, übernimmt aber keine Änderungen aus dem Inputvariabelfeld
-                            element.businessObject.extensionElements.values[0].inputParameters[o].value = values['qa:valueProp']
-                            addinput = false;
-                          }
-                        }
-                        // verhindert das es immer wieder neue doppelte inputparameter erstellt
-                        if (addinput) {
-                          element.businessObject.extensionElements.values[0].inputParameters.push(inputParameter);
-                        } else {
-                          addinput = true;
-                        }
-                        element.businessObject.$attrs['qa:valueProp'] = values['qa:valueProp'];
-                        console.log(values['qa:valueProp']);
+                        element.businessObject.extensionElements.values[0].inputParameters[1].value = values['qa:NodeTemplate'];
                         return;
                       }
                       return;
                     }
+                  }),
+                  EntryFactory.selectBox({
+                    id: 'properties',
+                    //description: 'NodeTemplate',
+                    label: 'Properties',
+                    selectOptions: function (element, values) {
+                      //console.log(CustomPropsProvider.template);
+                      //return CustomPropsProvider.properties;
+                      console.log(CustomPropsProvider.properties);
+                      for (let i = 0; i < CustomPropsProvider.properties.length; i++) {
+                        var nodetemplate = element.businessObject.$attrs['qa:NodeTemplate']
+                        if (CustomPropsProvider.properties[i].id == nodetemplate) {
+                          var options = [{ name: 'none', value: 'none' }];
+                          let properties = CustomPropsProvider.properties[i].properties.kvproperties;
+                          properties = JSON.stringify(properties).split(",");
 
-                  },
-                }),
-              ]
-            }]
-        })
+                          for (let j = 0; j < properties.length; j++) {
+                            let property = properties[j].split(':')[0].replace("{", "");
+                            if (property.startsWith("\"") && property.endsWith("\"")) {
+                              property = property.substring(1, property.length - 1);
+                            }
+                            options.push({ name: property, value: property })
+                          }
+                          //options.push({name: , value: });
+                        }
+                      }
+                      return options;
+                    },
+                    setControlValue: true,
+                    modelProperty: 'qa:Properties',
+                    set: function (element, values, node) {
+                      if (values['qa:Properties'] != 'none') {
+                        element.businessObject.$attrs['qa:Properties'] = values['qa:Properties'];
+                        if (is(element.businessObject, 'bpmn:ScriptTask')) {
+                          if (element.businessObject.$attrs['qa:ntype'] === "PropertiesChanger") {
+                            element.businessObject.extensionElements.values[0].inputParameters[1].value = values['qa:Properties'];
+                          }
+                        }
+                        return;
+                      }
+                      return;
+                    },
+                  }),
+                  EntryFactory.textField({
+                    id: 'valueInput',
+                    //description: 'Value of Parameter',
+                    label: 'Value of Property',
+                    modelProperty: 'qa:valueProp',
+                    hidden: function (element, node) {
+                      console.log(element.businessObject.$attrs['qa:Property']);
+                      if (element.businessObject.$attrs['qa:Properties'] == 'none' || element.businessObject.$attrs['qa:Properties'] == undefined) {
+                        return true;
+                      } else {
+                        return false;
+                      }
+                    },
+                    get: function (element, values) {
+                      console.log(CustomPropsProvider.properties);
+
+                      var propertyName = element.businessObject.$attrs['qa:Properties'];
+
+                      for (let i = 0; i < CustomPropsProvider.properties.length; i++) {
+                        var nodetemplate = element.businessObject.$attrs['qa:NodeTemplate']
+                        if (CustomPropsProvider.properties[i].id == nodetemplate) {
+                          var options = [{ name: 'none', value: 'none' }];
+                          let properties = CustomPropsProvider.properties[i].properties.kvproperties;
+                          properties = JSON.stringify(properties).split(",");
+                          console.log(properties)
+                          for (let j = 0; j < properties.length; j++) {
+                            let property = properties[j].split(':', 2)[0].replace("{", "");
+                            console.log(property)
+                            if (property.startsWith("\"") && property.endsWith("\"")) {
+                              console.log("GEHT DAS")
+                              property = property.substring(1, property.length - 1);
+                              if (property == propertyName) {
+                                var propertyValue = properties[j].substr(properties[j].indexOf(':') + 1);;
+                                console.log("VAlue");
+                                console.log(propertyValue)
+                                if (propertyValue.startsWith("\"") && propertyValue.endsWith("\"")) {
+                                  propertyValue = propertyValue.substring(1, propertyValue.length - 1);
+                                  const inputParameter = CustomPropsProvider.moddle.create('camunda:InputParameter', {
+                                    name: 'Input_' + propertyName,
+                                    value: propertyValue
+                                  });
+                                  let addinput = true;
+                                  for (let o = 0; o < element.businessObject.extensionElements.values[0].inputParameters.length; o++) {
+                                    if (inputParameter.name === element.businessObject.extensionElements.values[0].inputParameters[o].name) {
+                                      // updates den Wert bei Veränderung, übernimmt aber keine Änderungen aus dem Inputvariabelfeld
+                                      element.businessObject.extensionElements.values[0].inputParameters[o].value = propertyValue
+                                      addinput = false;
+                                    }
+                                  }
+                                  // verhindert das es immer wieder neue doppelte inputparameter erstellt
+                                  if (addinput) {
+                                    element.businessObject.extensionElements.values[0].inputParameters.push(inputParameter);
+                                  } else {
+                                    addinput = true;
+                                  }
+                                  return {
+                                    'qa:valueProp': propertyValue
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                      return {
+                        'qa:valueProp': ''
+                      }
+                    },
+                  }
+                  ),
+                ]
+              }]
+          })
       }
     } else if ((element.businessObject.$type == 'bpmn:DataObjectReference') && (element.businessObject.$attrs['qa:dtype'] == "ServiceInstanceDataObject")) {
       return this.bpmnPropertiesProvider.getTabs(element)
