@@ -6,36 +6,6 @@
       "tagAlias": "lowerCase"
     },
     "types": [
-      {
-        "name": "InputParameter",
-        "extends": [
-            "camunda:InputParameter"
-        ]
-    },
-        {
-            "name": "AnalyzedNode",
-            "extends": [
-                "bpmn:FlowNode"
-            ],
-            "properties": [
-                {
-                    "name": "ntype",
-                    "isAttr": true,
-                    "type": "String"
-                }
-            ]
-        },
-      {
-        "name": "ntypetest",
-        "superClass": [ "Element" ],
-        "properties": [
-          {
-            "name": "ntype",
-            "isAttr": true,
-            "type": "String"
-          }   
-        ]
-      }
     ],
     "emumerations": [],
     "associations": []
