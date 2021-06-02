@@ -273,8 +273,8 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
             moddle.create('camunda:InputOutput', {
               inputParameters: [
                 moddle.create('camunda:InputParameter', { name: 'NodeInstanceURL' }),
-                moddle.create('camunda:InputParameter', { name: 'Nodetemplate' }),
-                moddle.create('camunda:InputParameter', { name: 'ServiceTemplateID' }),
+                moddle.create('camunda:InputParameter', { name: 'NodeTemplate' }),
+                moddle.create('camunda:InputParameter', { name: 'Properties' }),
               ],
             }),
           ],
@@ -286,6 +286,40 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
 
       const shape = elementFactory.createShape({
         type: 'bpmn:DataObjectReference',
+        businessObject: businessObject
+      });
+      console.log(businessObject);
+
+      create.start(event, shape);
+
+    }
+  }
+
+  function createNodeInstanceDataObjectTask() {
+    return function (event) {
+      const businessObject = bpmnFactory.create('bpmn:ScriptTask', {
+        extensionElements: moddle.create('bpmn:ExtensionElements', {
+          values: [
+            moddle.create('camunda:InputOutput', {
+              inputParameters: [
+                moddle.create('camunda:InputParameter', { name: 'NodeInstanceURL' }),
+                moddle.create('camunda:InputParameter', {name: 'DataObject'}),
+                moddle.create('camunda:InputParameter', { name: 'NodeTemplate' }),
+                moddle.create('camunda:InputParameter', { name: 'Properties' }),
+              ],
+            }),
+          ],
+        })
+      });
+
+      businessObject.name = "lustiger data object ersatz";
+      businessObject.scriptFormat = "groovy";
+      businessObject.resource = "deployment://DataObject.groovy";
+      businessObject.$attrs['qa:dtype'] = "NodeInstanceDataObjectTask";
+
+
+      const shape = elementFactory.createShape({
+        type: 'bpmn:ScriptTask',
         businessObject: businessObject
       });
       console.log(businessObject);
@@ -505,6 +539,16 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
       action: {
         dragstart: createRelationshipInstanceDataObject(),
         click: createRelationshipInstanceDataObject()
+      }
+    },
+    'create.node-instance-2': {
+      group: 'activity1',
+      className: 'bpmn-icon-task blue',
+      title: 'Create nodeInstance',
+      action: {
+        dragstart: createNodeInstanceDataObjectTask(),
+        click: createNodeInstanceDataObjectTask()
+
       }
     },
     'tool-separator3': {
