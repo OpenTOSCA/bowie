@@ -95,6 +95,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
           values: [
             moddle.create('camunda:InputOutput', {
               inputParameters: [
+                moddle.create('camunda:InputParameter', { name: 'State' }),
                 moddle.create('camunda:InputParameter', { name: 'NodeTemplate' }),
               ],
             }),
@@ -108,11 +109,6 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
       businessObject.resource = "deployment://CreateNodeInstance.groovy";
       businessObject.$attrs['qa:ntype'] = "NodeInstance";
 
-      console.log("EXTENSION ELEMENTS");
-      console.log(businessObject.extensionElements);
-      console.log(businessObject.extensionElements.values);
-      console.log(businessObject.extensionElements.values[0].inputParameters);
-      console.log("EXTENSION ELEMENTS");
 
       const shape = elementFactory.createShape({
         type: 'bpmn:ScriptTask',
@@ -133,6 +129,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
           values: [
             moddle.create('camunda:InputOutput', {
               inputParameters: [
+                moddle.create('camunda:InputParameter', { name: 'State' }),
                 moddle.create('camunda:InputParameter', { name: 'RelationshipTemplate' }),
                 moddle.create('camunda:InputParameter', { name: 'SourceURL' }),
                 moddle.create('camunda:InputParameter', { name: 'TargetURL' }),
@@ -238,6 +235,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
           values: [
             moddle.create('camunda:InputOutput', {
               inputParameters: [
+                moddle.create('camunda:InputParameter', { name: 'State' }),
                 moddle.create('camunda:InputParameter', { name: 'InstanceURL' }),
                 moddle.create('camunda:InputParameter', { name: 'NodeTemplate' }),
                 moddle.create('camunda:InputParameter', { name: 'Properties' }),
@@ -366,7 +364,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
           values: [
             moddle.create('camunda:InputOutput', {
               inputParameters: [
-                moddle.create('camunda:InputParameter', { name: 'RelationshipTemplate' }),
+                moddle.create('camunda:InputParameter', { name: 'RelationshipInstanceURL' }),
                 moddle.create('camunda:InputParameter', { name: 'SourceURL' }),
                 moddle.create('camunda:InputParameter', { name: 'TargetURL' }),
               ],

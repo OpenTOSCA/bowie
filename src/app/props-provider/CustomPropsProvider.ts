@@ -1,25 +1,16 @@
 import { EntryFactory, IPropertiesProvider, } from '../bpmn-js/bpmn-js';
 import _camundaModdleDescriptor from "camunda-bpmn-moddle/resources/camunda.json";
-import { $, jQuery } from "jquery";
 import BpmnModdle from 'bpmn-moddle';
-import { Observable, pipe } from 'rxjs/Rx';
 import { HttpService } from '../util/http.service';
-import { ToscaInterface } from '../model/toscaInterface';
-import { AppComponent } from '../app.component';
 import { NodeTemplate } from '../model/nodetemplate';
 import { map } from 'rxjs/internal/operators';
 import { WineryService } from '../services/winery.service';
-import { HttpClient, HttpHandler } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { FindValueSubscriber } from 'rxjs/internal/operators/find';
 import { is } from 'bpmn-js/lib/util/ModelUtil';
-import { isFactory } from '@angular/core/src/render3/interfaces/injector';
-import { temporaryAllocator } from '@angular/compiler/src/render3/view/util';
-
 
 
 /**
- * 
+ * !!! If you want to add new attributes to objects you need to add a customized prefix otherwise the Camunda Engine will throw an error.
  */
 @Injectable()
 export class CustomPropsProvider implements IPropertiesProvider {
@@ -30,6 +21,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
   static interfaces = [{ name: 'none', value: 'none' }];
   static operations = [];
   static template = [{ name: 'none', value: 'none' }];
+  static relationshiptemplate = [{ name: 'none', value: 'none' }];
   static winery2: WineryService;
   static tosca = [];
   static opt = [{ name: 'INITIAL', value: 'INITIAL' }, { name: 'CREATING', value: 'CREATING' }, { name: 'CREATED', value: 'CREATED' }, { name: 'CONFIGURING', value: 'CONFIGURING' },
@@ -85,21 +77,14 @@ export class CustomPropsProvider implements IPropertiesProvider {
       const url = 'nodetypes/' + encodeURIComponent(encodeURIComponent((namespace)))
         + '/' + encodeURIComponent(encodeURIComponent((nodetemplate))) + '/interfaces/';
       let http2 = new XMLHttpRequest();
-      console.log('http://localhost:8080/' + 'winery/' + url);
       http2.open("GET", 'http://localhost:8080/' + 'winery/' + url, true);
       http2.send();
       http2.onreadystatechange = function () {
         if (http2.readyState === XMLHttpRequest.DONE) {
-
-          console.log(http2.responseText);
-          var response = JSON.parse(http2.responseText);
+          let response = JSON.parse(http2.responseText);
           CustomPropsProvider.interfaces = [];
           CustomPropsProvider.tosca = [];
-          console.log('JSON PARSE');
-          console.log(response);
-          // var array = [];
-
-          for (var i = 0; i < response.length; i++) {
+          for (let i = 0; i < response.length; i++) {
             CustomPropsProvider.tosca.push({ name: response[i].name, value: response[i].operation });
             //array.push({
             //    name: response[i].name, value: response[i].name
@@ -111,8 +96,8 @@ export class CustomPropsProvider implements IPropertiesProvider {
             //window['interfaceN'] = array;
           }
           //element.businessObject.$attrs['qa:interface'] = CustomPropsProvider.interfaces;
-          console.log("hier für interfaces checken:");
-          console.log(CustomPropsProvider.tosca);
+          //console.log("hier für interfaces checken:");
+          //console.log(CustomPropsProvider.tosca);
           resolve(CustomPropsProvider.tosca);
         }
 
@@ -123,15 +108,14 @@ export class CustomPropsProvider implements IPropertiesProvider {
   }
 
   public async update2(selectOptions) {
-    console.log(CustomPropsProvider.winery2);
-    var template = await this.loadNodeTemplates(CustomPropsProvider.template);
+    let template = await this.loadNodeTemplates(CustomPropsProvider.template);
   }
 
   public async loadNodeTemplates(options) {
     if (CustomPropsProvider.winery2 != undefined) {
       CustomPropsProvider.winery2.loadNodeTemplates();
-      var httpService = CustomPropsProvider.winery2.httpService;
-      console.log('Service', httpService);
+      let httpService = CustomPropsProvider.winery2.httpService;
+      //console.log('Service', httpService);
       const url = 'servicetemplates/' + this.encode('http://opentosca.org/servicetemplates')
         + '/' + this.encode('MyTinyToDo_Bare_Docker') + '/topologytemplate/';
 
@@ -144,9 +128,6 @@ export class CustomPropsProvider implements IPropertiesProvider {
 
 
   private transferResponse2NodeTemplate(response: any) {
-    console.log("cHECK");
-    console.log(response);
-
     const nodeTemplates: NodeTemplate[] = [];
     for (const key in response.nodeTemplates) {
       if (response.nodeTemplates.hasOwnProperty(key)) {
@@ -209,13 +190,13 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   modelProperty: 'qa:serviceinstanceID',
                   setControlValue: true,
                   selectOptions: function (element, node) {
-                    var serviceInstances = [];
+                    let serviceInstances = [];
                     serviceInstances.push({ name: 'none', value: 'none' });
                     if (element.businessObject.$parent.$type == 'bpmn:Process') {
                       // entspricht der Participant Id, indem ich mich gerade befinde.
-                      var length = element.businessObject.$parent.flowElements.length;
-                      var flowElement = element.businessObject.$parent.flowElements;
-                      for (var i = 0; i < length; i++) {
+                      let length = element.businessObject.$parent.flowElements.length;
+                      let flowElement = element.businessObject.$parent.flowElements;
+                      for (let i = 0; i < length; i++) {
                         if (flowElement[i].$type == 'bpmn:ScriptTask' && flowElement[i].$attrs['qa:ntype'] == 'ServiceTemplateInstance' && flowElement[i].resultVariable != undefined) {
                           serviceInstances.push({ name: flowElement[i].resultVariable, value: flowElement[i].resultVariable });
                         }
@@ -224,15 +205,14 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     }
                   },
                   set: function (element, values, node) {
-                    console.log(values['qa:serviceinstanceID'])
-                    if (values['qa:serviceinstanceID'] != undefined) {
+                    if (values['qa:serviceinstanceID'] != 'none') {
                       element.businessObject.$attrs['qa:serviceinstanceID'] = values['qa:serviceinstanceID'];
                       element.businessObject.extensionElements.values[0].inputParameters[0].value = "${" + values['qa:serviceinstanceID'] + "}";
 
                       element.businessObject.$attrs['qa:CSARID'] = CustomPropsProvider.winery2.serviceTemplateId + '.csar';
                       element.businessObject.extensionElements.values[0].inputParameters[1].value = element.businessObject.$attrs['qa:CSARID'];
 
-                      var namespace = "{http://opentosca.org/servicetemplates}"
+                      let namespace = "{http://opentosca.org/servicetemplates}"
                       element.businessObject.$attrs['qa:servicetemplateID'] = namespace + CustomPropsProvider.winery2.serviceTemplateId;
                       element.businessObject.extensionElements.values[0].inputParameters[2].value = element.businessObject.$attrs['qa:servicetemplateID'];
                       return;
@@ -250,9 +230,6 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   setControlValue: true,
                   modelProperty: 'qa:NodeTemplate',
                   set: function (element, values, node) {
-                    console.log('qa:nodetemplate values:');
-                    console.log(values['qa:NodeTemplate'].split('_')[0]);
-                    console.log(values);
                     if (values['qa:NodeTemplate'] != 'none') {
                       element.businessObject.$attrs['qa:NodeTemplate'] = values['qa:NodeTemplate'];
                       element.businessObject.$attrs['qa:interface'] = [];
@@ -293,8 +270,6 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   selectOptions: function (element, values) {
 
                     if (element.businessObject.$attrs['qa:NodeTemplate'] !== undefined) {
-                      // element.businessObject.$attrs.nodetemplate = values.nodetemplate;
-                      // console.log(window['interfaceN']);
                       console.log("interface wird jetzt gesetzt");
 
                       // falls interfaces leer ist wird hier aufgefuellt
@@ -381,12 +356,12 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     }
 
                     /*
-                      for (var i = 0; i < CustomPropsProvider.tosca.length; i++) {
+                      for (let i = 0; i < CustomPropsProvider.tosca.length; i++) {
                         if (CustomPropsProvider.tosca[i].name == element.businessObject.$attrs['qa:interface']) {
                           CustomPropsProvider.operations = [];
-                          var arr = [];
+                          let arr = [];
                           CustomPropsProvider.operations.push({ name: 'none', value: 'none' });
-                          for (var j = 0; j < CustomPropsProvider.tosca[i].value.length; j++) {
+                          for (let j = 0; j < CustomPropsProvider.tosca[i].value.length; j++) {
                             CustomPropsProvider.operations.push({
                               name: CustomPropsProvider.tosca[i].value[j].name, value:
                                 CustomPropsProvider.tosca[i].value[j].name
@@ -416,8 +391,6 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     // inputtests hier
                     if (is(element.businessObject, 'bpmn:ScriptTask')) {
                       if (element.businessObject.$attrs['qa:ntype'] === "CallNodeOperation") {
-                        console.log(element.businessObject.$attrs)
-                        console.log(element.businessObject.$attrs['qa:ntype'])
                         console.log("inputParams wird jetzt gesetzt");
                         console.log(CustomPropsProvider.options);
                         if (element.businessObject.$attrs['qa:interface'] !== undefined) {
@@ -443,9 +416,9 @@ export class CustomPropsProvider implements IPropertiesProvider {
                           }
                         }
                         element.businessObject.$attrs['qa:inputParameter'] = CustomPropsProvider.options;
-                        var inputparameters = element.businessObject.$attrs['qa:inputParameter'];
+                        let inputparameters = element.businessObject.$attrs['qa:inputParameter'];
                         console.log(inputparameters)
-                        for (var i = 0; i <= inputparameters.length - 1; i++) {
+                        for (let i = 0; i <= inputparameters.length - 1; i++) {
                           let addinput = true;
                           const inputParameter = CustomPropsProvider.moddle.create('camunda:InputParameter', {
                             name: 'Input_' + inputparameters[i].name,
@@ -488,19 +461,19 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     console.log(values['qa:inputParams'].split(','));
 
                     if (values['qa:inputParams'] != undefined) {
-                      var s = values['qa:inputParams'].split(',');
+                      let s = values['qa:inputParams'].split(',');
                       element.businessObject.$attrs['qa:nameInput'] = s[0];
                       element.businessObject.$attrs['qa:typeInput'] = s[1];
                       console.log('TEST');
                       console.log(element.businessObject.$attrs['qa:inputParameter']);
                       if (element.businessObject.$attrs['qa:inputParameter'] != undefined) {
-                        var param = element.businessObject.$attrs['qa:inputParameter'];
-                        var length = param.length;
+                        let param = element.businessObject.$attrs['qa:inputParameter'];
+                        let length = param.length;
 
-                        for (var i = 0; i < length; i++) {
+                        for (let i = 0; i < length; i++) {
                           console.log(param[i].name == element.businessObject.$attrs['qa:nameInput']);
                           if (param[i].name == element.businessObject.$attrs['qa:nameInput']) {
-                            var split = param[i].value.split(',');
+                            let split = param[i].value.split(',');
                             console.log(split);
                             if (split.length == 3) {
                               element.businessObject.$attrs['qa:valueInput'] = split[2];
@@ -540,12 +513,13 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   //description: 'Type of Parameter',
                   label: 'Type of Parameter',
                   selectOptions: function (element, values) {
-                    var types = [ { name: 'VALUE', value: 'VALUE' }, { name: 'String', value: 'String' }, { name: 'DA', value: 'DA' }];
+                    let types = [{ name: 'VALUE', value: 'VALUE' }, { name: 'String', value: 'String' }, { name: 'DA', value: 'DA' }];
                     return types;
                   },
                   set: function (element, values, node) {
                     element.businessObject.$attrs['qa:typeInput'] = values['qa:typeInput'];
                     element.businessObject.$attrs['qa:type2Input'] = values['qa:typeInput'];
+                    element.businessObject.$attrs['qa:dataObject'] = 'none';
                     return;
                   },
                   setControlValue: true,
@@ -572,16 +546,16 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       return true;
                     }
                   },
-                  set: function(element, values, node){
+                  set: function (element, values, node) {
                     element.businessObject.$attrs['qa:deploymentArtifact'] = values['qa:deploymentArtifact'];
-                    var name = element.businessObject.$attrs['qa:inputParams'].split(",")[0];
+                    let name = element.businessObject.$attrs['qa:inputParams'].split(",")[0];
                     for (let o = 0; o < element.businessObject.extensionElements.values[0].inputParameters.length; o++) {
-                      var extensionElement = element.businessObject.extensionElements.values[0].inputParameters[o].name;
+                      let extensionElement = element.businessObject.extensionElements.values[0].inputParameters[o].name;
                       extensionElement = extensionElement.split('Input_')[1];
                       console.log(name);
                       console.log(extensionElement);
                       if (name === extensionElement) {
-                        element.businessObject.extensionElements.values[0].inputParameters[o].value = 'DA!'+ values['qa:deploymentArtifact']
+                        element.businessObject.extensionElements.values[0].inputParameters[o].value = 'DA!' + values['qa:deploymentArtifact']
                       }
                     }
                     return;
@@ -593,15 +567,15 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   label: 'Data Object ID',
                   selectOptions: function (element, values) {
                     //console.log(CustomPropsProvider.template);
-                    var arr = [];
+                    let arr = [];
                     arr.push({ name: 'none', value: 'none' });
-                    var saveDataObject = [];
+                    let saveDataObject = [];
                     if (element.businessObject.$parent.$type == 'bpmn:Process') {
-                      var find = false;
+                      let find = false;
                       // entspricht der Participant Id, indem ich mich gerade befinde.
-                      var length = element.businessObject.$parent.flowElements.length;
-                      var flowElement = element.businessObject.$parent.flowElements;
-                      for (var i = 0; i < length; i++) {
+                      let length = element.businessObject.$parent.flowElements.length;
+                      let flowElement = element.businessObject.$parent.flowElements;
+                      for (let i = 0; i < length; i++) {
                         if (flowElement[i].$type == 'bpmn:DataObjectReference') {
                           arr.push({ name: flowElement[i].id, value: flowElement[i].id });
                           saveDataObject.push({ name: flowElement[i], value: flowElement[i] });
@@ -615,8 +589,8 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     if (values['qa:dataObject'] != 'none') {
                       element.businessObject.$attrs['qa:dataObject'] = values['qa:dataObject'];
                       if (element.businessObject.$attrs['qa:dataObjectV'] != undefined) {
-                        var dataObject = element.businessObject.$attrs['qa:dataObjectV'];
-                        for (var i = 0; i < dataObject.length; i++) {
+                        let dataObject = element.businessObject.$attrs['qa:dataObjectV'];
+                        for (let i = 0; i < dataObject.length; i++) {
                           if (dataObject[i].name.id == element.businessObject.$attrs['qa:dataObject']) {
                             element.businessObject.$attrs['qa:dataObject0'] = dataObject[i].value;
                           }
@@ -651,34 +625,35 @@ export class CustomPropsProvider implements IPropertiesProvider {
                         console.log(selectedDataObject);
                         if (dataObject == selectedDataObject) {
                           dataObject = dataObjectsList[i].name;
-                          console.log(dataObject.$attrs['qa:propertiesList'])
+                          console.log(dataObject.$attrs)
                           if (dataObject.$attrs['qa:propertiesList'] != undefined) {
-                            let properties = [{ name: 'none', value: 'none' }];
+                            let properties = [{ name: '', value: '' }];
                             console.log(dataObject.$attrs['qa:propertiesList']);
-                            for (let j = 0; j < dataObject.$attrs['qa:propertiesList'].length; j++) {
-                              let property = dataObject.$attrs['qa:propertiesList'][j].split('#')[0];
+                            for (let j = 0; j <= dataObject.$attrs['qa:propertiesList']; j++) {
+                              let property = dataObject.$attrs['qa:prop' + j];
+                              // Format: propery#propertyValue
+                              property = property.split('#')[0];
                               properties.push({ name: property, value: property });
                             }
                             return properties;
                           }
                         }
                       }
-                      console.log(element.businessObject.$attrs['qa:dataObjectV'])
                       return;
                     }
                   },
                   set: function (element, values) {
                     if (values['qa:dataObjectProperties'] != 'none') {
                       element.businessObject.$attrs['qa:dataObjectProperties'] = values['qa:dataObjectProperties'];
-                      var name = element.businessObject.$attrs['qa:inputParams'].split(",")[0];
+                      let name = element.businessObject.$attrs['qa:inputParams'].split(",")[0];
                       for (let o = 0; o < element.businessObject.extensionElements.values[0].inputParameters.length; o++) {
-                        var extensionElement = element.businessObject.extensionElements.values[0].inputParameters[o].name;
+                        let extensionElement = element.businessObject.extensionElements.values[0].inputParameters[o].name;
                         extensionElement = extensionElement.split('Input_')[1];
                         console.log(name);
                         console.log(extensionElement);
                         if (name === extensionElement) {
-                          var dataObject = element.businessObject.$attrs['qa:dataObject'];
-                          element.businessObject.extensionElements.values[0].inputParameters[o].value = 'VALUE!'+ dataObject + '#'+ values['qa:dataObjectProperties']
+                          let dataObject = element.businessObject.$attrs['qa:dataObject'];
+                          element.businessObject.extensionElements.values[0].inputParameters[o].value = 'VALUE!' + dataObject + '#' + values['qa:dataObjectProperties']
                         }
                       }
                       element.businessObject.$attrs['qa:dataObjectProperties'] = values['qa:dataObjectProperties'];
@@ -709,13 +684,13 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       return true;
                     }
                   },
-                  set: function(element, values, node){
-                    var name = element.businessObject.$attrs['qa:inputParams'].split(",")[0];
+                  set: function (element, values, node) {
+                    let name = element.businessObject.$attrs['qa:inputParams'].split(",")[0];
                     for (let o = 0; o < element.businessObject.extensionElements.values[0].inputParameters.length; o++) {
-                      var extensionElement = element.businessObject.extensionElements.values[0].inputParameters[o].name;
+                      let extensionElement = element.businessObject.extensionElements.values[0].inputParameters[o].name;
                       extensionElement = extensionElement.split('Input_')[1];
                       if (name === extensionElement) {
-                        element.businessObject.extensionElements.values[0].inputParameters[o].value = 'String!'+values['qa:valueInput']
+                        element.businessObject.extensionElements.values[0].inputParameters[o].value = 'String!' + values['qa:valueInput']
                       }
                     }
                     element.businessObject.$attrs['qa:valueInput'] = values['qa:valueInput'];
@@ -729,20 +704,20 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   selectOptions: function (element, values) {
                     /*
                   if (element.businessObject.$attrs['qa:interface'] != undefined) {
-                    for (var i = 0; i < CustomPropsProvider.tosca.length; i++) {
+                    for (let i = 0; i < CustomPropsProvider.tosca.length; i++) {
                       if (CustomPropsProvider.tosca[i].name == element.businessObject.$attrs['qa:interface']) {
                         CustomPropsProvider.outputParam = [];
-                        var arr = [];
+                        let arr = [];
                         if (element.businessObject.$attrs['qa:operation'] != undefined) {
-                          for (var j = 0; j < CustomPropsProvider.tosca[i].value.length; j++) {
+                          for (let j = 0; j < CustomPropsProvider.tosca[i].value.length; j++) {
                             if (element.businessObject.$attrs['qa:operation'] != 'none') {
                               if (CustomPropsProvider.tosca[i].value[j].name == element.businessObject.$attrs['qa:operation']) {
                                 console.log('OUTPUT PARAMETER')
                                 if (CustomPropsProvider.tosca[i].value[j].outputParameters != undefined) {
-                                  var parameter = CustomPropsProvider.tosca[i].value[j].outputParameters.outputParameter;
+                                  let parameter = CustomPropsProvider.tosca[i].value[j].outputParameters.outputParameter;
                                   if (parameter != undefined) {
-                                    var length = CustomPropsProvider.tosca[i].value[j].outputParameters.outputParameter.length;
-                                    for (var k = 0; k < length; k++) {
+                                    let length = CustomPropsProvider.tosca[i].value[j].outputParameters.outputParameter.length;
+                                    for (let k = 0; k < length; k++) {
                                       CustomPropsProvider.outputParam.push({
                                         name: parameter[k].name, value: parameter[k].name + ',' + parameter[k].type
                                       });
@@ -814,15 +789,15 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     //console.log(CustomPropsProvider.template);
                     console.log(element);
                     console.log('DATAOBJECT');
-                    var arr = [];
+                    let arr = [];
                     arr.push({ name: 'none', value: 'none' });
-                    var saveDataObject = [];
+                    let saveDataObject = [];
                     if (element.businessObject.$parent.$type == 'bpmn:Process') {
-                      var find = false;
+                      let find = false;
                       // entspricht der Participant Id, indem ich mich gerade befinde.
-                      var length = element.businessObject.$parent.flowElements.length;
-                      var flowElement = element.businessObject.$parent.flowElements;
-                      for (var i = 0; i < length; i++) {
+                      let length = element.businessObject.$parent.flowElements.length;
+                      let flowElement = element.businessObject.$parent.flowElements;
+                      for (let i = 0; i < length; i++) {
                         if (flowElement[i].$type == 'bpmn:DataObjectReference') {
                           arr.push({ name: flowElement[i].id, value: flowElement[i].id });
                           console.log(flowElement[i]);
@@ -842,9 +817,9 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       if (element.businessObject.$attrs.dataObjectV != undefined) {
 
                         console.log("heir ist nicht non")
-                        var dataObject = element.businessObject.$attrs.dataObjectV;
+                        let dataObject = element.businessObject.$attrs.dataObjectV;
                         console.log(element.businessObject.$attrs.dataObjectV);
-                        for (var i = 0; i < dataObject.length; i++) {
+                        for (let i = 0; i < dataObject.length; i++) {
                           console.log(dataObject[i].name);
                           console.log(element.businessObject.$attrs.dataObject);
                           if (dataObject[i].name.id == element.businessObject.$attrs.dataObject) {
@@ -954,9 +929,9 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   label: 'Input Parameter',
                   selectOptions: function (element, values) {
                     if (element.businessObject.$attrs.dataObject0 != undefined) {
-                      var arr = [];
+                      let arr = [];
                       if (element.businessObject.$attrs.dataObject0.$attrs.inputParameter != undefined) {
-                        for (var i = 0; i < element.businessObject.$attrs.dataObject0.$attrs.inputParameter.length; i++) {
+                        for (let i = 0; i < element.businessObject.$attrs.dataObject0.$attrs.inputParameter.length; i++) {
                           arr.push({
                             name: element.businessObject.$attrs.dataObject0.$attrs.inputParameter[i].value,
                             value: element.businessObject.$attrs.dataObject0.$attrs.inputParameter[i].value
@@ -964,12 +939,12 @@ export class CustomPropsProvider implements IPropertiesProvider {
                         }
 
                         if (element.businessObject.$attrs.ntype === "CallNodeOperation") {
-                          var names = [];
-                          var valuesInput = [];
-                          var param = element.businessObject.$attrs.dataObject0.$attrs.inputParameter;
-                          for (var i = 0; i < element.businessObject.$attrs.dataObject0.$attrs.inputParameter.length; i++) {
+                          let names = [];
+                          let valuesInput = [];
+                          let param = element.businessObject.$attrs.dataObject0.$attrs.inputParameter;
+                          for (let i = 0; i < element.businessObject.$attrs.dataObject0.$attrs.inputParameter.length; i++) {
 
-                            var split = param[i].value.split(',');
+                            let split = param[i].value.split(',');
                             if (split[0] != 'none') {
                               names.push(split[0]);
                               if (split[2] != undefined) {
@@ -1027,13 +1002,13 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   validate: function (element, values) {
                     console.log('Checkbox');
                     console.log(element);
-                    var check = values.saveValueCheckbox;
+                    let check = values.saveValueCheckbox;
                     console.log('VALUE OF INPUT PARAM');
                     console.log(values);
                     if (element.businessObject.$attrs.valueInput != undefined && check) {
                       if (element.businessObject.$attrs.inputParameter != undefined) {
-                        var length = element.businessObject.$attrs.inputParameter.length;
-                        for (var i = 0; i < length; i++) {
+                        let length = element.businessObject.$attrs.inputParameter.length;
+                        for (let i = 0; i < length; i++) {
 
                           if (element.businessObject.$attrs.inputParameter[i].name == element.businessObject.$attrs.nameInput) {
                             element.businessObject.$attrs.inputParameter[i].value = element.businessObject.$attrs.inputParameter[i].name + ',' +
@@ -1052,20 +1027,20 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   label: 'Output Parameter',
                   selectOptions: function (element, values) {
                     if (element.businessObject.$attrs.interface != undefined) {
-                      for (var i = 0; i < CustomPropsProvider.tosca.length; i++) {
+                      for (let i = 0; i < CustomPropsProvider.tosca.length; i++) {
                         if (CustomPropsProvider.tosca[i].name == element.businessObject.$attrs.interface) {
                           CustomPropsProvider.outputParam = [];
-                          var arr = [];
+                          let arr = [];
                           if (element.businessObject.$attrs.operation != undefined) {
-                            for (var j = 0; j < CustomPropsProvider.tosca[i].value.length; j++) {
+                            for (let j = 0; j < CustomPropsProvider.tosca[i].value.length; j++) {
                               if (element.businessObject.$attrs.operation != 'none') {
                                 if (CustomPropsProvider.tosca[i].value[j].name == element.businessObject.$attrs.operation) {
                                   console.log('OUTPUT PARAMETER')
                                   if (CustomPropsProvider.tosca[i].value[j].outputParameters != undefined) {
-                                    var parameter = CustomPropsProvider.tosca[i].value[j].outputParameters.outputParameter;
+                                    let parameter = CustomPropsProvider.tosca[i].value[j].outputParameters.outputParameter;
                                     if (parameter != undefined) {
-                                      var length = CustomPropsProvider.tosca[i].value[j].outputParameters.outputParameter.length;
-                                      for (var k = 0; k < length; k++) {
+                                      let length = CustomPropsProvider.tosca[i].value[j].outputParameters.outputParameter.length;
+                                      for (let k = 0; k < length; k++) {
                                         CustomPropsProvider.outputParam.push({
                                           name: parameter[k].name, value: parameter[k].name + ',' + parameter[k].type
                                         });
@@ -1105,37 +1080,47 @@ export class CustomPropsProvider implements IPropertiesProvider {
           groups: [
             {
               id: 'opProp',
-              label: this.translate('Data Object Properties'),
+              label: this.translate('Create NodeTemplateInstance Properties'),
               entries: [
+                EntryFactory.selectBox({
+                  id: 'State',
+                  //description: 'State',
+                  label: 'State',
+                  selectOptions: function (element, values) {
+                    let opt = [{name: '', value: '' },{name: 'INITIAL', value: 'INITIAL' }, { name: 'CREATING', value: 'CREATING' }, { name: 'CREATED', value: 'CREATED' }, { name: 'CONFIGURING', value: 'CONFIGURING' },
+                    { name: 'STARTING', value: 'STARTING' }, { name: 'STARTED', value: 'STARTED' }, { name: 'STOPPING', value: 'STOPPING' }, { name: 'STOPPED', value: 'STOPPED' }, { name: 'DELETING', value: 'DELETING' },
+                    { name: 'DELETED', value: 'DELETED' }, { name: 'ERROR', value: 'ERROR' }, { name: 'MIGRATED', value: 'MIGRATED' }];
+                    if (values.selectedOptions.length > 0 && (values.selectedOptions[0] != undefined)) {
+                      element.businessObject.extensionElements.values[0].inputParameters[0].value = values.selectedOptions[0].value;
+                    }
+                    return opt;
+
+                  },
+                  setControlValue: true,
+                  modelProperty: 'qa:State'
+                }),
                 EntryFactory.selectBox({
                   id: 'NodeTemplate',
                   //description: 'NodeTemplate',
                   label: 'NodeTemplate',
                   selectOptions: function (element, values) {
-                    //console.log(CustomPropsProvider.template);
-                    return CustomPropsProvider.template;
+                    let arr =[];
+                    for(let i=0; i<CustomPropsProvider.template.length; i++){
+                      let template = CustomPropsProvider.template[i].name;
+                      template = template.split('_')[0];
+                      arr.push({name: template, value: template});
+                    }
+                    return arr;
                   },
                   setControlValue: true,
                   modelProperty: 'qa:NodeTemplate',
                   set: function (element, values, node) {
-                    console.log("das ausgewählte Element ist");
-                    if (values['qa:NodeTemplate'] != 'none') {
+                    if (values['qa:NodeTemplate'] != '') {
                       element.businessObject.$attrs['qa:NodeTemplate'] = values['qa:NodeTemplate'];
-                      if (values['qa:NodeTemplate'] != undefined) {
                         element.businessObject.$attrs['qa:NodeTemplate'] = values['qa:NodeTemplate'];
-
-                        //inputtests
-                        if (is(element.businessObject, 'bpmn:ScriptTask')) {
-                          if (element.businessObject.$attrs['qa:ntype'] === "CallNodeOperation") {
-                            element.businessObject.extensionElements.values[0].inputParameters[3].value = values['qa:NodeTemplate'];
-                          } else if (element.businessObject.$attrs['qa:ntype'] === "NodeInstance") {
-                            element.businessObject.extensionElements.values[0].inputParameters[0].value = values['qa:NodeTemplate'];
-                          }
-                        }
-                        //
+                        element.businessObject.extensionElements.values[0].inputParameters[1].value = values['qa:NodeTemplate'];
                         return;
                       }
-                    }
                     return;
                   }
                 })]
@@ -1157,15 +1142,15 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   label: 'Data Object ID',
                   selectOptions: function (element, values) {
                     //console.log(CustomPropsProvider.template);
-                    var arr = [];
+                    let arr = [];
                     arr.push({ name: 'none', value: 'none' });
-                    var saveDataObject = [];
+                    let saveDataObject = [];
                     if (element.businessObject.$parent.$type == 'bpmn:Process') {
-                      var find = false;
+                      let find = false;
                       // entspricht der Participant Id, indem ich mich gerade befinde.
-                      var length = element.businessObject.$parent.flowElements.length;
-                      var flowElement = element.businessObject.$parent.flowElements;
-                      for (var i = 0; i < length; i++) {
+                      let length = element.businessObject.$parent.flowElements.length;
+                      let flowElement = element.businessObject.$parent.flowElements;
+                      for (let i = 0; i < length; i++) {
                         if (flowElement[i].$type == 'bpmn:DataObjectReference') {
                           arr.push({ name: flowElement[i].id, value: flowElement[i].id });
                           saveDataObject.push({ name: flowElement[i], value: flowElement[i] });
@@ -1179,8 +1164,8 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     if (values['qa:dataObject'] != 'none') {
                       element.businessObject.$attrs['qa:dataObject'] = values['qa:dataObject'];
                       if (element.businessObject.$attrs['qa:dataObjectV'] != undefined) {
-                        var dataObject = element.businessObject.$attrs['qa:dataObjectV'];
-                        for (var i = 0; i < dataObject.length; i++) {
+                        let dataObject = element.businessObject.$attrs['qa:dataObjectV'];
+                        for (let i = 0; i < dataObject.length; i++) {
                           if (dataObject[i].name.id == element.businessObject.$attrs['qa:dataObject']) {
                             element.businessObject.$attrs['qa:dataObject0'] = dataObject[i].value;
                           }
@@ -1252,8 +1237,27 @@ export class CustomPropsProvider implements IPropertiesProvider {
           groups: [
             {
               id: 'relationshipInstanceProp',
-              label: this.translate('Relationship Data Object Properties'),
+              label: this.translate('Create RelationshipTemplateInstance Properties'),
               entries: [
+                EntryFactory.selectBox({
+                  id: 'State',
+                  //description: 'State',
+                  label: 'State',
+                  selectOptions: function (element, values) {
+                    let opt = [{name: '', value: '' },{name: 'INITIAL', value: 'INITIAL' }, { name: 'CREATING', value: 'CREATING' }, { name: 'CREATED', value: 'CREATED' }, { name: 'CONFIGURING', value: 'CONFIGURING' },
+                    { name: 'STARTING', value: 'STARTING' }, { name: 'STARTED', value: 'STARTED' }, { name: 'STOPPING', value: 'STOPPING' }, { name: 'STOPPED', value: 'STOPPED' }, { name: 'DELETING', value: 'DELETING' },
+                    { name: 'DELETED', value: 'DELETED' }, { name: 'ERROR', value: 'ERROR' }, { name: 'MIGRATED', value: 'MIGRATED' }];
+                    if (values.selectedOptions.length > 0 && (values.selectedOptions[0] != undefined)) {
+                      element.businessObject.extensionElements.values[0].inputParameters[0].value = values.selectedOptions[0].value;
+                    }
+                    return opt;
+
+                  },
+                  setControlValue: true,
+                  modelProperty: 'qa:State'
+                }),
+                /**
+                 * 
                 EntryFactory.selectBox({
                   id: 'dataObject',
                   //description: 'Data Object ID',
@@ -1262,15 +1266,15 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     //console.log(CustomPropsProvider.template);
                     console.log(element);
                     console.log('DATAOBJECT');
-                    var arr = [];
+                    let arr = [];
                     arr.push({ name: 'none', value: 'none' });
-                    var saveDataObject = [];
+                    let saveDataObject = [];
                     if (element.businessObject.$parent.$type == 'bpmn:Process') {
-                      var find = false;
+                      let find = false;
                       // entspricht der Participant Id, indem ich mich gerade befinde.
-                      var length = element.businessObject.$parent.flowElements.length;
-                      var flowElement = element.businessObject.$parent.flowElements;
-                      for (var i = 0; i < length; i++) {
+                      let length = element.businessObject.$parent.flowElements.length;
+                      let flowElement = element.businessObject.$parent.flowElements;
+                      for (let i = 0; i < length; i++) {
                         if (flowElement[i].$type == 'bpmn:DataObjectReference') {
                           arr.push({ name: flowElement[i].id, value: flowElement[i].id });
                           console.log(flowElement[i]);
@@ -1290,9 +1294,9 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       if (element.businessObject.$attrs['qa:dataObjectV'] != undefined) {
 
                         console.log("heir ist nicht non")
-                        var dataObject = element.businessObject.$attrs['qa:dataObjectV'];
+                        let dataObject = element.businessObject.$attrs['qa:dataObjectV'];
                         console.log(element.businessObject.$attrs['qa:dataObjectV']);
-                        for (var i = 0; i < dataObject.length; i++) {
+                        for (let i = 0; i < dataObject.length; i++) {
                           console.log(dataObject[i].name);
                           console.log(element.businessObject.$attrs['qa:dataObject']);
                           if (dataObject[i].name.id == element.businessObject.$attrs['qa:dataObject']) {
@@ -1309,25 +1313,103 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   setControlValue: true,
                   modelProperty: 'qa:dataObject',
                 }),
+                
                 EntryFactory.textBox({
                   id: 'RelationshipInstanceID',
                   //description: 'RelationshipInstance ID',
                   label: 'Relationship Instance ID',
                   modelProperty: 'qa:relationshipinstanceID'
                 }),
-                EntryFactory.textBox({
+                 */
+                EntryFactory.selectBox({
+                  id: 'RelationshipTemplate',
+                  //description: 'State',
+                  label: 'RelationshipTemplate',
+                  selectOptions: function (element, values) {
+                    return CustomPropsProvider.relationshiptemplate;
+                  },
+                  set: function(element, values, node){
+                    if (values['qa:RelationshipTemplate'] != 'none') {
+                      element.businessObject.$attrs['qa:RelationshipTemplate'] = values['qa:RelationshipTemplate'];
+                      element.businessObject.extensionElements.values[0].inputParameters[1].value = values['qa:RelationshipTemplate'];
+                      return;
+                    }
+                    return;
+                  },
+                  setControlValue: true,
+                  modelProperty: 'qa:RelationshipTemplate'
+                }),
+                EntryFactory.selectBox({
                   id: 'SourceURL',
-                  //description: 'SourceURL',
+                  //description: 'State',
                   label: 'SourceURL',
+                  selectOptions: function (element, values) {
+                    if (element.businessObject.$parent.$type == 'bpmn:Process') {
+                      let find = false;
+                      // entspricht der Participant Id, indem ich mich gerade befinde.
+                      let length = element.businessObject.$parent.flowElements.length;
+                      let flowElement = element.businessObject.$parent.flowElements;
+                      console.log("FLOWELEMENT");
+                      console.log(flowElement)
+                      let arr = [];
+                      arr.push({ name: 'none', value: 'none' });
+                      for (let i = 0; i < length; i++) {
+                        console.log(flowElement[i].ntype)
+                        if (flowElement[i].$type == 'bpmn:ScriptTask' && flowElement[i].$attrs['qa:ntype'] == 'NodeInstance' && flowElement[i].resultVariable != undefined) {
+                          arr.push({ name: flowElement[i].resultVariable, value: flowElement[i].resultVariable });
+                        }
+                      }
+
+                      return arr;
+                    }
+                  },
+                  set: function(element, values, node){
+                    if (values['qa:SourceURL'] != 'none') {
+                      element.businessObject.$attrs['qa:SourceURL'] = values['qa:SourceURL'];
+                      element.businessObject.extensionElements.values[0].inputParameters[2].value = values['qa:SourceURL'];
+                      return;
+                    }
+                    element.businessObject.extensionElements.values[0].inputParameters[2].value = '';
+                    return;
+                  },
+                  setControlValue: true,
                   modelProperty: 'qa:SourceURL'
                 }),
-                EntryFactory.textBox({
+                EntryFactory.selectBox({
                   id: 'TargetURL',
-                  //description: 'TargetURL',
+                  //description: 'State',
                   label: 'TargetURL',
+                  selectOptions: function (element, values) {
+                    if (element.businessObject.$parent.$type == 'bpmn:Process') {
+                      let find = false;
+                      // entspricht der Participant Id, indem ich mich gerade befinde.
+                      let length = element.businessObject.$parent.flowElements.length;
+                      let flowElement = element.businessObject.$parent.flowElements;
+                      console.log("FLOWELEMENT");
+                      console.log(flowElement)
+                      let arr = [];
+                      arr.push({ name: 'none', value: 'none'});
+                      for (let i = 0; i < length; i++) {
+                        console.log(flowElement[i].ntype)
+                        if (flowElement[i].$type == 'bpmn:ScriptTask' && flowElement[i].$attrs['qa:ntype'] == 'NodeInstance' && flowElement[i].resultVariable != undefined) {
+                          arr.push({ name: flowElement[i].resultVariable, value: flowElement[i].resultVariable });
+                        }
+                      }
+                      return arr;
+                    }
+                  },
+                  set: function(element, values, node){
+                    if (values['qa:TargetURL'] != 'none') {
+                      element.businessObject.$attrs['qa:TargetURL'] = values['qa:TargetURL'];
+                      element.businessObject.extensionElements.values[0].inputParameters[3].value = values['qa:TargetURL'];
+                      return;
+                    }
+                    element.businessObject.extensionElements.values[0].inputParameters[3].value = '';
+                    return;
+                  },
+                  setControlValue: true,
                   modelProperty: 'qa:TargetURL'
-                }),
-
+                })
               ]
             }]
         });
@@ -1348,15 +1430,15 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     label: 'Instance ID',
                     selectOptions: function (element, values) {
                       if (element.businessObject.$parent.$type == 'bpmn:Process') {
-                        var find = false;
+                        let find = false;
                         // entspricht der Participant Id, indem ich mich gerade befinde.
-                        var length = element.businessObject.$parent.flowElements.length;
-                        var flowElement = element.businessObject.$parent.flowElements;
+                        let length = element.businessObject.$parent.flowElements.length;
+                        let flowElement = element.businessObject.$parent.flowElements;
                         console.log("FLOWELEMENT");
                         console.log(flowElement)
-                        var arr = [];
+                        let arr = [];
                         arr.push({ name: undefined, value: undefined });
-                        for (var i = 0; i < length; i++) {
+                        for (let i = 0; i < length; i++) {
                           console.log(flowElement[i].ntype)
                           if (flowElement[i].$type == 'bpmn:ScriptTask' && flowElement[i].$attrs['qa:ntype'] == 'NodeInstance' && flowElement[i].resultVariable != undefined) {
                             arr.push({ name: flowElement[i].resultVariable, value: flowElement[i].resultVariable });
@@ -1391,13 +1473,13 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       if (values['qa:NodeTemplate'] != 'none') {
                         element.businessObject.$attrs['qa:NodeTemplate'] = values['qa:NodeTemplate'];
                         for (let i = 0; i < CustomPropsProvider.properties.length; i++) {
-                          var nodetemplate = element.businessObject.$attrs['qa:NodeTemplate']
+                          let nodetemplate = element.businessObject.$attrs['qa:NodeTemplate']
                           if (CustomPropsProvider.properties[i].id == nodetemplate) {
-                            var options = [{ name: 'none', value: 'none' }];
+                            let options = [{ name: 'none', value: 'none' }];
                             let properties = CustomPropsProvider.properties[i].properties.kvproperties;
                             properties = JSON.stringify(properties).split(",");
                             console.log(properties)
-                            let propertiesList = [];
+                            let propertiesList = 0;
                             for (let j = 0; j < properties.length; j++) {
                               console.log(j)
                               let property = properties[j].split(':')[0].replace("{", "");
@@ -1405,7 +1487,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                               if (property.startsWith("\"") && property.endsWith("\"")) {
                                 property = property.substring(1, property.length - 1);
                                 let addinput = true;
-                                var propertyValue = properties[j].substr(properties[j].indexOf(':') + 1).replace("}", "");
+                                let propertyValue = properties[j].substr(properties[j].indexOf(':') + 1).replace("}", "");
                                 console.log(propertyValue);
                                 if (propertyValue.startsWith("\"") && propertyValue.endsWith("\"")) {
                                   propertyValue = propertyValue.substring(1, propertyValue.length - 1);
@@ -1420,7 +1502,10 @@ export class CustomPropsProvider implements IPropertiesProvider {
                                     }
                                   }
                                   if (addinput) {
-                                    propertiesList.push(property + '#' + propertyValue);
+                                    // necessary because we cannot save arrays correct
+                                    element.businessObject.$attrs['qa:prop' + j] = property + '#' + propertyValue;
+                                    console.log(element.businessObject.$attrs['qa:prop' + i]);
+
                                     element.businessObject.extensionElements.values[0].inputParameters.push(inputParameter);
                                   } else {
                                     addinput = true;
@@ -1428,7 +1513,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                                 }
                               }
 
-                            } element.businessObject.$attrs['qa:propertiesList'] = propertiesList;
+                            } element.businessObject.$attrs['qa:propertiesList'] = properties.length - 1;
 
                           }
                         }
@@ -1447,13 +1532,15 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       //console.log(CustomPropsProvider.template);
                       //return CustomPropsProvider.properties;
                       console.log(CustomPropsProvider.properties);
+                      let options = [{ name: 'none', value: 'none' }];
                       for (let i = 0; i < CustomPropsProvider.properties.length; i++) {
-                        var nodetemplate = element.businessObject.$attrs['qa:NodeTemplate']
+                        let nodetemplate = element.businessObject.$attrs['qa:NodeTemplate']
                         if (CustomPropsProvider.properties[i].id == nodetemplate) {
-                          var options = [{ name: 'none', value: 'none' }];
+
                           let properties = CustomPropsProvider.properties[i].properties.kvproperties;
                           properties = JSON.stringify(properties).split(",");
-
+                          console.log("PROPERTIES");
+                          console.log()
                           for (let j = 0; j < properties.length; j++) {
                             let property = properties[j].split(':')[0].replace("{", "");
                             if (property.startsWith("\"") && property.endsWith("\"")) {
@@ -1498,12 +1585,12 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     get: function (element, values) {
                       console.log(CustomPropsProvider.properties);
 
-                      var propertyName = element.businessObject.$attrs['qa:Properties'];
+                      let propertyName = element.businessObject.$attrs['qa:Properties'];
 
                       for (let i = 0; i < CustomPropsProvider.properties.length; i++) {
-                        var nodetemplate = element.businessObject.$attrs['qa:NodeTemplate']
+                        let nodetemplate = element.businessObject.$attrs['qa:NodeTemplate']
                         if (CustomPropsProvider.properties[i].id == nodetemplate) {
-                          var options = [{ name: 'none', value: 'none' }];
+                          let options = [{ name: 'none', value: 'none' }];
                           let properties = CustomPropsProvider.properties[i].properties.kvproperties;
                           properties = JSON.stringify(properties).split(",");
                           console.log(properties)
@@ -1514,7 +1601,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                               console.log("GEHT DAS")
                               property = property.substring(1, property.length - 1);
                               if (property == propertyName) {
-                                var propertyValue = properties[j].substr(properties[j].indexOf(':') + 1);;
+                                let propertyValue = properties[j].substr(properties[j].indexOf(':') + 1);;
                                 console.log("VAlue");
                                 console.log(propertyValue)
                                 if (propertyValue.startsWith("\"") && propertyValue.endsWith("\"")) {
@@ -1556,15 +1643,15 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     label: 'Instance ID',
                     selectOptions: function (element, values) {
                       if (element.businessObject.$parent.$type == 'bpmn:Process') {
-                        var find = false;
+                        let find = false;
                         // entspricht der Participant Id, indem ich mich gerade befinde.
-                        var length = element.businessObject.$parent.flowElements.length;
-                        var flowElement = element.businessObject.$parent.flowElements;
+                        let length = element.businessObject.$parent.flowElements.length;
+                        let flowElement = element.businessObject.$parent.flowElements;
                         console.log("FLOWELEMENT");
                         console.log(flowElement)
-                        var arr = [];
+                        let arr = [];
                         arr.push({ name: undefined, value: undefined });
-                        for (var i = 0; i < length; i++) {
+                        for (let i = 0; i < length; i++) {
                           console.log(flowElement[i].ntype)
                           if (flowElement[i].$type == 'bpmn:ScriptTask' && flowElement[i].$attrs['qa:ntype'] == 'NodeInstance' && flowElement[i].resultVariable != undefined) {
                             arr.push({ name: flowElement[i].resultVariable, value: flowElement[i].resultVariable });
@@ -1599,13 +1686,13 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       if (values['qa:NodeTemplate'] != 'none') {
                         element.businessObject.$attrs['qa:NodeTemplate'] = values['qa:NodeTemplate'];
                         for (let i = 0; i < CustomPropsProvider.properties.length; i++) {
-                          var nodetemplate = element.businessObject.$attrs['qa:NodeTemplate']
+                          let nodetemplate = element.businessObject.$attrs['qa:NodeTemplate']
                           if (CustomPropsProvider.properties[i].id == nodetemplate) {
-                            var options = [{ name: 'none', value: 'none' }];
+                            let options = [{ name: 'none', value: 'none' }];
                             let properties = CustomPropsProvider.properties[i].properties.kvproperties;
                             properties = JSON.stringify(properties).split(",");
                             console.log(properties)
-                            let propertiesList = [];
+                            let propertiesList = 0;
                             for (let j = 0; j < properties.length; j++) {
                               console.log(j)
                               let property = properties[j].split(':')[0].replace("{", "");
@@ -1613,7 +1700,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                               if (property.startsWith("\"") && property.endsWith("\"")) {
                                 property = property.substring(1, property.length - 1);
                                 let addinput = true;
-                                var propertyValue = properties[j].substr(properties[j].indexOf(':') + 1).replace("}", "");
+                                let propertyValue = properties[j].substr(properties[j].indexOf(':') + 1).replace("}", "");
                                 console.log(propertyValue);
                                 if (propertyValue.startsWith("\"") && propertyValue.endsWith("\"")) {
                                   propertyValue = propertyValue.substring(1, propertyValue.length - 1);
@@ -1628,7 +1715,6 @@ export class CustomPropsProvider implements IPropertiesProvider {
                                     }
                                   }
                                   if (addinput) {
-                                    propertiesList.push(property + '#' + propertyValue);
                                     element.businessObject.extensionElements.values[0].inputParameters.push(inputParameter);
                                   } else {
                                     addinput = true;
@@ -1636,7 +1722,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                                 }
                               }
 
-                            } element.businessObject.$attrs['qa:propertiesList'] = propertiesList;
+                            } element.businessObject.$attrs['qa:propertiesList'] = properties.length - 1;
 
                           }
                         }
@@ -1656,9 +1742,9 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       //return CustomPropsProvider.properties;
                       console.log(CustomPropsProvider.properties);
                       for (let i = 0; i < CustomPropsProvider.properties.length; i++) {
-                        var nodetemplate = element.businessObject.$attrs['qa:NodeTemplate']
+                        let nodetemplate = element.businessObject.$attrs['qa:NodeTemplate']
                         if (CustomPropsProvider.properties[i].id == nodetemplate) {
-                          var options = [{ name: 'none', value: 'none' }];
+                          let options = [{ name: 'none', value: 'none' }];
                           let properties = CustomPropsProvider.properties[i].properties.kvproperties;
                           properties = JSON.stringify(properties).split(",");
 
@@ -1673,7 +1759,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                           //options.push({name: , value: });
                         }
                       }
-                      return options;
+                      // return options;
                     },
                     setControlValue: true,
                     modelProperty: 'qa:Properties',
@@ -1706,12 +1792,12 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     get: function (element, values) {
                       console.log(CustomPropsProvider.properties);
 
-                      var propertyName = element.businessObject.$attrs['qa:Properties'];
+                      let propertyName = element.businessObject.$attrs['qa:Properties'];
 
                       for (let i = 0; i < CustomPropsProvider.properties.length; i++) {
-                        var nodetemplate = element.businessObject.$attrs['qa:NodeTemplate']
+                        let nodetemplate = element.businessObject.$attrs['qa:NodeTemplate']
                         if (CustomPropsProvider.properties[i].id == nodetemplate) {
-                          var options = [{ name: 'none', value: 'none' }];
+                          let options = [{ name: 'none', value: 'none' }];
                           let properties = CustomPropsProvider.properties[i].properties.kvproperties;
                           properties = JSON.stringify(properties).split(",");
                           console.log(properties)
@@ -1722,7 +1808,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                               console.log("GEHT DAS")
                               property = property.substring(1, property.length - 1);
                               if (property == propertyName) {
-                                var propertyValue = properties[j].substr(properties[j].indexOf(':') + 1);;
+                                let propertyValue = properties[j].substr(properties[j].indexOf(':') + 1);;
                                 console.log("VAlue");
                                 console.log(propertyValue)
                                 if (propertyValue.startsWith("\"") && propertyValue.endsWith("\"")) {
@@ -1808,24 +1894,112 @@ export class CustomPropsProvider implements IPropertiesProvider {
               label: this.translate('Relationship Data Object Properties'),
               entries: [
                 EntryFactory.selectBox({
-                  id: 'RelationshipInstanceID',
-                  //description: 'RelationshipInstance ID',
-                  label: 'Relationship Instance ID',
-                  modelProperty: 'qa:relationshipinstanceID'
+                  id: 'RelationshipInstanceURL',
+                  //description: 'State',
+                  label: 'RelationshipInstanceURL',
+                  selectOptions: function (element, values) {
+                    if (element.businessObject.$parent.$type == 'bpmn:Process') {
+                      let find = false;
+                      // entspricht der Participant Id, indem ich mich gerade befinde.
+                      let length = element.businessObject.$parent.flowElements.length;
+                      let flowElement = element.businessObject.$parent.flowElements;
+                      console.log("FLOWELEMENT");
+                      console.log(flowElement)
+                      let arr = [];
+                      arr.push({ name: 'none', value: 'none' });
+                      for (let i = 0; i < length; i++) {
+                        console.log(flowElement[i].ntype)
+                        if (flowElement[i].$type == 'bpmn:ScriptTask' && flowElement[i].$attrs['qa:ntype'] == 'RelationshipInstance' && flowElement[i].resultVariable != undefined) {
+                          arr.push({ name: flowElement[i].resultVariable, value: flowElement[i].resultVariable });
+                        }
+                      }
+
+                      return arr;
+                    }
+                  },
+                  set: function(element, values, node){
+                    if (values['qa:RelationshipInstanceURL'] != 'none') {
+                      element.businessObject.$attrs['qa:RelationshipInstanceURL'] = values['qa:RelationshipInstanceURL'];
+                      element.businessObject.extensionElements.values[0].inputParameters[2].value = values['qa:RelationshipInstanceURL'];
+                      return;
+                    }
+                    element.businessObject.extensionElements.values[0].inputParameters[2].value = '';
+                    return;
+                  },
+                  setControlValue: true,
+                  modelProperty: 'qa:RelationshipInstanceURL'
                 }),
-                EntryFactory.textBox({
+                EntryFactory.selectBox({
                   id: 'SourceURL',
-                  //description: 'SourceURL',
+                  //description: 'State',
                   label: 'SourceURL',
+                  selectOptions: function (element, values) {
+                    if (element.businessObject.$parent.$type == 'bpmn:Process') {
+                      let find = false;
+                      // entspricht der Participant Id, indem ich mich gerade befinde.
+                      let length = element.businessObject.$parent.flowElements.length;
+                      let flowElement = element.businessObject.$parent.flowElements;
+                      console.log("FLOWELEMENT");
+                      console.log(flowElement)
+                      let arr = [];
+                      arr.push({ name: 'none', value: 'none' });
+                      for (let i = 0; i < length; i++) {
+                        console.log(flowElement[i].ntype)
+                        if (flowElement[i].$type == 'bpmn:ScriptTask' && flowElement[i].$attrs['qa:ntype'] == 'NodeInstance' && flowElement[i].resultVariable != undefined) {
+                          arr.push({ name: flowElement[i].resultVariable, value: flowElement[i].resultVariable });
+                        }
+                      }
+
+                      return arr;
+                    }
+                  },
+                  set: function(element, values, node){
+                    if (values['qa:SourceURL'] != 'none') {
+                      element.businessObject.$attrs['qa:SourceURL'] = values['qa:SourceURL'];
+                      element.businessObject.extensionElements.values[0].inputParameters[2].value = values['qa:SourceURL'];
+                      return;
+                    }
+                    element.businessObject.extensionElements.values[0].inputParameters[2].value = '';
+                    return;
+                  },
+                  setControlValue: true,
                   modelProperty: 'qa:SourceURL'
                 }),
-                EntryFactory.textBox({
+                EntryFactory.selectBox({
                   id: 'TargetURL',
-                  //description: 'TargetURL',
+                  //description: 'State',
                   label: 'TargetURL',
+                  selectOptions: function (element, values) {
+                    if (element.businessObject.$parent.$type == 'bpmn:Process') {
+                      let find = false;
+                      // entspricht der Participant Id, indem ich mich gerade befinde.
+                      let length = element.businessObject.$parent.flowElements.length;
+                      let flowElement = element.businessObject.$parent.flowElements;
+                      console.log("FLOWELEMENT");
+                      console.log(flowElement)
+                      let arr = [];
+                      arr.push({ name: 'none', value: 'none'});
+                      for (let i = 0; i < length; i++) {
+                        console.log(flowElement[i].ntype)
+                        if (flowElement[i].$type == 'bpmn:ScriptTask' && flowElement[i].$attrs['qa:ntype'] == 'NodeInstance' && flowElement[i].resultVariable != undefined) {
+                          arr.push({ name: flowElement[i].resultVariable, value: flowElement[i].resultVariable });
+                        }
+                      }
+                      return arr;
+                    }
+                  },
+                  set: function(element, values, node){
+                    if (values['qa:TargetURL'] != 'none') {
+                      element.businessObject.$attrs['qa:TargetURL'] = values['qa:TargetURL'];
+                      element.businessObject.extensionElements.values[0].inputParameters[3].value = values['qa:TargetURL'];
+                      return;
+                    }
+                    element.businessObject.extensionElements.values[0].inputParameters[3].value = '';
+                    return;
+                  },
+                  setControlValue: true,
                   modelProperty: 'qa:TargetURL'
-                }),
-
+                })
               ]
             }]
         });
@@ -1844,15 +2018,13 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   //description: 'State',
                   label: 'State',
                   selectOptions: function (element, values) {
+                    let opt = [{ name: 'INITIAL', value: 'INITIAL' }, { name: 'CREATING', value: 'CREATING' }, { name: 'CREATED', value: 'CREATED' }, { name: 'CONFIGURING', value: 'CONFIGURING' },
+                    { name: 'STARTING', value: 'STARTING' }, { name: 'STARTED', value: 'STARTED' }, { name: 'STOPPING', value: 'STOPPING' }, { name: 'STOPPED', value: 'STOPPED' }, { name: 'DELETING', value: 'DELETING' },
+                    { name: 'DELETED', value: 'DELETED' }, { name: 'ERROR', value: 'ERROR' }, { name: 'MIGRATED', value: 'MIGRATED' }];
                     if (values.selectedOptions.length > 0 && (values.selectedOptions[0] != undefined)) {
-                      // Set changed value
-                      if (is(element.businessObject, 'bpmn:ScriptTask')) {
-                        if (element.businessObject.$attrs['qa:ntype'] === "StateChanger") {
-                          element.businessObject.extensionElements.values[0].inputParameters[0].value = values.selectedOptions[0].value;
-                        }
-                      }
+                      element.businessObject.extensionElements.values[0].inputParameters[0].value = values.selectedOptions[0].value;
                     }
-                    return CustomPropsProvider.opt;
+                    return opt;
 
                   },
                   setControlValue: true,
@@ -1864,13 +2036,13 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   label: 'Instance ID',
                   selectOptions: function (element, values) {
                     if (element.businessObject.$parent.$type == 'bpmn:Process') {
-                      var find = false;
+                      let find = false;
                       // entspricht der Participant Id, indem ich mich gerade befinde.
-                      var length = element.businessObject.$parent.flowElements.length;
-                      var flowElement = element.businessObject.$parent.flowElements;
-                      var arr = [];
+                      let length = element.businessObject.$parent.flowElements.length;
+                      let flowElement = element.businessObject.$parent.flowElements;
+                      let arr = [];
                       arr.push({ name: undefined, value: undefined });
-                      for (var i = 0; i < length; i++) {
+                      for (let i = 0; i < length; i++) {
                         if (flowElement[i].$type == 'bpmn:ScriptTask' && flowElement[i].resultVariable != undefined) {
                           arr.push({ name: flowElement[i].resultVariable, value: flowElement[i].resultVariable });
                         }
@@ -1901,21 +2073,38 @@ export class CustomPropsProvider implements IPropertiesProvider {
           groups: [
             {
               id: 'opProp',
-              label: this.translate('OperationTask Properties'),
+              label: this.translate('Set Properties'),
               entries: [
+                EntryFactory.selectBox({
+                  id: 'State',
+                  //description: 'State',
+                  label: 'State',
+                  selectOptions: function (element, values) {
+                    let opt = [{name: '', value: '' },{name: 'INITIAL', value: 'INITIAL' }, { name: 'CREATING', value: 'CREATING' }, { name: 'CREATED', value: 'CREATED' }, { name: 'CONFIGURING', value: 'CONFIGURING' },
+                    { name: 'STARTING', value: 'STARTING' }, { name: 'STARTED', value: 'STARTED' }, { name: 'STOPPING', value: 'STOPPING' }, { name: 'STOPPED', value: 'STOPPED' }, { name: 'DELETING', value: 'DELETING' },
+                    { name: 'DELETED', value: 'DELETED' }, { name: 'ERROR', value: 'ERROR' }, { name: 'MIGRATED', value: 'MIGRATED' }];
+                    if (values.selectedOptions.length > 0 && (values.selectedOptions[0] != undefined)) {
+                      element.businessObject.extensionElements.values[0].inputParameters[0].value = values.selectedOptions[0].value;
+                    }
+                    return opt;
+
+                  },
+                  setControlValue: true,
+                  modelProperty: 'qa:State'
+                }),
                 EntryFactory.selectBox({
                   id: 'InstanceID',
                   //description: 'Instance ID',
                   label: 'Instance ID',
                   selectOptions: function (element, values) {
                     if (element.businessObject.$parent.$type == 'bpmn:Process') {
-                      var find = false;
+                      let find = false;
                       // entspricht der Participant Id, indem ich mich gerade befinde.
-                      var length = element.businessObject.$parent.flowElements.length;
-                      var flowElement = element.businessObject.$parent.flowElements;
-                      var arr = [];
+                      let length = element.businessObject.$parent.flowElements.length;
+                      let flowElement = element.businessObject.$parent.flowElements;
+                      let arr = [];
                       arr.push({ name: undefined, value: undefined });
-                      for (var i = 0; i < length; i++) {
+                      for (let i = 0; i < length; i++) {
                         if (flowElement[i].$type == 'bpmn:ScriptTask' && flowElement[i].resultVariable != undefined) {
                           arr.push({ name: flowElement[i].resultVariable, value: flowElement[i].resultVariable });
                         }
@@ -1927,7 +2116,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     if (is(element.businessObject, 'bpmn:ScriptTask')) {
                       if (element.businessObject.$attrs['qa:ntype'] === "PropertiesChanger") {
                         element.businessObject.$attrs['qa:instanceID'] = values['qa:instanceID'];
-                        element.businessObject.extensionElements.values[0].inputParameters[1].value = values['qa:instanceID'];
+                        element.businessObject.extensionElements.values[0].inputParameters[1].value = "${"+values['qa:instanceID'] + "}";
                       }
                     }
                     return;
@@ -1940,23 +2129,73 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   //description: 'NodeTemplate',
                   label: 'NodeTemplate',
                   selectOptions: function (element, values) {
-                    //console.log(CustomPropsProvider.template);
-                    return CustomPropsProvider.template;
+                    let arr =[];
+                    for(let i=0; i<CustomPropsProvider.template.length; i++){
+                      let template = CustomPropsProvider.template[i].name;
+                      template = template.split('_')[0];
+                      arr.push({name: template, value: template});
+                    }
+                    return arr;
                   },
                   setControlValue: true,
                   modelProperty: 'qa:NodeTemplate',
                   set: function (element, values, node) {
-                    if (values['qa:NodeTemplate'] != 'none') {
-                      element.businessObject.$attrs['qa:NodeTemplate'] = values['qa:NodeTemplate'];
-                      if (is(element.businessObject, 'bpmn:ScriptTask')) {
-                        if (element.businessObject.$attrs['qa:ntype'] === "PropertiesChanger") {
-                          element.businessObject.extensionElements.values[0].inputParameters[1].value = values['qa:NodeTemplate'];
+                      if (values['qa:NodeTemplate'] != 'none') {
+                        element.businessObject.$attrs['qa:NodeTemplate'] = values['qa:NodeTemplate'];
+                        for (let i = 0; i < CustomPropsProvider.properties.length; i++) {
+                          let nodetemplate = element.businessObject.$attrs['qa:NodeTemplate']
+                          console.log(nodetemplate);
+                          let nodeid = CustomPropsProvider.properties[i].id;
+                          nodeid = nodeid.split('_')[0];
+                          if (nodeid == nodetemplate) {
+                            let options = [{ name: 'none', value: 'none' }];
+                            let properties = CustomPropsProvider.properties[i].properties.kvproperties;
+                            properties = JSON.stringify(properties).split(",");
+                            console.log(properties)
+                            let propertiesList = 0;
+                            for (let j = 0; j < properties.length; j++) {
+                              console.log(j)
+                              let property = properties[j].split(':')[0].replace("{", "");
+                              console.log(property)
+                              if (property.startsWith("\"") && property.endsWith("\"")) {
+                                property = property.substring(1, property.length - 1);
+                                let addinput = true;
+                                let propertyValue = properties[j].substr(properties[j].indexOf(':') + 1).replace("}", "");
+                                console.log(propertyValue);
+                                if (propertyValue.startsWith("\"") && propertyValue.endsWith("\"")) {
+                                  propertyValue = propertyValue.substring(1, propertyValue.length - 1);
+                                  const inputParameter = CustomPropsProvider.moddle.create('camunda:InputParameter', {
+                                    name: 'Input_' + property,
+                                    value: propertyValue
+                                  });
+                                  console.log(inputParameter)
+                                  for (let o = 0; o < element.businessObject.extensionElements.values[0].inputParameters.length; o++) {
+                                    if (inputParameter.name === element.businessObject.extensionElements.values[0].inputParameters[o].name) {
+                                      addinput = false;
+                                    }
+                                  }
+                                  if (addinput) {
+                                    // necessary because we cannot save arrays correct
+                                    element.businessObject.$attrs['qa:prop' + j] = property + '#' + propertyValue;
+                                    console.log(element.businessObject.$attrs['qa:prop' + i]);
+
+                                    element.businessObject.extensionElements.values[0].inputParameters.push(inputParameter);
+                                  } else {
+                                    addinput = true;
+                                  }
+                                }
+                              }
+
+                            } element.businessObject.$attrs['qa:propertiesList'] = properties.length - 1;
+
+                          }
                         }
+
+                        element.businessObject.extensionElements.values[0].inputParameters[1].value = values['qa:NodeTemplate'];
+                        return;
                       }
                       return;
                     }
-                    return;
-                  },
                 }),
                 EntryFactory.selectBox({
                   id: 'properties',
@@ -1966,23 +2205,26 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     //console.log(CustomPropsProvider.template);
                     //return CustomPropsProvider.properties;
                     console.log(CustomPropsProvider.properties);
+                    let options = [{ name: 'none', value: 'none' }];
                     for (let i = 0; i < CustomPropsProvider.properties.length; i++) {
-                      var nodetemplate = element.businessObject.$attrs['qa:NodeTemplate']
-                      if (CustomPropsProvider.properties[i].id == nodetemplate) {
-                        var options = [{ name: 'none', value: 'none' }];
+                      let nodetemplate = element.businessObject.$attrs['qa:NodeTemplate'];
+                      let nodeid = CustomPropsProvider.properties[i].id;
+                      nodeid = nodeid.split('_')[0];
+                      if (nodeid == nodetemplate) {
+
                         let properties = CustomPropsProvider.properties[i].properties.kvproperties;
                         properties = JSON.stringify(properties).split(",");
-
+                        console.log("PROPERTIES");
+                        console.log()
                         for (let j = 0; j < properties.length; j++) {
                           let property = properties[j].split(':')[0].replace("{", "");
                           if (property.startsWith("\"") && property.endsWith("\"")) {
                             property = property.substring(1, property.length - 1);
+
+                            options.push({ name: property, value: property })
                           }
-                          options.push({ name: property, value: property });
                         }
                         //options.push({name: , value: });
-
-
                       }
                     }
                     return options;
@@ -2015,7 +2257,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       return false;
                     }
                   }, set: function (element, values) {
-                    var propertyName = element.businessObject.$attrs['qa:Properties'];
+                    let propertyName = element.businessObject.$attrs['qa:Properties'];
                     if (propertyName != '') {
                       if (values['qa:valueProps'] != undefined || values['qa:valueProps'] != '') {
                         console.log(propertyName);
@@ -2050,106 +2292,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
             }]
         })
     }
-    else if (element.businessObject.$type == 'bpmn:DataObjectReference') {
-      return this.bpmnPropertiesProvider.getTabs(element)
-        .concat({
-          id: 'custom',
-          label: this.translate('Properties'),
-          groups: [
-            {
-              id: 'opProp',
-              label: this.translate('OperationTask Properties'),
-              entries: [
-                EntryFactory.selectBox({
-                  id: 'task',
-                  //description: 'Task ID',
-                  label: 'Task ID',
-                  selectOptions: function (element, values) {
-                    //console.log(CustomPropsProvider.template);
-                    var arr = [];
-                    arr.push({ name: 'none', value: 'none' });
-                    var saveTask = [];
-                    if (element.businessObject.$parent.$type == 'bpmn:Process') {
-                      var find = false;
-                      // entspricht der Participant Id, indem ich mich gerade befinde.
-                      var length = element.businessObject.$parent.flowElements.length;
-                      var flowElement = element.businessObject.$parent.flowElements;
-                      for (var i = 0; i < length; i++) {
-                        if (flowElement[i].$type == 'bpmn:ScriptTask') {
-                          arr.push({ name: flowElement[i].id, value: flowElement[i].id });
-                          console.log(flowElement[i]);
-                          saveTask.push({ name: flowElement[i], value: flowElement[i] });
-                          console.log(flowElement[i]);
-                        }
-                      }
-                      console.log(arr);
-                      element.businessObject.$attrs['qa:dataObjectV'] = saveTask;
-                      return arr;
-                    }
-                  },
-                  set: function (element, values, node) {
-                    if (values['qa:task'] != 'none') {
-                      element.businessObject.$attrs['qa:task'] = values['qa:task'];
-                      if (element.businessObject.$attrs['qa:dataObjectV'] != undefined) {
-                        var tasks = element.businessObject.$attrs['qa:dataObjectV'];
-                        console.log(element.businessObject.$attrs['qa:dataObjectV']);
-                        for (var i = 0; i < tasks.length; i++) {
-
-                          if (tasks[i].name.id == element.businessObject.$attrs['qa:task']) {
-
-                            element.businessObject.$attrs['qa:dataObject0'] = tasks[i].value;
-                          }
-                        }
-                      }
-                      return;
-                    }
-                  },
-                  setControlValue: true,
-                  modelProperty: 'qa:task',
-                }),
-                EntryFactory.selectBox({
-                  id: 'outputParamTask',
-                  //description: 'Task ID',
-                  label: 'Task ID',
-                  selectOptions: function (element, values) {
-                    //console.log(CustomPropsProvider.template);
-                    var arr = [];
-                    arr.push({ name: 'none', value: 'none' });
-                    var saveTask = [];
-                    if (element.businessObject.$attrs['qa:task'] != undefined) {
-
-                      var task = element.businessObject.$attrs['qa:dataObject0'];
-                      if (element.businessObject.$attrs['qa:dataObject0'] != undefined) {
-                        var outputParam = task.$attrs['qa:outputParams'];
-                        if (outputParam != undefined) {
-
-                          for (var i = 0; i < outputParam.length; i++) {
-                            arr.push({ name: outputParam[i].name, value: outputParam[i].name });
-                          }
-                          return arr;
-                        }
-                      }
-
-                    }
-                  },
-                  set: function (element, values, node) {
-                    //element.businessObject.$attrs.inputParameter = element.businessObject.$attrs.dataObject0.$attrs.inputParameter;
-                    element.businessObject.$attrs['qa:outputParamTask'] = values['qa:outputParamTask'];
-
-                  },
-                  setControlValue: true,
-                  modelProperty: 'qa:outputParamTask',
-                }),
-                EntryFactory.textField({
-                  id: 'valueOutput',
-                  //description: 'Value of Output Parameter',
-                  label: 'Value of Output Parameter',
-                  modelProperty: 'qa:valueOutput'
-                }),
-              ]
-            }]
-        })
-    } else {
+   else {
       return this.bpmnPropertiesProvider.getTabs(element)
         .concat({
           id: 'custom',
