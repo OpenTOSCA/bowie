@@ -6,6 +6,12 @@
       "tagAlias": "lowerCase"
     },
     "types": [
+      {
+        "name": "InputParameter",
+        "extends": [
+            "camunda:InputParameter"
+        ]
+    },
         {
             "name": "AnalyzedNode",
             "extends": [

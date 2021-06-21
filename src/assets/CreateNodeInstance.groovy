@@ -23,6 +23,8 @@ if(status == 200){
     def resultText = post.getInputStream().getText();    
     def slurper = new JsonSlurper();
     def json = slurper.parseText(resultText);
+    println "nodeinstance"
+    println json;
     return json;
 }else{
     execution.setVariable("ErrorDescription", "Received status code " + status + " while creating Instance of NodeTemplate with ID: " + template);

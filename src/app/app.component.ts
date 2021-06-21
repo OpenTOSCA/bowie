@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {Modeler, OriginalPropertiesProvider, PropertiesPanelModule, InjectionNames, OriginalPaletteProvider, OriginalRenderer} from "./bpmn-js/bpmn-js";
+import {Modeler, OriginalPropertiesProvider, PropertiesPanelModule, InjectionNames, OriginalPaletteProvider, OriginalRenderer, PathMap} from "./bpmn-js/bpmn-js";
 import {CustomPropsProvider} from './props-provider/CustomPropsProvider';
 import CustomPaletteProvider from "./props-provider/CustomPaletteProvider";
 import CustomRenderer from "./props-provider/CustomRenderer";
@@ -8,7 +8,7 @@ import {WineryService} from "./services/winery.service";
 import { ActivatedRoute, Params } from '@angular/router';
 import { PageParameter } from './model/page-parameter';
 import _camundaModdleDescriptor from "camunda-bpmn-moddle/resources/camunda.json";
-import modeltest from '../docs/modeltest.json';
+import moddle from '../docs/moddle.json';
 //import SituationPropertiesProvider from './provider/situations/SituationPropertiesProvider';
 
 
@@ -77,7 +77,7 @@ export class AppComponent implements OnInit {
       },
       moddleExtensions: {
         custom: _camundaModdleDescriptor,
-        qa: modeltest   
+        qa: moddle
       }
     });
     
@@ -116,16 +116,20 @@ export class AppComponent implements OnInit {
   }
 
   save(): void {
-    this.modeler.saveXML((err: any, xml: any) => {console.log('Result of saving XML: ', err, xml);
-    let temp = JSON.stringify(xml);
-   this.wineryService.save(temp);
-  });
-  }
-  
-  testsave(): void {
-      this.modeler.saveXML((err: any, xml: any) => {console.log('Result of saving XML: ', err, xml);
-          //let temp2 = JSON.stringify(xml);
-          this.wineryService.testsave(xml);
-      });
-  }
+        this.modeler.saveXML((err: any, xml: any) => {
+            console.log('Result of saving XML: ', err, xml);
+            let temp = JSON.stringify(xml);
+            this.wineryService.save(temp);
+        });
+    }
+
+    testsave(): void {
+        this.modeler.saveXML((err: any, xml: any) => {
+            console.log('Result of saving XML: ', err, xml);
+            //let temp2 = JSON.stringify(xml);
+            this.wineryService.testsave(xml);
+        });
+    }
+    
+    
 }

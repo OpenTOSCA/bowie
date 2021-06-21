@@ -11,18 +11,43 @@ if(status != 200){
 }
 
 def properties = execution.getVariable("Properties").split(",");
-def values = execution.getVariable("Values").split(",");
-
-if(properties.size() != values.size()){
-    execution.setVariable("ErrorDescription", "Number of properties to update and values is not equal!");
-    throw new org.camunda.bpm.engine.delegate.BpmnError("InvalidConfiguration");
+//def values = execution.getVariable("Values").split(",");
+//
+def propertiesNames = execution.getVariableNames();
+println "propertiesNames"
+println properties
+for(int i in 0..properties.size()-1){
+    if(properties[i].startsWith('Input_')){
+        properties[i] = properties[i].split('Input_')[1];
+    }
 }
+def nodeInstance = execution.getVariable("NodeInstanceURL");
+for(int j in 0..properties.size()-1){
+    for(int i in 0..propertiesNames.size()-1){
+        if(propertiesNames[i].startsWith(nodeInstance) && !propertiesNames[i].endsWith(nodeInstance)){
+            def temp = propertiesNames[i].split(nodeInstance)[1];
+            println temp;
+            if(temp == properties[j]){
+              def value = execution.getVariable('Input_'+temp);
+              execution.setVariable(nodeInstance+properties[j], value);
+            }
+        }
+    }
+}
+           
+
 
 def xml = new XmlSlurper().parseText(get.getInputStream().getText());
+println xml;
+println properties;
 properties.eachWithIndex { property, index ->
-    xml.'**'.findAll { if(it.name() == property) it.replaceBody values[index] }
+    xml.'**'.findAll { if(it.name() == property) it.replaceBody execution.getVariable('Input_'+property) }
 }
-
+println "das sind die Properties";
+println properties;
+println "XML"
+println xml.getClass();
+println xml;
 def put = new URL(url).openConnection();
 put.setRequestMethod("PUT");
 put.setDoOutput(true);

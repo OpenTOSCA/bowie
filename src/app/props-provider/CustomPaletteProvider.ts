@@ -3,12 +3,7 @@ import {
 } from 'min-dash';
 import _camundaModdleDescriptor from "camunda-bpmn-moddle/resources/camunda.json";
 import BpmnModdle from 'bpmn-moddle';
-import modeltest from '../../docs/modeltest.json';
-import BpmnModeler from 'bpmn-js/lib/Modeler';
 import Palette from 'diagram-js/lib/features/palette/Palette';
-import { AppComponent } from '../app.component';
-import { NG_MODEL_WITH_FORM_CONTROL_WARNING } from '@angular/forms/src/directives';
-
 
 /**
  * A palette that allows you to create BPMN _and_ custom elements.
@@ -22,7 +17,6 @@ export default function CustomPaletteProvider(palette, create, connect, elementF
   this._handTool = handTool;
   this._bpmnFactory = bpmnFactory;
   this._lassoTool = lassoTool;
-  
 
   palette.registerProvider(this);
 
@@ -40,11 +34,11 @@ CustomPaletteProvider.$inject = [
 ];
 
 
-const moddle = new BpmnModdle({ camunda: _camundaModdleDescriptor , qa: modeltest});
-
+const moddle = new BpmnModdle({ camunda: _camundaModdleDescriptor });
 
 
 CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
+
   var actions = {},
     create = this._create,
     connect = this._connect,
@@ -52,8 +46,8 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
     bpmnFactory = this._bpmnFactory,
     spaceTool = this._spaceTool,
     lassoTool = this._lassoTool,
-    modeling = this._modeling,
     handTool = this._handTool;
+
 
   function createRect(suitabilityScore) {
     return function (event) {
@@ -73,25 +67,14 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
   // danke internet https://forum.bpmn.io/t/proper-way-to-create-and-update-activities-in-bpmn-js-modeler/4696
 
   function createServiceTemplateInstance() {
-
     return function (event) {
       const businessObject = bpmnFactory.create('bpmn:ScriptTask');
-/*
-        const businessObject = bpmnFactory.create('bpmn:ScriptTask', {
-            extensionElements: moddle.create('bpmn:ExtensionElements', {
-                values: [
-                    moddle.create('qa:ntypetest', { 
-                        name: 'ntype' 
-                    }),
-                ],
-            })
-        });
-*/
+
       businessObject.resultVariable = "ServiceInstanceURL";
       businessObject.name = "lustige groovy ServiceTemplates";
       businessObject.scriptFormat = "groovy";
       businessObject.resource = "deployment://CreateServiceInstance.groovy";
-      //businessObject.ntype = "ServiceTemplateInstance";
+      businessObject.$attrs['qa:ntype'] = "ServiceTemplateInstance";
 
       const shape = elementFactory.createShape({
         type: 'bpmn:ScriptTask',
@@ -112,18 +95,20 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
           values: [
             moddle.create('camunda:InputOutput', {
               inputParameters: [
-                moddle.create('camunda:InputParameter', { name: 'NodeTemplate' }),
+                moddle.create('camunda:InputParameter', { name: 'NodeTemplate' }), 
+                  moddle.create('camunda:InputParameter', { name: 'NodeInstanceID' })  
               ],
             }),
           ],
         })
       });
 
-      businessObject.resultVariable = "NodeInstanceURL (Für jedes Template anders!)";
+      businessObject.resultVariable = businessObject.id+"NodeInstanceURL";
       businessObject.name = "lustige groovy nodeinstances";
       businessObject.scriptFormat = "groovy";
       businessObject.resource = "deployment://CreateNodeInstance.groovy";
-      businessObject.$attrs.ntype = "NodeInstance";
+      businessObject.$attrs['qa:ntype'] = "NodeInstance";
+      businessObject.extensionElements.values[0].inputParameters[1].value = "randomnodeinstanceid";
 
       console.log("EXTENSION ELEMENTS");
       console.log(businessObject.extensionElements);
@@ -140,7 +125,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
       create.start(event, shape);
 
 
-    }
+    };
   }
 
   function createRelationshipInstance() {
@@ -159,11 +144,11 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
         })
       });
 
-      businessObject.resultVariable = "RealtionshipInstanceURL (Für jedes Template anders!)";
-      businessObject.name = "lustige groovy realtionshipinstances";
+      businessObject.resultVariable = businessObject.id+"RelationshipInstanceURL";
+      businessObject.name = "lustige groovy relationshipinstances";
       businessObject.scriptFormat = "groovy";
       businessObject.resource = "deployment://CreateRelationshipInstance.groovy";
-      businessObject.$attrs.ntype = "RelationshipInstance";
+      businessObject.$attrs['qa:ntype'] = "RelationshipInstance";
 
       const shape = elementFactory.createShape({
         type: 'bpmn:ScriptTask',
@@ -202,7 +187,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
       businessObject.name = "lustige groovy node operations";
       businessObject.scriptFormat = "groovy";
       businessObject.resource = "deployment://CallNodeOperation.groovy";
-      businessObject.$attrs.ntype = "CallNodeOperation";
+      businessObject.$attrs['qa:ntype'] = "CallNodeOperation";
 
       const shape = elementFactory.createShape({
         type: 'bpmn:ScriptTask',
@@ -213,7 +198,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
       create.start(event, shape);
 
 
-    }
+    };
   }
 
   function createStateChanger() {
@@ -234,7 +219,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
       businessObject.name = "lustige groovy states";
       businessObject.scriptFormat = "groovy";
       businessObject.resource = "deployment://SetState.groovy";
-      businessObject.$attrs.ntype = "StateChanger";
+      businessObject.$attrs['qa:ntype'] = "StateChanger";
 
       const shape = elementFactory.createShape({
         type: 'bpmn:ScriptTask',
@@ -256,6 +241,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
             moddle.create('camunda:InputOutput', {
               inputParameters: [
                 moddle.create('camunda:InputParameter', { name: 'InstanceURL' }),
+                moddle.create('camunda:InputParameter', { name: 'NodeTemplate' }),
                 moddle.create('camunda:InputParameter', { name: 'Properties' }),
                 moddle.create('camunda:InputParameter', { name: 'Values' }),
               ],
@@ -267,7 +253,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
       businessObject.name = "lustige groovy properties";
       businessObject.scriptFormat = "groovy";
       businessObject.resource = "deployment://SetProperties.groovy";
-      businessObject.$attrs.ntype = "PropertiesChanger";
+      businessObject.$attrs['qa:ntype'] = "PropertiesChanger";
 
       const shape = elementFactory.createShape({
         type: 'bpmn:ScriptTask',
@@ -288,15 +274,9 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
           values: [
             moddle.create('camunda:InputOutput', {
               inputParameters: [
-                moddle.create('camunda:InputParameter', { name: 'ServiceInstanceID' }),
-                moddle.create('camunda:InputParameter', { name: 'CsarID' }),
+                moddle.create('camunda:InputParameter', { name: 'NodeInstanceURL' }),
+                moddle.create('camunda:InputParameter', { name: 'Nodetemplate' }),
                 moddle.create('camunda:InputParameter', { name: 'ServiceTemplateID' }),
-                moddle.create('camunda:InputParameter', { name: 'NodeTemplate' }),
-                moddle.create('camunda:InputParameter', { name: 'Interface' }),
-                moddle.create('camunda:InputParameter', { name: 'Operation' }),
-                moddle.create('camunda:InputParameter', { name: 'InputParamNames' }),
-                moddle.create('camunda:InputParameter', { name: 'InputParamValues' }),
-                moddle.create('camunda:InputParameter', { name: 'OutputParamNames' }),
               ],
             }),
           ],
@@ -304,7 +284,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
       });
 
       businessObject.name = "lustiges NodeInstanceDataObject";
-      businessObject.$attrs.dtype = "NodeInstanceDataObject";
+      businessObject.$attrs['qa:dtype'] = "NodeInstanceDataObject";
 
       const shape = elementFactory.createShape({
         type: 'bpmn:DataObjectReference',
@@ -314,7 +294,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
 
       create.start(event, shape);
 
-    }
+    };
   }
 
   function createServiceInstanceDataObject() {
@@ -334,7 +314,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
       });
 
       businessObject.name = "lustiges ServiceInstanceDataObject";
-      businessObject.$attrs.dtype = "ServiceInstanceDataObject";
+      businessObject.$attrs['qa:dtype'] = "ServiceInstanceDataObject";
 
       const shape = elementFactory.createShape({
         type: 'bpmn:DataObjectReference',
@@ -364,7 +344,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
       });
 
       businessObject.name = "lustiges RelationshipInstanceDataObject";
-      businessObject.$attrs.dtype = "RelationshipInstanceDataObject";
+      businessObject.$attrs['qa:dtype'] = "RelationshipInstanceDataObject";
 
       const shape = elementFactory.createShape({
         type: 'bpmn:DataObjectReference',
@@ -535,7 +515,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
     },
     'create.node-instance-task': {
       group: 'activity1',
-      className: 'bpmn-icon-task blue',
+      className: 'icon-nodeinstancecombo',
       title: 'Create nodeInstance',
       action: {
         dragstart: createNodeInstance(),
@@ -545,7 +525,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
     },
     'call-node-operation-task': {
       group: 'activity1',
-      className: 'bpmn-icon-task blue',
+      className: 'icon-kombotest1',
       title: 'Create CallNodeOperation',
       action: {
         dragstart: createCallNodeOperation('60'),
@@ -555,7 +535,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
     },
     'create.service-instance-task': {
       group: 'activity1',
-      className: 'bpmn-icon-task yellow',
+      className: 'icon-serviceinstancecombo',
       title: 'Create ServiceInstance',
       action: {
         dragstart: createServiceTemplateInstance(),
@@ -565,7 +545,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
     },
     'create.relationship-instance-task': {
       group: 'activity1',
-      className: 'bpmn-icon-task red',
+      className: 'icon-relinstancecombo',
       title: 'Create RelationshipInstance',
       action: {
         dragstart: createRelationshipInstance(),
@@ -575,7 +555,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
     },
     'set-state-task': {
       group: 'activity1',
-      className: 'bpmn-icon-task',
+      className: 'icon-kombotest2',
       title: 'Create SetStateTask',
       action: {
         dragstart: createStateChanger(),
@@ -585,7 +565,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
     },
     'set-properties-task': {
       group: 'activity1',
-      className: 'bpmn-icon-task',
+      className: 'icon-kombotest3',
       title: 'Create SetPropertiesTask',
       action: {
         dragstart: createPropertiesChanger(),
