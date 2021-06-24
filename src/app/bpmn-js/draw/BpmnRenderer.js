@@ -7,6 +7,7 @@ import {
 } from 'min-dash';
 
 import BaseRenderer from 'diagram-js/lib/draw/BaseRenderer';
+import PathMap from './PathMap';
 
 import {
   isExpanded,
@@ -1043,35 +1044,122 @@ export default function BpmnRenderer(
     'bpmn:ScriptTask': function(parentGfx, element) {
       var task = renderer('bpmn:Task')(parentGfx, element);
 
-      var pathData = pathMap.getScaledPath('TASK_TYPE_SCRIPT', {
+      var pathData = pathMap.getScaledPath('TASK_TYPE_DATAOBJECT', {
         abspos: {
-          x: 15,
-          y: 20
+          x: 10,
+          y: 10
         }
       });
+	  
+	  if(element.businessObject.$attrs['qa:ntype'] === "NodeInstance"){
+      console.log(element.height)
+		  pathData = pathMap.getScaledPath('TASK_TYPE_NODEINSTANCE',{
+        abspos: {
+          x: 15,
+          y: 15
+        }
+	    });
+      drawPath(parentGfx, pathData, {
+        strokeWidth: 5,
+        stroke: 'black',
+        transform: 'scale(0.13)',
+        fill: 'black'
+      });
 
-      if(element.businessObject.$attrs['qa:ntype'] === "CallNodeOperation" || element.businessObject.$attrs['qa:ntype'] === "NodeInstance"){
+      return task;
+	  }
+
+      if(element.businessObject.$attrs['qa:ntype'] === "CallNodeOperation"){
+        pathData = pathMap.getScaledPath('TASK_TYPE_CALLNODE',{
+          abspos: {
+            x: 10,
+            y: 10
+          }
+        });
         drawPath(parentGfx, pathData, {
-          strokeWidth: 1,
-          stroke: 'blue'
+          strokeWidth: 0.5,
+          stroke: 'white',
+          fill: 'black'
         });
   
         return task;
       }
 
       if(element.businessObject.$attrs['qa:ntype'] === "ServiceTemplateInstance"){
+        pathData = pathMap.getScaledPath('TASK_TYPE_SERVICETEMP',{
+          abspos: {
+            x: 10,
+            y: 10
+          }
+        });
         drawPath(parentGfx, pathData, {
-          strokeWidth: 1,
-          stroke: 'yellow'
+          strokeWidth: 5,
+          stroke: getStrokeColor(element, '#000000'),
+          transform: 'scale(0.13)'
         });
   
         return task;
       }
 
       if(element.businessObject.$attrs['qa:ntype'] === "RelationshipInstance"){
+        pathData = pathMap.getScaledPath('TASK_TYPE_REL',{
+          abspos: {
+            x: 10,
+            y: 10
+          }
+        });
         drawPath(parentGfx, pathData, {
-          strokeWidth: 1,
-          stroke: 'red'
+          strokeWidth: 5,
+          stroke: getStrokeColor(element, '#000000'),
+          transform: 'scale(0.1)'
+        });
+  
+        return task;
+      }
+      if(element.businessObject.$attrs['qa:ntype'] === "StateChanger"){
+        pathData = pathMap.getScaledPath('TASK_TYPE_SETSTATE',{
+          abspos: {
+            x: 15,
+            y: 15
+          }});
+        drawPath(parentGfx, pathData, {
+          strokeWidth: 0.5,
+          stroke: 'white',
+          fill: 'black'
+        });
+  
+        return task;
+      }
+
+      if(element.businessObject.$attrs['qa:ntype'] === "PropertiesChanger"){
+        pathData = pathMap.getScaledPath('TASK_TYPE_PROP',{
+        xScaleFactor: 0.4,
+        yScaleFactor: 0.4,
+        containerWidth: element.width,
+        containerHeight: element.height,
+        position: {
+          mx: 0.32,
+          my: 0.3
+        }});
+        drawPath(parentGfx, pathData, {
+          strokeWidth: 0.5,
+          stroke: 'black',
+          fill: 'white'
+        });
+  
+        return task;
+      }
+
+      if(element.businessObject.$attrs['qa:ntype'] === "DataObjectTask"){
+        pathData = pathMap.getScaledPath('TASK_TYPE_DATAOBJECT',{
+          abspos: {
+            x: 15,
+            y: 15
+          }});
+        drawPath(parentGfx, pathData, {
+          strokeWidth: 0.5,
+          stroke: 'white',
+          fill: 'black'
         });
   
         return task;
@@ -1523,15 +1611,15 @@ export default function BpmnRenderer(
       var elementObject = drawPath(parentGfx, pathData, {
         fill: getFillColor(element, defaultFillColor),
         fillOpacity: DEFAULT_FILL_OPACITY,
-        stroke: 'blue'
+        stroke: 'blue',
       });
-
+      console.log(pathData)
       var semantic = getSemantic(element);
 
       if (isCollection(semantic)) {
         renderDataItemCollection(parentGfx, element);
       }
-
+      console.log(elementObject)
       return elementObject;
     }
     if(element.businessObject.$attrs['qa:dtype'] === "ServiceInstanceDataObject"){
@@ -1929,7 +2017,7 @@ export default function BpmnRenderer(
 }
 
 
-inherits(BpmnRenderer, BaseRenderer);
+inherits(BpmnRenderer, BaseRenderer, PathMap);
 
 BpmnRenderer.$inject = [
   'config.bpmnRenderer',

@@ -6,6 +6,7 @@ import * as _EntryFactory from 'bpmn-js-properties-panel/lib/factory/EntryFactor
 import * as _BpmnFactory from 'bpmn-js/lib/features/modeling/BpmnFactory';
 import _PaletteProvider from 'bpmn-js/lib/features/palette/PaletteProvider';
 import _Renderer from './draw/BpmnRenderer';
+import _PathMap from './draw/PathMap';
 import * as _CreateHelper from 'bpmn-js-properties-panel/lib/provider/camunda/element-templates/CreateHelper';
 
 export const InjectionNames = {
@@ -14,6 +15,7 @@ export const InjectionNames = {
   createHelper: 'createHelper',
   bpmnRenderer: 'bpmnRenderer',
   renderer: 'renderer',
+  pathMap: 'pathMap',
   elementRegistry: 'elementRegistry',
   translate: 'translate',
   propertiesProvider: 'propertiesProvider',
@@ -23,6 +25,7 @@ export const InjectionNames = {
 };
 
 export const Modeler = _Modeler;
+export const PathMap = _PathMap;
 export const CreateHelper = _CreateHelper;
 export const PropertiesPanelModule = _PropertiesPanelModule;
 export const EntryFactory = _EntryFactory;

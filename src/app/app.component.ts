@@ -9,6 +9,7 @@ import { ActivatedRoute, Params } from '@angular/router';
 import { PageParameter } from './model/page-parameter';
 import _camundaModdleDescriptor from "camunda-bpmn-moddle/resources/camunda.json";
 import moddle from '../docs/moddle.json';
+import PathMap from './bpmn-js/draw/PathMap';
 //import SituationPropertiesProvider from './provider/situations/SituationPropertiesProvider';
 
 
@@ -67,6 +68,7 @@ export class AppComponent implements OnInit {
         {[InjectionNames.propertiesProvider]: ['type', CustomPropsProvider]},
         
         {[InjectionNames.bpmnRenderer]: ['type', OriginalRenderer]},
+        {[InjectionNames.pathMap]: ['type', PathMap]},
         {[InjectionNames.renderer]: ['type', CustomRenderer]},
         {[InjectionNames.originalPaletteProvider]: ['type', OriginalPaletteProvider]},
         {[InjectionNames.paletteProvider]: ['type', CustomPaletteProvider]},
