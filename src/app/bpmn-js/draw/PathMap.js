@@ -44,14 +44,14 @@ export default function PathMap() {
        //164.66406,176.55664
     //heightElements: [6, 14],
     //widthElements: [10.5, 21]
-  }, 
+  }, */
   'EVENT_MESSAGE': {
     d: 'm {mx},{my} l 0,{e.y1} l {e.x1},0 l 0,-{e.y1} z l {e.x0},{e.y0} l {e.x0},-{e.y0}',
     height: 36,
     width:  36,
     heightElements: [6, 14],
     widthElements: [10.5, 21]
-  },*/
+  },
     'EVENT_SIGNAL': {
       d: 'M {mx},{my} l {e.x0},{e.y0} l -{e.x1},0 Z',
       height: 36,
@@ -480,13 +480,13 @@ export default function PathMap() {
       console.log(rawPath.heightElements)
       for (var heightIndex = 0; heightIndex < rawPath.heightElements.length; heightIndex++) {
         console.log("DHDHDH")
-        coordinates['y' + heightIndex] = rawPath.heightElements[heightIndex] / 100;
+        coordinates['y' + heightIndex] = rawPath.heightElements[heightIndex] * heightRatio;
       }
 
       // Apply width ratio
       console.log(rawPath.widthElements)
       for (var widthIndex = 0; widthIndex < rawPath.widthElements.length; widthIndex++) {
-        coordinates['x' + widthIndex] = rawPath.widthElements[widthIndex] / 100;
+        coordinates['x' + widthIndex] = rawPath.widthElements[widthIndex] * widthRatio;
       }
     }
     console.log(mx);

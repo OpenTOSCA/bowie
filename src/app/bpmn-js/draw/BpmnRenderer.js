@@ -1062,7 +1062,7 @@ export default function BpmnRenderer(
       drawPath(parentGfx, pathData, {
         strokeWidth: 5,
         stroke: 'black',
-        transform: 'scale(0.13)',
+        transform: 'scale(0.11) translate(30,-50)',
         fill: 'black'
       });
 
@@ -1079,7 +1079,8 @@ export default function BpmnRenderer(
         drawPath(parentGfx, pathData, {
           strokeWidth: 0.5,
           stroke: 'white',
-          fill: 'black'
+          fill: 'black',
+		  transform: 'scale(0.85) translate(2,2)'
         });
   
         return task;
@@ -1095,7 +1096,7 @@ export default function BpmnRenderer(
         drawPath(parentGfx, pathData, {
           strokeWidth: 5,
           stroke: getStrokeColor(element, '#000000'),
-          transform: 'scale(0.13)'
+          transform: 'scale(0.10) translate(45,7)'
         });
   
         return task;
@@ -1109,9 +1110,9 @@ export default function BpmnRenderer(
           }
         });
         drawPath(parentGfx, pathData, {
-          strokeWidth: 5,
+          strokeWidth: 6,
           stroke: getStrokeColor(element, '#000000'),
-          transform: 'scale(0.1)'
+          transform: 'scale(0.09) translate(30,20)'
         });
   
         return task;
@@ -1125,7 +1126,8 @@ export default function BpmnRenderer(
         drawPath(parentGfx, pathData, {
           strokeWidth: 0.5,
           stroke: 'white',
-          fill: 'black'
+          fill: 'black',
+		  transform: 'translate(4,2) scale(1.05)'
         });
   
         return task;
@@ -1144,23 +1146,25 @@ export default function BpmnRenderer(
         drawPath(parentGfx, pathData, {
           strokeWidth: 0.5,
           stroke: 'black',
-          fill: 'white'
+          fill: 'white',
+		  transform: 'scale(0.9) translate(5,0)'
         });
   
         return task;
       }
 
-      if(element.businessObject.$attrs['qa:ntype'] === "DataObjectTask"){
+      if(element.businessObject.$attrs['qa:dtype'] === "NodeInstanceDataObjectTask"){
         pathData = pathMap.getScaledPath('TASK_TYPE_DATAOBJECT',{
           abspos: {
             x: 15,
             y: 15
-          }});
+		}});
         drawPath(parentGfx, pathData, {
-          strokeWidth: 0.5,
-          stroke: 'white',
-          fill: 'black'
-        });
+          strokeWidth: 0.6,
+          stroke: 'black',
+          //fill: 'white',
+		  transform: 'translate(-3.5,1.5) scale(1.08) skewX(-0.5)'
+	});
   
         return task;
       }
