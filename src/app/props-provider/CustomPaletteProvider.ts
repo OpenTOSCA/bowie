@@ -68,7 +68,17 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
 
   function createServiceTemplateInstance() {
     return function (event) {
-      const businessObject = bpmnFactory.create('bpmn:ScriptTask');
+      const businessObject = bpmnFactory.create('bpmn:ScriptTask', {
+        extensionElements: moddle.create('bpmn:ExtensionElements', {
+          values: [
+            moddle.create('camunda:InputOutput', {
+              inputParameters: [
+                moddle.create('camunda:InputParameter', { name: 'State' }),
+              ],
+            }),
+          ],
+        })
+      });
 
       businessObject.resultVariable = "ServiceInstanceURL";
       businessObject.name = "lustige groovy ServiceTemplates";
@@ -539,10 +549,10 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
         click: createRelationshipInstanceDataObject()
       }
     },
-    'create.node-instance-2': {
+    'create.data-objecttask': {
       group: 'activity1',
-      className: 'bpmn-icon-task blue',
-      title: 'Create nodeInstance',
+      className: 'icon-kombotest4',
+      title: 'Create dataObjectTask',
       action: {
         dragstart: createNodeInstanceDataObjectTask(),
         click: createNodeInstanceDataObjectTask()
@@ -553,29 +563,9 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
       group: 'activity1',
       separator: true
     },
-    'create.node-instance-task': {
-      group: 'activity1',
-      className: 'bpmn-icon-task blue',
-      title: 'Create nodeInstance',
-      action: {
-        dragstart: createNodeInstance(),
-        click: createNodeInstance()
-
-      }
-    },
-    'call-node-operation-task': {
-      group: 'activity1',
-      className: 'bpmn-icon-task blue',
-      title: 'Create CallNodeOperation',
-      action: {
-        dragstart: createCallNodeOperation('60'),
-        click: createCallNodeOperation('60')
-
-      }
-    },
     'create.service-instance-task': {
       group: 'activity1',
-      className: 'bpmn-icon-task yellow',
+      className: 'icon-serviceinstancecombo',
       title: 'Create ServiceInstance',
       action: {
         dragstart: createServiceTemplateInstance(),
@@ -583,9 +573,19 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
 
       }
     },
+    'create.node-instance-task': {
+      group: 'activity1',
+      className: 'icon-nodeinstance',
+      title: 'Create nodeInstance',
+      action: {
+        dragstart: createNodeInstance(),
+        click: createNodeInstance()
+
+      }
+    },
     'create.relationship-instance-task': {
       group: 'activity1',
-      className: 'bpmn-icon-task red',
+      className: 'icon-relinstancecombo',
       title: 'Create RelationshipInstance',
       action: {
         dragstart: createRelationshipInstance(),
@@ -593,9 +593,19 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
 
       }
     },
+    'call-node-operation-task': {
+      group: 'activity1',
+      className: 'icon-kombotest1',
+      title: 'Create CallNodeOperation',
+      action: {
+        dragstart: createCallNodeOperation('60'),
+        click: createCallNodeOperation('60')
+
+      }
+    },
     'set-state-task': {
       group: 'activity1',
-      className: 'bpmn-icon-task',
+      className: 'icon-kombotest2',
       title: 'Create SetStateTask',
       action: {
         dragstart: createStateChanger(),
@@ -605,7 +615,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
     },
     'set-properties-task': {
       group: 'activity1',
-      className: 'bpmn-icon-task',
+      className: 'icon-kombotest3',
       title: 'Create SetPropertiesTask',
       action: {
         dragstart: createPropertiesChanger(),

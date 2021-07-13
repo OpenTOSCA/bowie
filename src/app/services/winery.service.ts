@@ -13,6 +13,9 @@
  *******************************************************************************/
 
 import { Injectable } from '@angular/core';
+import { FileItem, FileUploader } from 'ng2-file-upload';
+import { toByteArray} from 'base64-js';
+//import { Buffer } from 'buffer';
 import { saveAs } from 'file-saver';
 import { PageParameter } from '../model/page-parameter';
 import { NodeTemplate } from '../model/nodetemplate';
@@ -23,11 +26,12 @@ import { HttpHeaders } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
 import { ToscaInterface } from '../model/toscaInterface';
-import JSZip from 'jszip';
+import JSZip, { file } from 'jszip';
 import { AppComponent } from '../app.component';
 import { CustomPropsProvider } from '../props-provider/CustomPropsProvider';
 import { HttpClient } from '@angular/common/http';
 import { isNullOrUndefined } from 'util';
+import { toBase64String } from '@angular/compiler/src/output/source_map';
 
 /**
  * WineryService
@@ -58,6 +62,27 @@ export class WineryService {
         if (this.repositoryURL) {
             //this.loadPlan();
         }
+    }
+    public getArtifactTemplates(ref: string){
+        //http://localhost:8080/winery/artifacttemplates/http%253A%252F%252Fopentosca.org%252Fartifacttemplates/MyTinyToDo_DA/xml
+        let httpserv = this.http;
+        let namespace = ref.split('}')[0];
+        namespace = namespace.replace('{', '');
+        let da = ref.split('}')[1];
+        const url = 'artifacttemplates/' + this.encode(namespace)+ '/' +  da + '/xml';  
+        const headers = new HttpHeaders({ 'Content-Type': 'application/xml' }); 
+        console.log(this.getFullUrl(url))
+        httpserv.get(this.getFullUrl(url), {
+            headers: headers, responseType: 'text'
+        }).subscribe(response => {
+            console.log("TESTST")
+            let parser = new DOMParser();
+            let xmlDoc = parser.parseFromString(response,"text/xml").getElementsByTagName("ArtifactReference")[0].getAttribute("reference");
+            CustomPropsProvider.references.push(xmlDoc);
+            
+            console.log(xmlDoc);
+        })
+        
     }
 
     public loadNodeTemplates() {
@@ -116,7 +141,8 @@ export class WineryService {
                     CustomPropsProvider.properties.push(nodeTemplate);
                     if (nodeTemplate.deploymentArtifacts != undefined) {
                         for (var k = 0; k < nodeTemplate.deploymentArtifacts.deploymentArtifact.length; k++) {
-                            let ref = nodeTemplate.deploymentArtifacts.deploymentArtifact[k].artifactRef
+                            let ref = nodeTemplate.deploymentArtifacts.deploymentArtifact[k].artifactRef;
+                            this.getArtifactTemplates(ref);
                             let index = ref.indexOf("}");
                             let temp = ref.substring(index + 1);
                             CustomPropsProvider.DA.push({
@@ -134,6 +160,8 @@ export class WineryService {
                     CustomPropsProvider.properties.push(nodeTemplate);
                     if (nodeTemplate.deploymentArtifacts != undefined) {
                         for (var k = 0; k < nodeTemplate.deploymentArtifacts.length; k++) {
+                            let ref = nodeTemplate.deploymentArtifacts.deploymentArtifact[k].artifactRef;
+                            this.getArtifactTemplates(ref);
                             CustomPropsProvider.DA.push({
                                 value: nodeTemplate.deploymentArtifacts.deploymentArtifact[k].artifactRef, name:
                                     nodeTemplate.deploymentArtifacts.deploymentArtifact[k].artifactRef
@@ -289,6 +317,7 @@ export class WineryService {
             "../../assets/CreateServiceInstance.groovy",
             "../../assets/CreateRelationshipInstance.groovy",
             "../../assets/CreateNodeInstance.groovy",
+            "../../assets/DataObject.groovy",
             "../../assets/CallNodeOperation.groovy"];
         url2.forEach((urlll) => {
             const filename = urlll.split('/')[urlll.split('/').length - 1];
@@ -301,33 +330,71 @@ export class WineryService {
                     count++;
                     if (count === url2.length) {
                         zip2.file("insertplannamehere.bpmn", xml, { binary: true });
-                        zip2.generateAsync({ type: "base64" })
-                            .then(function (content) {
+                        zip2.generateAsync({ type: "blob" })
+                            .then(async function (content) {
+                                 
 
                                 // see FileSaver.js
                                 // const headers = new HttpHeaders({ 'Content-Type': 'multipart/form-data; boundary= -----------------------------7da24f2e50046' });
                                 // const headers = new HttpHeaders({ 'Content-Type': 'application/zip' });
+                                console.log(content);
+                                //let buffer = Buffer.from('h', 'base64');
+                                
+                                //let buffer2 = buffer.toString('binary')
+                                //console.log(buffer);
+                                //let test = Uint8Array.from(buffer).toString();
+                                //let newContent = buffer;
+                                let newContent = content;
+                                var bob = new Blob([content], {type: "application/zip"});
+                                let formdata = new FormData();
+                                formData.append("DataObject.groovy", "../assets/DataObject.groovy");
+                                let blobby = new Blob([content])
+
+                                //let newContent = toByteArray(content);
                                 const requestData = '-----------------------------7da24f2e50046\r\n'
                                     + 'Content-Disposition: form-data; name=\"file\"; filename=\"file.zip\"\r\n'
                                     + 'Content-type: application/zip\r\n\r\n'
                                     //+ 'Content-type: plain/text\r\n\r\n'
-                                    + content + /*content +*/ '\r\n-----------------------------7da24f2e50046--\r\n';
+                                    + bob + '\r\n-----------------------------7da24f2e50046--\r\n';
+                                    
 
-                                blobcontent = content;
+                                    
 
-                                //saveAs(content, "example.zip");
-                                /*
-                                let fils = new File([content], 'example.zip', {type: "application/zip"});
+                                blobcontent = newContent;
+                                console.log(blobcontent);
+                                let fl = new FileUploader({ url: fullUrl });
+                                
+
+
+                                saveAs(content, "example.zip");
+                                
+                                
+                                let fils = new File([bob], 'example.zip', {type: "application/zip"});
                                 formData.append('file', fils, 'example.zip');
+                                
                                 console.log(fils);
-                                 */
+                                let fileitem = new FileItem(fl, fils, {});
+                                fileitem.isReady = true;
+                                fileitem.headers=  [{name: 'Content-Type', value: 'application/zip'}, {name: 'Access-Control-Allow-Origin', value: '*'}];
+                                console.log(fileitem)
+                                fileitem.method = "PUT";
+                                fl.setOptions({method: "PUT", headers: [{name: 'Access-Control-Allow-Origin', value: '*'}, {name: 'Access-Control-Allow-Headers', value: 'Content-Type:application/zip'}]});
+                                fl.addToQueue([fils]);
+                             
+                                fl.uploadAll();
+                                
+                                //fileitem._prepareToUploading();
+                                //.uploadItem(fileitem);
+                                
+                                console.log(fl.getReadyItems());
+                                console.log(fl.getNotUploadedItems());
 
                                 // https://github.com/Stuk/jszip/issues/312 das hier hilft
 
                                 //console.log(content);
                                 console.log(requestData);
-                                httpcli.put(fullUrl, requestData, { headers: headers })
-                                    .subscribe(response => { console.log('save date success'); console.log(fullUrl); });
+                                //httpcli.put(fullUrl, requestData, { headers: headers })
+                                  //  .subscribe(response => { console.log('save date success'); console.log(fullUrl); });
                                 //httpcli.put(fullUrl, content, {headers: headers})
                                 //    .subscribe(response => {console.log('save date success'); console.log(fullUrl); });
 
@@ -359,6 +426,16 @@ export class WineryService {
         });
         */
 
+    }
+
+    public base64DecodeUnicode(str: string) {
+        // Convert Base64 encoded bytes to percent-encoding, and then get the original string.
+         let percentEncodedStr = atob(str).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join('');
+    
+    
+        return decodeURIComponent(percentEncodedStr);
     }
 
     public save(data: string) {

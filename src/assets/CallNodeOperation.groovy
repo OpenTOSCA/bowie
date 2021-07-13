@@ -13,17 +13,22 @@ def outputParamNames = execution.getVariable("OutputParamNames").split(",");
 def paramsNeu = "{";
 println inputParamNames;
 for(int i in 0..inputParamNames.size()-1){
+    if(inputParamNames[i] != null){
     if(inputParamNames[i].startsWith('Input_')){
         def currentParam = inputParamNames[i];
         def param = execution.getVariable(currentParam);
-        param = param.replace('->', ',');
+        if(param != null){
+          param = param.replace('->', ',');
+        
         def type = param.split("!")[0];
         param = param.split("!")[1];
         if(type=='DA'){
            def paramDA = execution.getVariable("instanceDataAPIUrl").split("/servicetemplates")[0];
+           def da = param.split("#")[0];
+           def fileName = param.split("#")[1];
            def namespace = URLEncoder.encode('http://opentosca.org/artifacttemplates', "UTF-8");
            namespace = URLEncoder.encode(namespace, "UTF-8");
-           paramDA= paramDA+'/content/artifacttemplates/'+namespace+'/'+ param + '/files/tinytodo.zip';
+           paramDA= paramDA+'/content/artifacttemplates/'+namespace+'/'+ da + '/files/' + fileName;
            param = paramDA;
         }
         if(type=='VALUE'){
@@ -39,6 +44,7 @@ for(int i in 0..inputParamNames.size()-1){
         }
         def paramName = inputParamNames[i].split('Input_')[1];
         paramsNeu = paramsNeu + '"' + paramName + '" : "' + param + '",';
+    }}
     }
 }
 
