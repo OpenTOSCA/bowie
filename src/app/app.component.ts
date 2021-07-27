@@ -117,15 +117,7 @@ export class AppComponent implements OnInit {
     this.wineryService.loadPlan2(this.modeler);
   }
 
-  save(): void {
-        this.modeler.saveXML((err: any, xml: any) => {
-            console.log('Result of saving XML: ', err, xml);
-            let temp = JSON.stringify(xml);
-            this.wineryService.save(temp);
-        });
-    }
-
-    testsave(): void {
+  testsave(): void {
         this.modeler.saveXML((err: any, xml: any) => {
             console.log('Result of saving XML: ', err, xml);
             //let temp2 = JSON.stringify(xml);
