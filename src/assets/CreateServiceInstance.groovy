@@ -13,7 +13,7 @@ if(status == 200){
     def resultText = post.getInputStream().getText();    
     def slurper = new JsonSlurper();
     def json = slurper.parseText(resultText);
-    def message2 = execution.getVariable("Status");
+    def message2 = execution.getVariable("State");
     println "DAS IST DER STATE";
     println message2;
     def url2 = json;

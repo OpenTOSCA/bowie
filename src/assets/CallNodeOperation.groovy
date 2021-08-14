@@ -11,6 +11,7 @@ def operation = execution.getVariable("Operation");
 def inputParamNames = execution.getVariableNames();
 def outputParamNames = execution.getVariable("OutputParamNames").split(",");
 def paramsNeu = "{";
+println "alle Variablen";
 println inputParamNames;
 for(int i in 0..inputParamNames.size()-1){
     if(inputParamNames[i] != null){
