@@ -27,7 +27,7 @@ All seven tasks are an extension of the BPMN script task. Each of them contains 
 -Parameters: `State` (optional)
 -Result variable: `ServiceInstanceURL`
 
-This task generates a servicetemplate instance and allows setting the state of the servicetemplate instance, if the creation of that instance was successful.
+This task generates a servicetemplate instance and allows setting the state of this instance, if the creation of the servicetemplate instance was successful.
 
 #### 3.1.2 Create nodetemplate instance task 
 -Parameters: `State` (optional), `NodeTemplate`
@@ -52,62 +52,62 @@ The purpose of this task is to make the camunda engine aware of the data objects
 The call node operation task executes a management operation based on the parameters of the selected nodetemplate.
 An input parameter is either of type string, type VALUE or type DA. If the type string is selected, an extra textfield appears, where the value of the parameters must be specified.
 If the type VALUE is selected, a list of the currently available data objects ids is visible. After choosing an id, the data object property gets selected. The property whose value should be assigned to the input parameter needs to be chosen next.
-If the type DA is selected, a list of all Deployment Artifacts, which were specified in the xml in the winery, becomes visible.
+If the type DA is selected, a list of all Deployment Artifacts, which are specified in the xml file inside the winery, becomes visible.
 
 #### 3.1.6 set properties task
 -Parameters: `State` (optional), `InstanceURL`, `NodeTemplate`, `Properties`, `Value of Property`
 
-This task allows editing properties of an instance but be aware that it can change the properties inside the data object.
+This task allows editing properties of an instance, but be aware that it can change the properties inside the data object.
 
 #### 3.1.7 set state task
 -Parameters: `State`, `InstanceURL`
 
-This task allows setting the state of the instance, which is specified in the parameter InstanceURL, if you dont want to set the state at the point of creation or if you want to explicitly model the state.
+This task allows setting the state of the instance, which is specified in the parameter InstanceURL. This is useful if you dont want to set the state at the point of creation or if you want to explicitly model the state.
 
 ### 3.2 Extensions of the data object
 (Bild)
-The purpose of these constructs is to provide an overview of the properties of a selected node instance and to provide access to these properties in different tasks. During runtime, the properties may change and that should affect the information reflected in the data object. To use these data objects, a data object task in the workflow needs to be integrated. If this is not the case, the camunda engine will completely ignore the data object.
+The purpose of these constructs is to provide an overview of the properties of a selected node instance and to provide access to these properties in different tasks. During runtime, the properties may change and this should affect the information reflected in the data object. To use these data objects, a data object task in the workflow needs to be integrated. If this is not the case, the camunda engine will completely ignore the data object.
 
 ## 4) Example usage
-First of all, we start with a start event. On the left side you see the Palette of the Modeler which is extended by our symbols and that are explained in the earlier sections. On the right side you can see the PropertiesPanel which we extended by a new tab the so-called Properties tab which you will see later on. 
+First of all, we begin with a start event. On the left side, you can see the Palette of the Modeler, which is extended by our symbols that are explained in the earlier sections. On the right side, you can see the PropertiesPanel which we extended by a new tab, the so-called Properties tab, which you will see later on. 
 
 ### 0. Step: Create a ServiceTemplate instance
 ![](./pictures/Step0.PNG)
-As explained in section reference the service template instance task creates a service template and allows to optionally directly set the state. In order to reduce the workflow, we set the state of the successful created servicetemplate instance to CREATING. 
+As explained in section reference, the service template instance task creates a service template and allows the option to directly set the state. In order to reduce the workflow, we set the state of the successfully created servicetemplate instance to CREATING. 
 
 
 ### 1. Step: Create a DockerEngine instance
 ![](./pictures/Step1.PNG)
-In the next step we change the name of the result variable to DockerEngineNodeInstanceURL. The default value is of the result variable is a combination of the id and the String ‘NodeInstanceURL’, since each id of an element is unique, we can guarantee that each resultvariable is unique.
-We model now the creation of a DockerEngine instance, and we set the state to STARTED. This will work if the instance is successfully created.
+In the next step we change the name of the result variable to DockerEngineNodeInstanceURL. The default value is of the result variable is a combination of the id and the String ‘NodeInstanceURL’. Since each id of an element is unique, we can guarantee that each resultvariable is unique.
+We now model the creation of a DockerEngine instance and set the state to STARTED. This will work if the instance is successfully created.
 ![](./pictures/Step2.PNG)
 
 ### 2. Step: Create data object for DockerEngine instance
 ![](./pictures/Step3.PNG)
-Data objects are ignored by the process engine. They are important if you want to use properties of the node instance in multiple tasks (for example in a call node operation task). We change the id (and the name) of the data object to MyTinyToDoDataObject. This step is only for reasons of clarify.
+Data objects are ignored by the process engine. They are important if you want to use properties of the node instance in multiple tasks (for example in a call node operation task). We change the id (and the name) of the data object to MyTinyToDoDataObject. This step is only for reasons of clarity.
 ![](./pictures/Step4.PNG)
-In a data object we specify that this data object is mapped to a certain node instance id in order to address its values later. The values of the properties are read-only and the values correspond to the xml in the Winery. For example, we specified in the XML that the value of the DockerEngineURL is given by the input of the user.
+In a data object we specify that this data object is mapped to a certain node instance id, in order to address its values later on. The values of the properties are read-only and correspond to the xml in the Winery. For example, we specified in the XML that the value of the DockerEngineURL is given by the input of the user.
 
 ### 3. Step: Create data object for DockerEngine instance
-Data object tasks allow that data objects are not ignored by the process engine because internally we connect the node instance with the data object. Internally we created for each property of the node template a variable `NodeInstanceURLProperty`.
+Data object tasks allow, that data objects are not ignored by the process engine because we connect the node instance with the data object internally. Furthermore we create a variable `NodeInstanceURLProperty` internally for each property of the node template.
 ![](./pictures/Step5.PNG)
 
 ### 4. Step: Set DockerEngine instance properties
 
-Because we already set the state of the created DockerEngine instance in the last step we leave the optional state in the set properties task empty. To configure the DockerEngine instance correctly we need to set its properties. In this case we need to say that the value of the DockerEngineURL is ${DockerEngineURL}. In camunda this is the way to dynamic set and get process variables. In our case the value of ${DockerEngineURL} is the input which we are given by the user in the UI.
+Because we already set the state of the created DockerEngine instance in the last step, we leave the optional state in the set properties task empty. To configure the DockerEngine instance correctly, we need to set its properties. In this case we need to describe the value of the DockerEngineURL as ${DockerEngineURL}. In camunda this is the way to dynamically get and set process variables. In our case the value of ${DockerEngineURL} is the input which we are given by the user in the UI.
 ![](./pictures/Step6.PNG)
 
 ### 5. Step: Create a MyTinyToDoDockerContainer instance
 ![](./pictures/Step7.PNG)
-Now we change the name of the result variable to MyTinyToDoNodeInstanceURL. Again, this is only necessary to directly recognize which variable is now created. 
-We model now the creation of a MyTinyToDoDockerContainer instance, and we set the state to STARTING. This will work if the instance is successfully created. 
+Now we change the name of the result variable to MyTinyToDoNodeInstanceURL. Again, this is only necessary to directly recognize which variable is getting created. 
+We now model the creation of a MyTinyToDoDockerContainer instance, and set the state to STARTING. This will work if the instance is successfully created. 
 ![](./pictures/Step8.PNG)
 
 ### 6. Step: Call the startContainer operation of the DockerEngine
 ![](./pictures/Step9.PNG)
 ![](./pictures/Step10.PNG)
 ![](./pictures/Step11.PNG)
-The call node operation task allows three different types of parameters. If you specify that the type of the parameter is VALUE you need to select input in the value of parameter field. In this case we specify that the input parameter of the startContainer operation has the value ${DockerEngineURL}.
+The call node operation task allows three different types of parameters. If you specify that the type of the parameter is VALUE, you need to select input in the value of the parameter field. In this case we specify, that the input parameter of the startContainer operation has the value ${DockerEngineURL}.
 The second possibility is to set the type of the parameter to VALUE. Now we have to specify from which dataobject we need to get which property. In this case we set the ContainerPorts value to the Port value of the MyTinyToDoDataObject. The last possibility is to set the type of the parameter to DA (Deployment Artifact).  You will get a list of all Deployment Artifacts which are specified in the XML in the Winery.
 
 ### 7. Step: Set MyTinyToDoDockerContainer instance properties
@@ -127,5 +127,5 @@ Now we can set the state of the ServiceInstanceURL to STARTED.
 
 ### 10. Step: The whole workflow
 ![](./pictures/Step15.PNG)
-This is a complete workflow which specify the build plan of the CSAR MyTinyToDo_Bare_Docker_BPMN.
+This is a complete workflow which specifies the build plan of the CSAR MyTinyToDo_Bare_Docker_BPMN.
 
