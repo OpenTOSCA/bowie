@@ -7,8 +7,6 @@ import { map } from 'rxjs/internal/operators';
 import { WineryService } from '../services/winery.service';
 import { Injectable } from '@angular/core';
 import { is } from 'bpmn-js/lib/util/ModelUtil';
-import CamundaPropertiesProvider from 'bpmn-js-properties-panel/lib/provider/camunda/CamundaPropertiesProvider';
-
 
 /**
  * !!! If you want to add new attributes to objects you need to add a customized prefix otherwise the Camunda Engine will throw an error.
@@ -162,7 +160,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
       // console.log(prom);
       CustomPropsProvider.machnureinmal = false;
     }
-   
+
     // this.update2(CustomPropsProvider.options);
     let tmp = this;
     let prom = this.interfaceloadfunction();
@@ -413,18 +411,18 @@ export class CustomPropsProvider implements IPropertiesProvider {
                                     name: parameter[l].name,
                                     value: parameter[l].name + ',' + parameter[l].type
                                   });
-                                  
+
                                 }
-                              
+
                               }
                             }
                           }
                         }
                         element.businessObject.$attrs['qa:inputParameter'] = CustomPropsProvider.options;
-                        
+
                         let inputparameters = element.businessObject.$attrs['qa:inputParameter'];
                         console.log(inputparameters)
-                        for (let o = element.businessObject.extensionElements.values[0].inputParameters.length-1; o>=0; o--) {
+                        for (let o = element.businessObject.extensionElements.values[0].inputParameters.length - 1; o >= 0; o--) {
                           if (element.businessObject.extensionElements.values[0].inputParameters[o].name.startsWith('Input_')) {
 
                             element.businessObject.extensionElements.values[0].inputParameters.pop();
@@ -437,7 +435,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                             value: ''
                           });
                           console.log(inputParameter)
-                          
+
                           for (let o = 0; o < element.businessObject.extensionElements.values[0].inputParameters.length; o++) {
                             if (inputParameter.name === element.businessObject.extensionElements.values[0].inputParameters[o].name) {
                               addinput = false;
@@ -526,7 +524,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   //description: 'Type of Parameter',
                   label: 'Type of Parameter',
                   selectOptions: function (element, values) {
-                    let types = [{ name: 'VALUE', value: 'VALUE' }, { name: 'String', value: 'String' }, { name: 'DA', value: 'DA' }];
+                    let types = [{ name: '', value: '' }, { name: 'VALUE', value: 'VALUE' }, { name: 'String', value: 'String' }, { name: 'DA', value: 'DA' }];
                     return types;
                   },
                   set: function (element, values, node) {
@@ -564,19 +562,19 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     let name = element.businessObject.$attrs['qa:inputParams'].split(",")[0];
                     let reference = '';
                     let fileName = '';
-                    for(let d =0; d < CustomPropsProvider.references.length; d++){
+                    for (let d = 0; d < CustomPropsProvider.references.length; d++) {
                       reference = CustomPropsProvider.references[d];
                       let da = values['qa:deploymentArtifact'];
-                      if(reference.includes(da)){
+                      if (reference.includes(da)) {
                         let index = reference.lastIndexOf('/');
-                        fileName = reference.substring(index+1);
+                        fileName = reference.substring(index + 1);
                       }
                     }
                     for (let o = 0; o < element.businessObject.extensionElements.values[0].inputParameters.length; o++) {
                       let extensionElement = element.businessObject.extensionElements.values[0].inputParameters[o].name;
                       extensionElement = extensionElement.split('Input_')[1];
                       if (name === extensionElement) {
-                        element.businessObject.extensionElements.values[0].inputParameters[o].value = 'DA!' + values['qa:deploymentArtifact']+ '#'+ fileName;
+                        element.businessObject.extensionElements.values[0].inputParameters[o].value = 'DA!' + values['qa:deploymentArtifact'] + '#' + fileName;
                       }
                     }
                     return;
@@ -735,22 +733,22 @@ export class CustomPropsProvider implements IPropertiesProvider {
                               hasOwnProperty('outputParameters'))) {
                             for (let l = 0; l < CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].
                               interfaces[CustomPropsProvider.interfaceindex].value[k].outputParameters.outputParameter.length; l++) {
-                              // warum so und dann splitten??
+
                               let outparameter = CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].
                                 interfaces[CustomPropsProvider.interfaceindex].value[k].outputParameters.outputParameter;
                               CustomPropsProvider.outputParam.push({
                                 name: outparameter[l].name,
                                 value: outparameter[l].name + ',' + outparameter[l].type
                               });
-                            
-                            
+
+
                               let addinput = true;
                               const inputParameter = CustomPropsProvider.moddle.create('camunda:OutputParameter', {
                                 name: 'Output_' + outparameter[l].name,
                                 value: ''
                               });
                               console.log(inputParameter)
-                              
+
                               for (let o = 0; o < element.businessObject.extensionElements.values[0].outputParameters.length; o++) {
                                 if (inputParameter.name === element.businessObject.extensionElements.values[0].outputParameters[o].name) {
                                   addinput = false;
@@ -761,28 +759,139 @@ export class CustomPropsProvider implements IPropertiesProvider {
                               } else {
                                 addinput = true;
                               }
-    
-                              }
+
+                            }
                           }
                         }
 
                       }
                     }
                     element.businessObject.extensionElements.values[0].inputParameters[8].value = '';
-                    if(CustomPropsProvider.outputParam.length-1 >=0){
-                    for(let o = 0; o<CustomPropsProvider.outputParam.length-1; o++){
-                      element.businessObject.extensionElements.values[0].inputParameters[8].value += CustomPropsProvider.outputParam[o].name + ',';
-                    }
-                    let lastEntryIndex = CustomPropsProvider.outputParam.length-1;
-                    element.businessObject.extensionElements.values[0].inputParameters[8].value += CustomPropsProvider.outputParam[lastEntryIndex].name;
+                    if (CustomPropsProvider.outputParam.length - 1 >= 0) {
+                      for (let o = 0; o < CustomPropsProvider.outputParam.length - 1; o++) {
+                        element.businessObject.extensionElements.values[0].inputParameters[8].value += CustomPropsProvider.outputParam[o].name + ',';
+                      }
+                      let lastEntryIndex = CustomPropsProvider.outputParam.length - 1;
+                      element.businessObject.extensionElements.values[0].inputParameters[8].value += CustomPropsProvider.outputParam[lastEntryIndex].name;
 
-                    element.businessObject.$attrs['qa:outputParams'] = CustomPropsProvider.outputParam;
-                  }
+                      //element.businessObject.$attrs['qa:outputParams'] = CustomPropsProvider.outputParam;
+                    }
                     return CustomPropsProvider.outputParam;
+                  },
+                  set: function (element, values, node) {
+                    if (values['qa:outputParams'] != 'none') {
+                      element.businessObject.$attrs['qa:outputParams'] = values['qa:outputParams'];
+                      return;
+                    }
                   },
                   setControlValue: true,
                   modelProperty: 'qa:outputParams'
-                })
+                }),
+                EntryFactory.selectBox({
+                  id: 'dataObject2',
+                  //description: 'Data Object ID',
+                  label: 'Map to Data Object',
+                  selectOptions: function (element, values) {
+                    //console.log(CustomPropsProvider.template);
+                    let arr = [];
+                    arr.push({ name: 'none', value: 'none' });
+                    let saveDataObject = [];
+                    if (element.businessObject.$parent.$type == 'bpmn:Process') {
+                      let find = false;
+                      // entspricht der Participant Id, indem ich mich gerade befinde.
+                      let length = element.businessObject.$parent.flowElements.length;
+                      let flowElement = element.businessObject.$parent.flowElements;
+                      for (let i = 0; i < length; i++) {
+                        if (flowElement[i].$type == 'bpmn:DataObjectReference') {
+                          arr.push({ name: flowElement[i].id, value: flowElement[i].id });
+                          saveDataObject.push({ name: flowElement[i], value: flowElement[i] });
+                        }
+                      }
+                      element.businessObject.$attrs['qa:dataObjectV2'] = saveDataObject;
+                      return arr;
+                    }
+                  },
+                  set: function (element, values, node) {
+                    if (values['qa:dataObject2'] != 'none') {
+                      element.businessObject.$attrs['qa:dataObject2'] = values['qa:dataObject2'];
+                      if (element.businessObject.$attrs['qa:dataObjectV2'] != undefined) {
+                        let dataObject = element.businessObject.$attrs['qa:dataObjectV2'];
+                        for (let i = 0; i < dataObject.length; i++) {
+                          if (dataObject[i].name.id == element.businessObject.$attrs['qa:dataObject2']) {
+                            element.businessObject.$attrs['qa:dataObject02'] = dataObject[i].value;
+                          }
+                        }
+                      }
+                      return;
+                    }
+                  },
+                  setControlValue: true,
+
+                  modelProperty: 'qa:dataObject2',
+                }),
+                EntryFactory.selectBox({
+                  id: 'dataObjectProperties2',
+                  // description: 'Data Object ID',
+                  label: 'Map to Data Object Properties',
+                  selectOptions: function (element, values) {
+                    console.log("DATATATS");
+                    let selectedDataObject = element.businessObject.$attrs['qa:dataObject2'];
+                    console.log(selectedDataObject)
+                    if (selectedDataObject != 'none' && selectedDataObject != undefined) {
+                      let dataObjectsList = element.businessObject.$attrs['qa:dataObjectV2'];
+                      for (let i = 0; i < dataObjectsList.length; i++) {
+                        let dataObject = dataObjectsList[i].name.id;
+                        console.log(dataObject);
+                        console.log(selectedDataObject);
+                        if (dataObject == selectedDataObject) {
+                          dataObject = dataObjectsList[i].name;
+                          console.log(dataObject.$attrs)
+                          if (dataObject.$attrs['qa:propertiesList'] != undefined) {
+                            let properties = [{ name: '', value: '' }];
+                            console.log(dataObject.$attrs['qa:propertiesList']);
+                            for (let j = 0; j <= dataObject.$attrs['qa:propertiesList']; j++) {
+                              let property = dataObject.$attrs['qa:prop' + j];
+                              // Format: propery#propertyValue
+                              property = property.split('#')[0];
+                              properties.push({ name: property, value: property });
+                            }
+                            return properties;
+                          }
+                        }
+                      }
+                      return;
+                    }
+                  },
+                  set: function (element, values) {
+                    if (values['qa:dataObjectProperties2'] != 'none') {
+                      element.businessObject.$attrs['qa:dataObjectProperties2'] = values['qa:dataObjectProperties2'];
+                      let name = element.businessObject.$attrs['qa:outputParams'].split(",")[0];
+                      for (let o = 0; o < element.businessObject.extensionElements.values[0].outputParameters.length; o++) {
+                        let extensionElement = element.businessObject.extensionElements.values[0].outputParameters[o].name;
+                        extensionElement = extensionElement.split('Output_')[1];
+                        console.log(name);
+                        console.log(extensionElement);
+                        if (name === extensionElement) {
+                          let dataObject = element.businessObject.$attrs['qa:dataObject2'];
+                          element.businessObject.extensionElements.values[0].outputParameters[o].value = 'VALUE!' + dataObject + '#' + values['qa:dataObjectProperties2']
+                        }
+                      }
+                      element.businessObject.$attrs['qa:dataObjectProperties2'] = values['qa:dataObjectProperties2'];
+                      return;
+                    }
+                    return
+                  },
+                  setControlValue: true,
+                  hidden: function (element, node) {
+                    console.log(element.businessObject.$attrs['qa:dataObject2']);
+                    if (element.businessObject.$attrs['qa:dataObject2'] != 'none' && element.businessObject.$attrs['qa:dataObject2'] != undefined) {
+                      return false;
+                    } else {
+                      return true;
+                    }
+                  },
+                  modelProperty: 'qa:dataObjectProperties2',
+                }),
               ]
             }]
         });
@@ -1102,7 +1211,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   //description: 'State',
                   label: 'State',
                   selectOptions: function (element, values) {
-                    let opt = [{name: '', value: '' },{name: 'INITIAL', value: 'INITIAL' }, { name: 'CREATING', value: 'CREATING' }, { name: 'CREATED', value: 'CREATED' }, { name: 'CONFIGURING', value: 'CONFIGURING' },
+                    let opt = [{ name: '', value: '' }, { name: 'INITIAL', value: 'INITIAL' }, { name: 'CREATING', value: 'CREATING' }, { name: 'CREATED', value: 'CREATED' }, { name: 'CONFIGURING', value: 'CONFIGURING' },
                     { name: 'STARTING', value: 'STARTING' }, { name: 'STARTED', value: 'STARTED' }, { name: 'STOPPING', value: 'STOPPING' }, { name: 'STOPPED', value: 'STOPPED' }, { name: 'DELETING', value: 'DELETING' },
                     { name: 'DELETED', value: 'DELETED' }, { name: 'ERROR', value: 'ERROR' }, { name: 'MIGRATED', value: 'MIGRATED' }];
                     if (values.selectedOptions.length > 0 && (values.selectedOptions[0] != undefined)) {
@@ -1119,19 +1228,19 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   //description: 'NodeTemplate',
                   label: 'NodeTemplate',
                   selectOptions: function (element, values) {
-                    
-                    let arr =[];
+
+                    let arr = [];
                     // 
                     let nodeTemplate = element.businessObject.extensionElements.values[0].inputParameters[1].value;
-                    
-                    for(let i=0; i<CustomPropsProvider.template.length; i++){
+
+                    for (let i = 0; i < CustomPropsProvider.template.length; i++) {
                       let template = CustomPropsProvider.template[i].name;
                       //template = template.split('_')[0];
-                      arr.push({name: template, value: template});
+                      arr.push({ name: template, value: template });
                     }
                     if (nodeTemplate != undefined) {
                       element.businessObject.$attrs['qa:NodeTemplate'] = nodeTemplate;
-                      
+
                     }
                     return arr;
                   },
@@ -1140,10 +1249,10 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   set: function (element, values, node) {
                     if (values['qa:NodeTemplate'] != '') {
                       element.businessObject.$attrs['qa:NodeTemplate'] = values['qa:NodeTemplate'];
-                        element.businessObject.$attrs['qa:NodeTemplate'] = values['qa:NodeTemplate'];
-                        element.businessObject.extensionElements.values[0].inputParameters[1].value = values['qa:NodeTemplate'];
-                        return;
-                      }
+                      element.businessObject.$attrs['qa:NodeTemplate'] = values['qa:NodeTemplate'];
+                      element.businessObject.extensionElements.values[0].inputParameters[1].value = values['qa:NodeTemplate'];
+                      return;
+                    }
                     return;
                   }
                 })]
@@ -1164,7 +1273,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   //description: 'State',
                   label: 'State',
                   selectOptions: function (element, values) {
-                    let opt = [{name: '', value: '' },{name: 'INITIAL', value: 'INITIAL' }, { name: 'CREATING', value: 'CREATING' }, { name: 'CREATED', value: 'CREATED' }, { name: 'CONFIGURING', value: 'CONFIGURING' },
+                    let opt = [{ name: '', value: '' }, { name: 'INITIAL', value: 'INITIAL' }, { name: 'CREATING', value: 'CREATING' }, { name: 'CREATED', value: 'CREATED' }, { name: 'CONFIGURING', value: 'CONFIGURING' },
                     { name: 'STARTING', value: 'STARTING' }, { name: 'STARTED', value: 'STARTED' }, { name: 'STOPPING', value: 'STOPPING' }, { name: 'STOPPED', value: 'STOPPED' }, { name: 'DELETING', value: 'DELETING' },
                     { name: 'DELETED', value: 'DELETED' }, { name: 'ERROR', value: 'ERROR' }, { name: 'MIGRATED', value: 'MIGRATED' }];
                     if (values.selectedOptions.length > 0 && (values.selectedOptions[0] != undefined)) {
@@ -1196,7 +1305,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   //description: 'State',
                   label: 'State',
                   selectOptions: function (element, values) {
-                    let opt = [{name: '', value: '' },{name: 'INITIAL', value: 'INITIAL' }, { name: 'CREATING', value: 'CREATING' }, { name: 'CREATED', value: 'CREATED' }, { name: 'CONFIGURING', value: 'CONFIGURING' },
+                    let opt = [{ name: '', value: '' }, { name: 'INITIAL', value: 'INITIAL' }, { name: 'CREATING', value: 'CREATING' }, { name: 'CREATED', value: 'CREATED' }, { name: 'CONFIGURING', value: 'CONFIGURING' },
                     { name: 'STARTING', value: 'STARTING' }, { name: 'STARTED', value: 'STARTED' }, { name: 'STOPPING', value: 'STOPPING' }, { name: 'STOPPED', value: 'STOPPED' }, { name: 'DELETING', value: 'DELETING' },
                     { name: 'DELETED', value: 'DELETED' }, { name: 'ERROR', value: 'ERROR' }, { name: 'MIGRATED', value: 'MIGRATED' }];
                     if (values.selectedOptions.length > 0 && (values.selectedOptions[0] != undefined)) {
@@ -1280,7 +1389,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   selectOptions: function (element, values) {
                     return CustomPropsProvider.relationshiptemplate;
                   },
-                  set: function(element, values, node){
+                  set: function (element, values, node) {
                     if (values['qa:RelationshipTemplate'] != 'none') {
                       element.businessObject.$attrs['qa:RelationshipTemplate'] = values['qa:RelationshipTemplate'];
                       element.businessObject.extensionElements.values[0].inputParameters[1].value = values['qa:RelationshipTemplate'];
@@ -1315,10 +1424,10 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       return arr;
                     }
                   },
-                  set: function(element, values, node){
+                  set: function (element, values, node) {
                     if (values['qa:SourceURL'] != 'none') {
                       element.businessObject.$attrs['qa:SourceURL'] = values['qa:SourceURL'];
-                      element.businessObject.extensionElements.values[0].inputParameters[2].value = values['qa:SourceURL'];
+                      element.businessObject.extensionElements.values[0].inputParameters[2].value = '${' + values['qa:SourceURL'] + '}';
                       return;
                     }
                     element.businessObject.extensionElements.values[0].inputParameters[2].value = '';
@@ -1340,7 +1449,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       console.log("FLOWELEMENT");
                       console.log(flowElement)
                       let arr = [];
-                      arr.push({ name: 'none', value: 'none'});
+                      arr.push({ name: 'none', value: 'none' });
                       for (let i = 0; i < length; i++) {
                         console.log(flowElement[i].ntype)
                         if (flowElement[i].$type == 'bpmn:ScriptTask' && flowElement[i].$attrs['qa:ntype'] == 'NodeInstance' && flowElement[i].resultVariable != undefined) {
@@ -1350,10 +1459,10 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       return arr;
                     }
                   },
-                  set: function(element, values, node){
+                  set: function (element, values, node) {
                     if (values['qa:TargetURL'] != 'none') {
                       element.businessObject.$attrs['qa:TargetURL'] = values['qa:TargetURL'];
-                      element.businessObject.extensionElements.values[0].inputParameters[3].value = values['qa:TargetURL'];
+                      element.businessObject.extensionElements.values[0].inputParameters[3].value = '${' + values['qa:TargetURL'] + '}';
                       return;
                     }
                     element.businessObject.extensionElements.values[0].inputParameters[3].value = '';
@@ -1367,6 +1476,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
         });
     } else if ((element.businessObject.$type == 'bpmn:DataObjectReference') && (element.businessObject.$attrs['qa:dtype'] == "NodeInstanceDataObject")) {
       {
+
         return this.bpmnPropertiesProvider.getTabs(element)
           .concat({
             id: 'custom',
@@ -1404,6 +1514,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                         if (element.businessObject.$attrs['qa:dtype'] === "NodeInstanceDataObject") {
                           element.businessObject.$attrs['qa:instanceID'] = values['qa:instanceID'];
                           element.businessObject.extensionElements.values[0].inputParameters[0].value = values['qa:instanceID'];
+                          element.businessObject.$attrs['qa:customPropertiesList'] = 0;
                         }
                       }
                       return;
@@ -1425,7 +1536,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       if (values['qa:NodeTemplate'] != 'none') {
                         element.businessObject.$attrs['qa:NodeTemplate'] = values['qa:NodeTemplate'];
                         // removes old input_ parameters
-                        for (let o = element.businessObject.extensionElements.values[0].inputParameters.length-1; o >=0; o--) {
+                        for (let o = element.businessObject.extensionElements.values[0].inputParameters.length - 1; o >= 0; o--) {
                           if (element.businessObject.extensionElements.values[0].inputParameters[o].name.startsWith('Input_')) {
                             element.businessObject.extensionElements.values[0].inputParameters.pop();
                           }
@@ -1508,7 +1619,35 @@ export class CustomPropsProvider implements IPropertiesProvider {
                               options.push({ name: property, value: property })
                             }
                           }
+                          
+                          
                           //options.push({name: , value: });
+                        }
+                      }
+                      let length = element.businessObject.$attrs['qa:customPropertiesList'];
+                          console.log(length)
+                      for(let k=0; k < length; k++){
+                        let customProp = element.businessObject.$attrs['qa:customProp'+ k]; 
+                        console.log(customProp);
+                        options.push({ name: customProp, value: customProp });
+                        const inputParameter = CustomPropsProvider.moddle.create('camunda:InputParameter', {
+                          name: 'Input_' + customProp,
+                          value: ''
+                        });
+                        let addInput = true;
+                        for (let o = 0; o < element.businessObject.extensionElements.values[0].inputParameters.length; o++) {
+                          console.log(element.businessObject.extensionElements.values[0].inputParameters[o].name);
+                         
+                          if (inputParameter.name === element.businessObject.extensionElements.values[0].inputParameters[o].name) {
+                            addInput = false;
+                          }
+                        }
+  
+                        if (addInput) {
+                          console.log("test")
+                          element.businessObject.extensionElements.values[0].inputParameters.push(inputParameter);
+                        } else {
+                          addInput = true;
                         }
                       }
                       return options;
@@ -1579,8 +1718,57 @@ export class CustomPropsProvider implements IPropertiesProvider {
                         'qa:valueProp': ''
                       }
                     },
-                  }
-                  )
+                  }),
+                  EntryFactory.textField({
+                    id: 'customProp',
+                    //description: 'Value of Parameter',
+                    label: 'Name of custom property',
+                    modelProperty: 'qa:customProp', 
+                  }),
+                  EntryFactory.checkbox({
+                    id: 'saveValueCheckbox',
+                    description: 'Save this parameter as custom property.',
+                    //label: 'Save',
+                    modelProperty: 'qa:saveValueCheckbox',
+                    set: function (element, values) {
+                      let check = values['qa:saveValueCheckbox'];
+                      element.businessObject.$attrs['qa:saveValueCheckbox'] = check;
+                      let addInput = true;
+                      console.log(check);
+                      let nameProp = element.businessObject.$attrs['qa:customProp'];
+                      if(nameProp != undefined || nameProp == ''){
+                      const inputParameter = CustomPropsProvider.moddle.create('camunda:InputParameter', {
+                        name: 'Input_' + nameProp,
+                        value: ''
+                      });
+                      for (let o = 0; o < element.businessObject.extensionElements.values[0].inputParameters.length; o++) {
+                        console.log(element.businessObject.extensionElements.values[0].inputParameters[o].name);
+                        console.log(nameProp);
+                        if (inputParameter.name === element.businessObject.extensionElements.values[0].inputParameters[o].name) {
+                          addInput = false;
+                        }
+                      }
+
+                      if (addInput) {
+                        element.businessObject.extensionElements.values[0].inputParameters.push(inputParameter);
+
+                        
+                        let pos = element.businessObject.$attrs['qa:customPropertiesList'];
+                        element.businessObject.$attrs['qa:customProp'+ pos] = nameProp;
+                        element.businessObject.$attrs['qa:Properties'] = '';
+                        element.businessObject.$attrs['qa:customPropertiesList'] +=1;
+
+                      } else {
+                        addInput = true;
+                      }
+                      
+                      
+                      //element.businessObject.$attrs['qa:saveValueCheckbox'] = false;
+                    
+                      
+
+                    }}
+                  }),
                 ]
               }]
           })
@@ -1664,14 +1852,14 @@ export class CustomPropsProvider implements IPropertiesProvider {
                           for (let i = 0; i < dataObject.length; i++) {
                             if (dataObject[i].name.id == element.businessObject.$attrs['qa:dataObject']) {
                               element.businessObject.$attrs['qa:dataObject0'] = dataObject[i].value;
-                             
+
                             }
                           }
                         }
                         element.businessObject.extensionElements.values[0].inputParameters[1].value = values['qa:dataObject'];
                         return;
                       }
-                      
+
                     },
                     setControlValue: true,
                     hidden: function (element, node) {
@@ -1697,7 +1885,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       if (values['qa:NodeTemplate'] != 'none') {
                         element.businessObject.$attrs['qa:NodeTemplate'] = values['qa:NodeTemplate'];
                         // removes old input_ parameters
-                        for (let o = element.businessObject.extensionElements.values[0].inputParameters.length-1; o >=0; o--) {
+                        for (let o = element.businessObject.extensionElements.values[0].inputParameters.length - 1; o >= 0; o--) {
                           if (element.businessObject.extensionElements.values[0].inputParameters[o].name.startsWith('Input_')) {
                             element.businessObject.extensionElements.values[0].inputParameters.pop();
                           }
@@ -1749,7 +1937,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                           }
                         }
 
-                        element.businessObject.extensionElements.values[0].inputParameters[1].value = values['qa:NodeTemplate'];
+                        element.businessObject.extensionElements.values[0].inputParameters[2].value = values['qa:NodeTemplate'];
                         return;
                       }
                       return;
@@ -1843,7 +2031,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       return arr;
                     }
                   },
-                  set: function(element, values, node){
+                  set: function (element, values, node) {
                     if (values['qa:RelationshipInstanceURL'] != 'none') {
                       element.businessObject.$attrs['qa:RelationshipInstanceURL'] = values['qa:RelationshipInstanceURL'];
                       element.businessObject.extensionElements.values[0].inputParameters[2].value = values['qa:RelationshipInstanceURL'];
@@ -1879,7 +2067,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       return arr;
                     }
                   },
-                  set: function(element, values, node){
+                  set: function (element, values, node) {
                     if (values['qa:SourceURL'] != 'none') {
                       element.businessObject.$attrs['qa:SourceURL'] = values['qa:SourceURL'];
                       element.businessObject.extensionElements.values[0].inputParameters[2].value = values['qa:SourceURL'];
@@ -1904,7 +2092,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       console.log("FLOWELEMENT");
                       console.log(flowElement)
                       let arr = [];
-                      arr.push({ name: 'none', value: 'none'});
+                      arr.push({ name: 'none', value: 'none' });
                       for (let i = 0; i < length; i++) {
                         console.log(flowElement[i].ntype)
                         if (flowElement[i].$type == 'bpmn:ScriptTask' && flowElement[i].$attrs['qa:ntype'] == 'NodeInstance' && flowElement[i].resultVariable != undefined) {
@@ -1914,7 +2102,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       return arr;
                     }
                   },
-                  set: function(element, values, node){
+                  set: function (element, values, node) {
                     if (values['qa:TargetURL'] != 'none') {
                       element.businessObject.$attrs['qa:TargetURL'] = values['qa:TargetURL'];
                       element.businessObject.extensionElements.values[0].inputParameters[3].value = values['qa:TargetURL'];
@@ -2006,7 +2194,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   //description: 'State',
                   label: 'State',
                   selectOptions: function (element, values) {
-                    let opt = [{name: '', value: '' },{name: 'INITIAL', value: 'INITIAL' }, { name: 'CREATING', value: 'CREATING' }, { name: 'CREATED', value: 'CREATED' }, { name: 'CONFIGURING', value: 'CONFIGURING' },
+                    let opt = [{ name: '', value: '' }, { name: 'INITIAL', value: 'INITIAL' }, { name: 'CREATING', value: 'CREATING' }, { name: 'CREATED', value: 'CREATED' }, { name: 'CONFIGURING', value: 'CONFIGURING' },
                     { name: 'STARTING', value: 'STARTING' }, { name: 'STARTED', value: 'STARTED' }, { name: 'STOPPING', value: 'STOPPING' }, { name: 'STOPPED', value: 'STOPPED' }, { name: 'DELETING', value: 'DELETING' },
                     { name: 'DELETED', value: 'DELETED' }, { name: 'ERROR', value: 'ERROR' }, { name: 'MIGRATED', value: 'MIGRATED' }];
                     if (values.selectedOptions.length > 0 && (values.selectedOptions[0] != undefined)) {
@@ -2044,7 +2232,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                         element.businessObject.$attrs['qa:instanceID'] = values['qa:instanceID'];
                         console.log("INSTANCE ID");
                         console.log(values['qa:instanceID']);
-                        element.businessObject.extensionElements.values[0].inputParameters[1].value = "${"+values['qa:instanceID'] + "}";
+                        element.businessObject.extensionElements.values[0].inputParameters[1].value = values['qa:instanceID'];
                       }
                     }
                     return;
@@ -2057,78 +2245,78 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   //description: 'NodeTemplate',
                   label: 'NodeTemplate',
                   selectOptions: function (element, values) {
-                    let arr =[];
-                    for(let i=0; i<CustomPropsProvider.template.length; i++){
+                    let arr = [];
+                    for (let i = 0; i < CustomPropsProvider.template.length; i++) {
                       let template = CustomPropsProvider.template[i].name;
                       template = template.split('_')[0];
-                      arr.push({name: template, value: template});
+                      arr.push({ name: template, value: template });
                     }
                     return arr;
                   },
                   setControlValue: true,
                   modelProperty: 'qa:NodeTemplate',
                   set: function (element, values, node) {
-                      if (values['qa:NodeTemplate'] != 'none') {
-                        element.businessObject.$attrs['qa:NodeTemplate'] = values['qa:NodeTemplate'];
-                        for (let o = element.businessObject.extensionElements.values[0].inputParameters.length-1; o >=0; o--) {
-                          if (element.businessObject.extensionElements.values[0].inputParameters[o].name.startsWith('Input_')) {
-                            element.businessObject.extensionElements.values[0].inputParameters.pop();
-                          }
+                    if (values['qa:NodeTemplate'] != 'none') {
+                      element.businessObject.$attrs['qa:NodeTemplate'] = values['qa:NodeTemplate'];
+                      for (let o = element.businessObject.extensionElements.values[0].inputParameters.length - 1; o >= 0; o--) {
+                        if (element.businessObject.extensionElements.values[0].inputParameters[o].name.startsWith('Input_')) {
+                          element.businessObject.extensionElements.values[0].inputParameters.pop();
                         }
-                        for (let i = 0; i < CustomPropsProvider.properties.length; i++) {
-                          let nodetemplate = element.businessObject.$attrs['qa:NodeTemplate']
-                          console.log(nodetemplate);
-                          let nodeid = CustomPropsProvider.properties[i].id;
-                          nodeid = nodeid.split('_')[0];
-                          if (nodeid == nodetemplate) {
-                            let options = [{ name: 'none', value: 'none' }];
-                            let properties = CustomPropsProvider.properties[i].properties.kvproperties;
-                            properties = JSON.stringify(properties).split(",");
-                            console.log(properties)
-                            let propertiesList = 0;
-                            for (let j = 0; j < properties.length; j++) {
-                              console.log(j)
-                              let property = properties[j].split(':')[0].replace("{", "");
-                              console.log(property)
-                              if (property.startsWith("\"") && property.endsWith("\"")) {
-                                property = property.substring(1, property.length - 1);
-                                let addinput = true;
-                                let propertyValue = properties[j].substr(properties[j].indexOf(':') + 1).replace("}", "");
-                                console.log(propertyValue);
-                                if (propertyValue.startsWith("\"") && propertyValue.endsWith("\"")) {
-                                  propertyValue = propertyValue.substring(1, propertyValue.length - 1);
-                                  const inputParameter = CustomPropsProvider.moddle.create('camunda:InputParameter', {
-                                    name: 'Input_' + property,
-                                    value: propertyValue
-                                  });
-                                  console.log(inputParameter)
-                                  for (let o = 0; o < element.businessObject.extensionElements.values[0].inputParameters.length; o++) {
-                                    if (inputParameter.name === element.businessObject.extensionElements.values[0].inputParameters[o].name) {
-                                      addinput = false;
-                                    }
-                                  }
-                                  if (addinput) {
-                                    // necessary because we cannot save arrays correct
-                                    element.businessObject.$attrs['qa:prop' + j] = property + '#' + propertyValue;
-                                    console.log(element.businessObject.$attrs['qa:prop' + i]);
-
-                                    element.businessObject.extensionElements.values[0].inputParameters.push(inputParameter);
-                                  } else {
-                                    addinput = true;
+                      }
+                      for (let i = 0; i < CustomPropsProvider.properties.length; i++) {
+                        let nodetemplate = element.businessObject.$attrs['qa:NodeTemplate']
+                        console.log(nodetemplate);
+                        let nodeid = CustomPropsProvider.properties[i].id;
+                        nodeid = nodeid.split('_')[0];
+                        if (nodeid == nodetemplate) {
+                          let options = [{ name: 'none', value: 'none' }];
+                          let properties = CustomPropsProvider.properties[i].properties.kvproperties;
+                          properties = JSON.stringify(properties).split(",");
+                          console.log(properties)
+                          let propertiesList = 0;
+                          for (let j = 0; j < properties.length; j++) {
+                            console.log(j)
+                            let property = properties[j].split(':')[0].replace("{", "");
+                            console.log(property)
+                            if (property.startsWith("\"") && property.endsWith("\"")) {
+                              property = property.substring(1, property.length - 1);
+                              let addinput = true;
+                              let propertyValue = properties[j].substr(properties[j].indexOf(':') + 1).replace("}", "");
+                              console.log(propertyValue);
+                              if (propertyValue.startsWith("\"") && propertyValue.endsWith("\"")) {
+                                propertyValue = propertyValue.substring(1, propertyValue.length - 1);
+                                const inputParameter = CustomPropsProvider.moddle.create('camunda:InputParameter', {
+                                  name: 'Input_' + property,
+                                  value: propertyValue
+                                });
+                                console.log(inputParameter)
+                                for (let o = 0; o < element.businessObject.extensionElements.values[0].inputParameters.length; o++) {
+                                  if (inputParameter.name === element.businessObject.extensionElements.values[0].inputParameters[o].name) {
+                                    addinput = false;
                                   }
                                 }
+                                if (addinput) {
+                                  // necessary because we cannot save arrays correct
+                                  element.businessObject.$attrs['qa:prop' + j] = property + '#' + propertyValue;
+                                  console.log(element.businessObject.$attrs['qa:prop' + i]);
+
+                                  element.businessObject.extensionElements.values[0].inputParameters.push(inputParameter);
+                                } else {
+                                  addinput = true;
+                                }
                               }
+                            }
 
-                            } element.businessObject.$attrs['qa:propertiesList'] = properties.length - 1;
+                          } element.businessObject.$attrs['qa:propertiesList'] = properties.length - 1;
 
-                          }
                         }
-
-                        element.businessObject.extensionElements.values[0].inputParameters[2].value = values['qa:NodeTemplate'];
-                        return;
                       }
+
+                      element.businessObject.extensionElements.values[0].inputParameters[2].value = values['qa:NodeTemplate'];
                       return;
                     }
+                    return;
+                  }
                 }),
                 EntryFactory.selectBox({
                   id: 'properties',
@@ -2150,15 +2338,15 @@ export class CustomPropsProvider implements IPropertiesProvider {
                         properties = JSON.stringify(properties).split(",");
                         console.log("PROPERTIES");
                         console.log()
-                        
+
                         for (let j = 0; j < properties.length; j++) {
-                          
+
                           let property = properties[j].split(':')[0].replace("{", "");
                           if (property.startsWith("\"") && property.endsWith("\"")) {
                             property = property.substring(1, property.length - 1);
 
                             options.push({ name: property, value: property })
-                            p = p + ','+ property;
+                            p = p + ',' + property;
                           }
                         }
                         //options.push({name: , value: });
@@ -2171,7 +2359,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   setControlValue: true,
                   modelProperty: 'qa:Properties',
                   set: function (element, values, node) {
-                    element.businessObject.$attrs['qa:valueProp'] ='';
+                    element.businessObject.$attrs['qa:valueProp'] = '';
                     if (values['qa:Properties'] != 'none') {
                       element.businessObject.$attrs['qa:Properties'] = values['qa:Properties'];
                       if (is(element.businessObject, 'bpmn:ScriptTask')) {
@@ -2183,7 +2371,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       for (let o = 0; o < element.businessObject.extensionElements.values[0].inputParameters.length; o++) {
                         console.log(values['qa:Properties'])
                         console.log(element.businessObject.extensionElements.values[0].inputParameters[o].name)
-                        let property = 'Input_'+values['qa:Properties'];
+                        let property = 'Input_' + values['qa:Properties'];
                         if (property === element.businessObject.extensionElements.values[0].inputParameters[o].name) {
                           // updates den Wert bei Veränderung, übernimmt aber keine Änderungen aus dem Inputvariabelfeld
                           console.log(element.businessObject.extensionElements.values[0].inputParameters[o].value)
@@ -2243,7 +2431,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
             }]
         })
     }
-   else {
+    else {
       return this.bpmnPropertiesProvider.getTabs(element)
         .concat({
           id: 'custom',
