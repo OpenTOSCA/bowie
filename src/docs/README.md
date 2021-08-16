@@ -3,7 +3,7 @@
 ## 1)	Motivation
 Applications consists of many different components that need to be maintained.  Manual deployment is a problem, because it is error-prone, time-consuming, and costly. On 08.06.2021 an admin configuration of the cloud provider Fastly caused a problem, which lead to 85% of the network returning errors. Consequently, applications like Netflix, Amazon or PayPal were not available for a certain amount of time. Another reason why manual deployment is not sufficient, is the complexity of an application or the requirement for deployment configuration / customization. Therefore, you need experts in this field, which typically causes higher expenses. An approach to prevent this problem is to select a specific deployment system. That on the other hand could lead to a vendor lock-in because most deployment systems differ in their functionalities. This leads to the compromise of using one of the available deployment systems, which matches most of your needs. This solution is insufficient, which is why we need a standard to deploy and manage cloud applications in a portable manner. TOSCA (The Topology and Orchestration Specification for Cloud Applications) is such a standard. It allows the automation of deployment and management of cloud applications in a portable manner. TOSCA also allows the imperative deployment modeling approach, i.e. you can upload a BPEL & BPMN plan to define a management plan. However, the current approach of the BPMN connection is not fully implemented yet. That is why we present a new BPMN modeler for the winery, which allows modelling of (customized) workflows with user-defined behavior. You can use this modeler to define a plan, which gets executed in the OpenTOSCA Runtime. In addition, the modeler is easy to use and to extend, which allows for different ways to create new tasks and integrate them into the project.
 
-## 2) Use Case Bild
+## 2) Use Case
 ![](./pictures/UseCase.png)
 
 Our Use Case is the creation of a MyTinyToDo instance, which is hosted on a Docker Engine (see figure 1). Every component is rendered as a box, each representing a node template. The edge represents a relationship template, which is of the type “hosted-on”.
@@ -50,9 +50,11 @@ The purpose of this task is to make the camunda engine aware of the data objects
 -Parameters: `ServiceInstanceURL`, `NodeTemplate`, `Interface`, `Operation`, `InputParameters`, `Name of Parameter`, `Type of Parameter` (DA, String or VALUE of data object), `OutputParameters`
 
 The call node operation task executes a management operation based on the parameters of the selected nodetemplate.
-An input parameter is either of type string, type VALUE or type DA. If the type string is selected, an extra textfield appears, where the value of the parameters must be specified.
-If the type VALUE is selected, a list of the currently available data objects ids is visible. After choosing an id, the data object property gets selected. The property whose value should be assigned to the input parameter needs to be chosen next.
-If the type DA is selected, a list of all Deployment Artifacts, which are specified in the xml file inside the winery, becomes visible.
+An input parameter is either of type string, type VALUE or type DA. If the type `String` is selected, an extra textfield appears, where the value of the parameters must be specified.
+If the type `VALUE` is selected, a list of the currently available data objects ids is visible. After choosing an id, the data object property gets selected. The property whose value should be assigned to the input parameter needs to be chosen next.
+If the type `DA` is selected, a list of all Deployment Artifacts, which are specified in the xml file inside the winery, becomes visible.
+
+If you want to export some output parameters to a data object variable, you need to select the corresponding output param, then you have to define to which property of the selected data object you want to map the output parameter.
 
 #### 3.1.6 set properties task
 -Parameters: `State` (optional), `InstanceURL`, `NodeTemplate`, `Properties`, `Value of Property`
@@ -65,7 +67,7 @@ This task allows editing properties of an instance, but be aware that it can cha
 This task allows setting the state of the instance, which is specified in the parameter InstanceURL. This is useful if you dont want to set the state at the point of creation or if you want to explicitly model the state.
 
 ### 3.2 Extensions of the data object
-(Bild)
+![](./pictures/DataObjectExtensions.PNG)
 The purpose of these constructs is to provide an overview of the properties of a selected node instance and to provide access to these properties in different tasks. During runtime, the properties may change and this should affect the information reflected in the data object. To use these data objects, a data object task in the workflow needs to be integrated. If this is not the case, the camunda engine will completely ignore the data object.
 
 ## 4) Example usage
