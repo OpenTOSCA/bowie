@@ -1052,7 +1052,6 @@ export default function BpmnRenderer(
       });
 	  
 	  if(element.businessObject.$attrs['qa:ntype'] === "NodeInstance"){
-      console.log(element.height)
 		  pathData = pathMap.getScaledPath('TASK_TYPE_NODEINSTANCE',{
         abspos: {
           x: 15,
@@ -1617,13 +1616,11 @@ export default function BpmnRenderer(
         fillOpacity: DEFAULT_FILL_OPACITY,
         stroke: 'blue',
       });
-      console.log(pathData)
       var semantic = getSemantic(element);
 
       if (isCollection(semantic)) {
         renderDataItemCollection(parentGfx, element);
       }
-      console.log(elementObject)
       return elementObject;
     }
     if(element.businessObject.$attrs['qa:dtype'] === "ServiceInstanceDataObject"){

@@ -454,8 +454,6 @@ export default function PathMap() {
    */
   this.getScaledPath = function getScaledPath(pathId, param) {
     var rawPath = this.pathMap[pathId];
-    console.log(rawPath)
-
     // positioning
     // compute the start point of the path
     var mx, my;
@@ -477,21 +475,15 @@ export default function PathMap() {
 
 
       // Apply height ratio
-      console.log(rawPath.heightElements)
       for (var heightIndex = 0; heightIndex < rawPath.heightElements.length; heightIndex++) {
-        console.log("DHDHDH")
         coordinates['y' + heightIndex] = rawPath.heightElements[heightIndex] * heightRatio;
       }
 
       // Apply width ratio
-      console.log(rawPath.widthElements)
       for (var widthIndex = 0; widthIndex < rawPath.widthElements.length; widthIndex++) {
         coordinates['x' + widthIndex] = rawPath.widthElements[widthIndex] * widthRatio;
       }
     }
-    console.log(mx);
-    console.log(my);
-    console.log(coordinates)
     // Apply value to raw path
     var path = format(
       rawPath.d, {

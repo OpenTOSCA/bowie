@@ -14,11 +14,7 @@ if(status == 200){
     def slurper = new JsonSlurper();
     def json = slurper.parseText(resultText);
     def message2 = execution.getVariable("State");
-    println "DAS IST DER STATE";
-    println message2;
     def url2 = json;
-    println "InstanceURL SetState";
-    println url2;
     def put = new URL(url2 + "/state").openConnection();
     put.setRequestMethod("PUT");
     put.setDoOutput(true);

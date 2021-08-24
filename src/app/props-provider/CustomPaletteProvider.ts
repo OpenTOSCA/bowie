@@ -81,7 +81,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
       });
 
       businessObject.resultVariable = "ServiceInstanceURL";
-      businessObject.name = "lustige groovy ServiceTemplates";
+      businessObject.name = "Create ServiceTemplate Instance";
       businessObject.scriptFormat = "groovy";
       businessObject.resource = "deployment://CreateServiceInstance.groovy";
       businessObject.$attrs['qa:ntype'] = "ServiceTemplateInstance";
@@ -114,7 +114,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
       });
 
       businessObject.resultVariable = businessObject.id+"NodeInstanceURL";
-      businessObject.name = "lustige groovy nodeinstances";
+      businessObject.name = "Create NodeTemplate Instance";
       businessObject.scriptFormat = "groovy";
       businessObject.resource = "deployment://CreateNodeInstance.groovy";
       businessObject.$attrs['qa:ntype'] = "NodeInstance";
@@ -150,7 +150,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
       });
 
       businessObject.resultVariable = businessObject.id+"RelationshipInstanceURL";
-      businessObject.name = "lustige groovy relationshipinstances";
+      businessObject.name = "Create RelationshipTemplate Instance";
       businessObject.scriptFormat = "groovy";
       businessObject.resource = "deployment://CreateRelationshipInstance.groovy";
       businessObject.$attrs['qa:ntype'] = "RelationshipInstance";
@@ -189,7 +189,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
         })
       });
 
-      businessObject.name = "lustige groovy node operations";
+      businessObject.name = "Call Node Operation";
       businessObject.scriptFormat = "groovy";
       businessObject.resource = "deployment://CallNodeOperation.groovy";
       businessObject.$attrs['qa:ntype'] = "CallNodeOperation";
@@ -221,7 +221,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
         })
       });
 
-      businessObject.name = "lustige groovy states";
+      businessObject.name = "Set State";
       businessObject.scriptFormat = "groovy";
       businessObject.resource = "deployment://SetState.groovy";
       businessObject.$attrs['qa:ntype'] = "StateChanger";
@@ -256,7 +256,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
         })
       });
 
-      businessObject.name = "lustige groovy properties";
+      businessObject.name = "Set Properties";
       businessObject.scriptFormat = "groovy";
       businessObject.resource = "deployment://SetProperties.groovy";
       businessObject.$attrs['qa:ntype'] = "PropertiesChanger";
@@ -289,7 +289,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
         })
       });
 
-      businessObject.name = "lustiges NodeInstanceDataObject";
+      businessObject.name = "NodeInstance DataObject";
       businessObject.$attrs['qa:dtype'] = "NodeInstanceDataObject";
 
       const shape = elementFactory.createShape({
@@ -320,7 +320,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
         })
       });
 
-      businessObject.name = "lustiger data object ersatz";
+      businessObject.name = "Activate data object";
       businessObject.scriptFormat = "groovy";
       businessObject.resource = "deployment://DataObject.groovy";
       businessObject.$attrs['qa:dtype'] = "NodeInstanceDataObjectTask";
@@ -353,7 +353,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
         })
       });
 
-      businessObject.name = "lustiges ServiceInstanceDataObject";
+      businessObject.name = "ServiceInstance DataObject";
       businessObject.$attrs['qa:dtype'] = "ServiceInstanceDataObject";
 
       const shape = elementFactory.createShape({
@@ -383,7 +383,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function (element) {
         })
       });
 
-      businessObject.name = "lustiges RelationshipInstanceDataObject";
+      businessObject.name = "RelationshipInstance DataObject";
       businessObject.$attrs['qa:dtype'] = "RelationshipInstanceDataObject";
 
       const shape = elementFactory.createShape({
