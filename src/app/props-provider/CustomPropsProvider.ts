@@ -594,7 +594,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   },
                   setControlValue: true,
                   hidden: function (element, node) {
-                    
+
                     if (element.businessObject.$attrs['qa:type2Input'] == 'VALUE') {
                       return false;
                     } else {
@@ -623,17 +623,17 @@ export class CustomPropsProvider implements IPropertiesProvider {
                               property = property.split('#')[0];
                               properties.push({ name: property, value: property });
                             }
-                            
+
                           }
                           if (dataObject.$attrs['qa:customPropertiesList'] != undefined) {
-                           
+
                             for (let j = 0; j <= dataObject.$attrs['qa:customPropertiesList']; j++) {
                               let property = dataObject.$attrs['qa:customProp' + j];
-                              if(property != undefined){
+                              if (property != undefined) {
                                 properties.push({ name: property, value: property });
                               }
                             }
-                            
+
                           }
                           return properties;
                         }
@@ -660,7 +660,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   },
                   setControlValue: true,
                   hidden: function (element, node) {
-                    if (element.businessObject.$attrs['qa:dataObject'] != 'none' && element.businessObject.$attrs['qa:dataObject'] != undefined &&element.businessObject.$attrs['qa:dataObject'].length >0) {
+                    if (element.businessObject.$attrs['qa:dataObject'] != 'none' && element.businessObject.$attrs['qa:dataObject'] != undefined && element.businessObject.$attrs['qa:dataObject'].length > 0) {
                       return false;
                     } else {
                       return true;
@@ -803,7 +803,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   },
                   setControlValue: true,
                   hidden: function (element, node) {
-                    if (element.businessObject.$attrs['qa:outputParams'] != 'none' && element.businessObject.$attrs['qa:outputParams'] != undefined &&element.businessObject.$attrs['qa:outputParams'].length >0) {
+                    if (element.businessObject.$attrs['qa:outputParams'] != 'none' && element.businessObject.$attrs['qa:outputParams'] != undefined && element.businessObject.$attrs['qa:outputParams'].length > 0) {
                       return false;
                     } else {
                       return true;
@@ -831,15 +831,15 @@ export class CustomPropsProvider implements IPropertiesProvider {
                               property = property.split('#')[0];
                               properties.push({ name: property, value: property });
                             }
-                            
+
                           }
-                          if(dataObject.$attrs['qa:customPropertiesList'] != undefined){
+                          if (dataObject.$attrs['qa:customPropertiesList'] != undefined) {
                             for (let j = 0; j <= dataObject.$attrs['qa:customPropertiesList']; j++) {
                               let property = dataObject.$attrs['qa:customProp' + j];
-                              if(property != undefined){
+                              if (property != undefined) {
                                 properties.push({ name: property, value: property });
                               }
-                              
+
                             }
                           }
                           return properties;
@@ -867,7 +867,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   },
                   setControlValue: true,
                   hidden: function (element, node) {
-                    if (element.businessObject.$attrs['qa:dataObject2'] != 'none' && element.businessObject.$attrs['qa:dataObject2'] != undefined && element.businessObject.$attrs['qa:dataObject2'].length >0) {
+                    if (element.businessObject.$attrs['qa:dataObject2'] != 'none' && element.businessObject.$attrs['qa:dataObject2'] != undefined && element.businessObject.$attrs['qa:dataObject2'].length > 0) {
                       return false;
                     } else {
                       return true;
@@ -1229,15 +1229,15 @@ export class CustomPropsProvider implements IPropertiesProvider {
                               options.push({ name: property, value: property })
                             }
                           }
-                          
-                          
+
+
                           //options.push({name: , value: });
                         }
                       }
                       let length = element.businessObject.$attrs['qa:customPropertiesList'];
-                          console.log(length)
-                      for(let k=0; k < length; k++){
-                        let customProp = element.businessObject.$attrs['qa:customProp'+ k]; 
+                      console.log(length)
+                      for (let k = 0; k < length; k++) {
+                        let customProp = element.businessObject.$attrs['qa:customProp' + k];
                         console.log(customProp);
                         options.push({ name: customProp, value: customProp });
                         const inputParameter = CustomPropsProvider.moddle.create('camunda:InputParameter', {
@@ -1247,12 +1247,12 @@ export class CustomPropsProvider implements IPropertiesProvider {
                         let addInput = true;
                         for (let o = 0; o < element.businessObject.extensionElements.values[0].inputParameters.length; o++) {
                           console.log(element.businessObject.extensionElements.values[0].inputParameters[o].name);
-                         
+
                           if (inputParameter.name === element.businessObject.extensionElements.values[0].inputParameters[o].name) {
                             addInput = false;
                           }
                         }
-  
+
                         if (addInput) {
                           console.log("test")
                           element.businessObject.extensionElements.values[0].inputParameters.push(inputParameter);
@@ -1340,7 +1340,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     id: 'customProp',
                     //description: 'Value of Parameter',
                     label: 'Name of custom property',
-                    modelProperty: 'qa:customProp', 
+                    modelProperty: 'qa:customProp',
                     hidden: function (element, node) {
                       if (element.businessObject.$attrs['qa:NodeTemplate'] == 'none' || element.businessObject.$attrs['qa:NodeTemplate'] == undefined) {
                         return true;
@@ -1360,38 +1360,39 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       let addInput = true;
                       console.log(check);
                       let nameProp = element.businessObject.$attrs['qa:customProp'];
-                      if(nameProp != undefined || nameProp == ''){
-                      const inputParameter = CustomPropsProvider.moddle.create('camunda:InputParameter', {
-                        name: 'Input_' + nameProp,
-                        value: ''
-                      });
-                      for (let o = 0; o < element.businessObject.extensionElements.values[0].inputParameters.length; o++) {
-                        console.log(element.businessObject.extensionElements.values[0].inputParameters[o].name);
-                        console.log(nameProp);
-                        if (inputParameter.name === element.businessObject.extensionElements.values[0].inputParameters[o].name) {
-                          addInput = false;
+                      if (nameProp != undefined || nameProp == '') {
+                        const inputParameter = CustomPropsProvider.moddle.create('camunda:InputParameter', {
+                          name: 'Input_' + nameProp,
+                          value: ''
+                        });
+                        for (let o = 0; o < element.businessObject.extensionElements.values[0].inputParameters.length; o++) {
+                          console.log(element.businessObject.extensionElements.values[0].inputParameters[o].name);
+                          console.log(nameProp);
+                          if (inputParameter.name === element.businessObject.extensionElements.values[0].inputParameters[o].name) {
+                            addInput = false;
+                          }
                         }
+
+                        if (addInput) {
+                          element.businessObject.extensionElements.values[0].inputParameters.push(inputParameter);
+
+
+                          let pos = element.businessObject.$attrs['qa:customPropertiesList'];
+                          element.businessObject.$attrs['qa:customProp' + pos] = nameProp;
+                          element.businessObject.$attrs['qa:Properties'] = '';
+                          element.businessObject.$attrs['qa:customPropertiesList'] += 1;
+
+                        } else {
+                          addInput = true;
+                        }
+
+
+                        //element.businessObject.$attrs['qa:saveValueCheckbox'] = false;
+
+
+
                       }
-
-                      if (addInput) {
-                        element.businessObject.extensionElements.values[0].inputParameters.push(inputParameter);
-
-                        
-                        let pos = element.businessObject.$attrs['qa:customPropertiesList'];
-                        element.businessObject.$attrs['qa:customProp'+ pos] = nameProp;
-                        element.businessObject.$attrs['qa:Properties'] = '';
-                        element.businessObject.$attrs['qa:customPropertiesList'] +=1;
-
-                      } else {
-                        addInput = true;
-                      }
-                      
-                      
-                      //element.businessObject.$attrs['qa:saveValueCheckbox'] = false;
-                    
-                      
-
-                    }},
+                    },
                     hidden: function (element, node) {
                       if (element.businessObject.$attrs['qa:NodeTemplate'] == 'none' || element.businessObject.$attrs['qa:NodeTemplate'] == undefined) {
                         return true;

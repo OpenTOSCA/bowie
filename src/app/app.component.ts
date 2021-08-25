@@ -58,13 +58,14 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.modeler = new Modeler({
+      keyboard: { bindTo: document },
       container: '#canvas',
       width: '100%',
       height: '600px',
       additionalModules: [
         PropertiesPanelModule,
         OriginalPropertiesProvider,
-      {[InjectionNames.bpmnPropertiesProvider]: ['type', OriginalPropertiesProvider.propertiesProvider[1]]},
+        {[InjectionNames.bpmnPropertiesProvider]: ['type', OriginalPropertiesProvider.propertiesProvider[1]]},
         {[InjectionNames.propertiesProvider]: ['type', CustomPropsProvider]},
         
         {[InjectionNames.bpmnRenderer]: ['type', OriginalRenderer]},
@@ -87,7 +88,12 @@ export class AppComponent implements OnInit {
       //AppComponent.winery2 = this.wineryService;
     CustomPropsProvider.winery2 = this.wineryService
   });
-
+    this.route.queryParams.forEach(params => {if(params.plan != undefined){
+           console.log(params.plan);
+           let t = params.plan.includes('bpel');
+           console.log(t);
+           this.initiateBPEL();
+    }})
     this.initiate();
     
   }
@@ -96,6 +102,27 @@ export class AppComponent implements OnInit {
     if (err) {
       console.warn('Ups, error: ', err);
     }
+  }
+
+  // bpel methode mit plan/bpel
+  // hier kommt das dann mit dem visualize rein
+  initiateBPEL(){
+    /** 
+    const url = '/assets/bpmn/initial.bpmn';
+    this.http.get(url, {
+      headers: {observe: 'response'}, responseType: 'text'
+    }).subscribe(
+      (x: any) => {
+        console.log('Fetched XML, now importing: ', x);
+        this.modeler.importXML(x, this.handleError);
+        
+      },
+      this.handleError
+    );
+    */
+
+    this.wineryService.loadPlanBPEL(this.modeler);
+
   }
 
   initiate(){

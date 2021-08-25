@@ -426,6 +426,54 @@ export class WineryService {
         });
       }
 
+      loadPlanBPEL(modeler:any) {
+        let planName = this.plan.split('/bpel')[0];
+        let url = 'servicetemplates/' + this.encode(this.namespace)
+            + '/' + this.encode(this.serviceTemplateId) + '/plans/' + this.encode(planName) + '/file';
+        console.log(url);
+        url = this.getFullUrl(url);
+    
+        return new Promise(function() {
+    
+          // request zip file representing plan
+          const xmlhttp = new XMLHttpRequest();
+          xmlhttp.responseType = 'blob';
+          xmlhttp.onload = async function(callback) {
+            if (xmlhttp.status === 200) {
+              console.log('Request finished with status code 200 for plan at path %s!', url);
+              const blob = new Blob([xmlhttp.response], { type: 'application/zip' });
+    
+              // load zip file using JSZip
+              let jszip = new JSZip();
+              let zip = await jszip.loadAsync(blob);
+              console.log('Successfully loaded zip!', zip);
+    
+              // find BPMN file in QAA
+              let files = zip.filter(function(relativePath, file) {
+                return !relativePath.startsWith('deployment-models') && relativePath.endsWith('.bpel');
+              });
+              console.log(files[0]);
+
+    
+              // check if exaclty one workflow is contained in the QAA
+              if (files.length !== 1) {
+                console.error('Plan with path %s must contain exactly one BPEL file but contains %i!', url, files.length);
+                
+              }
+              console.log(files[0]);
+              console.log(files);
+              
+              let bpmn = await files[0].async('string');
+              modeler.importXML(bpmn);
+              return bpmn;
+              
+            }
+          };
+          xmlhttp.open('GET', url, true);
+          xmlhttp.send();
+        });
+      }
+
 
     private encode(param: string): string {
         return encodeURIComponent(encodeURIComponent(param));
