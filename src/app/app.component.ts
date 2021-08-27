@@ -11,6 +11,7 @@ import _camundaModdleDescriptor from "camunda-bpmn-moddle/resources/camunda.json
 import moddle from '../docs/moddle.json';
 import PathMap from './bpmn-js/draw/PathMap';
 //import SituationPropertiesProvider from './provider/situations/SituationPropertiesProvider';
+import {BpelService} from './services/bpelparser.service';
 
 
 
@@ -53,7 +54,7 @@ export class AppComponent implements OnInit {
   static param : Params;
   static winery2: WineryService;
   
-  constructor(private http: HttpClient, private route: ActivatedRoute,private wineryService: WineryService) {
+  constructor(private http: HttpClient, private route: ActivatedRoute,private wineryService: WineryService, private bpelservice: BpelService) {
   }
 
   ngOnInit(): void {
@@ -121,7 +122,9 @@ export class AppComponent implements OnInit {
     );
     */
 
-    this.wineryService.loadPlanBPEL(this.modeler);
+    bpelToBeParsed = this.wineryService.loadPlanBPEL(this.modeler);
+	this.bpelservice.bpelspass(bpelToBeParsed, this.modeler);
+	
 
   }
 

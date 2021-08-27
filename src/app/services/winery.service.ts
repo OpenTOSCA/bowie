@@ -464,7 +464,7 @@ export class WineryService {
               console.log(files);
               
               let bpmn = await files[0].async('string');
-              modeler.importXML(bpmn);
+              // modeler.importXML(bpmn);
               return bpmn;
               
             }
