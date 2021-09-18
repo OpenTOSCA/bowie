@@ -426,7 +426,7 @@ export class WineryService {
         });
       }
 
-      loadPlanBPEL(modeler:any) {
+      loadPlanBPEL(modeler:any, bpelService: any) {
         let planName = this.plan.split('/bpel')[0];
         let url = 'servicetemplates/' + this.encode(this.namespace)
             + '/' + this.encode(this.serviceTemplateId) + '/plans/' + this.encode(planName) + '/file';
@@ -448,7 +448,7 @@ export class WineryService {
               let zip = await jszip.loadAsync(blob);
               console.log('Successfully loaded zip!', zip);
     
-              // find BPMN file in QAA
+              // find BPEL file in QAA
               let files = zip.filter(function(relativePath, file) {
                 return !relativePath.startsWith('deployment-models') && relativePath.endsWith('.bpel');
               });
@@ -460,12 +460,10 @@ export class WineryService {
                 console.error('Plan with path %s must contain exactly one BPEL file but contains %i!', url, files.length);
                 
               }
-              console.log(files[0]);
-              console.log(files);
               
-              let bpmn = await files[0].async('string');
-              // modeler.importXML(bpmn);
-              return bpmn;
+              let bpel = await files[0].async('string');
+              bpelService.bpelspass(bpel, modeler);
+              return bpel;
               
             }
           };

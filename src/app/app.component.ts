@@ -90,12 +90,14 @@ export class AppComponent implements OnInit {
     CustomPropsProvider.winery2 = this.wineryService
   });
     this.route.queryParams.forEach(params => {if(params.plan != undefined){
-           console.log(params.plan);
-           let t = params.plan.includes('bpel');
-           console.log(t);
-           this.initiateBPEL();
+           let bpelPlan = params.plan.includes('bpel');
+           if(bpelPlan){
+            this.initiateBPEL();
+          }
+          // this step is also important for bpel plans to initiate a process id
+          this.initiate();
+          
     }})
-    this.initiate();
     
   }
 
@@ -105,27 +107,8 @@ export class AppComponent implements OnInit {
     }
   }
 
-  // bpel methode mit plan/bpel
-  // hier kommt das dann mit dem visualize rein
   initiateBPEL(){
-    /** 
-    const url = '/assets/bpmn/initial.bpmn';
-    this.http.get(url, {
-      headers: {observe: 'response'}, responseType: 'text'
-    }).subscribe(
-      (x: any) => {
-        console.log('Fetched XML, now importing: ', x);
-        this.modeler.importXML(x, this.handleError);
-        
-      },
-      this.handleError
-    );
-    */
-
-    bpelToBeParsed = this.wineryService.loadPlanBPEL(this.modeler);
-	this.bpelservice.bpelspass(bpelToBeParsed, this.modeler);
-	
-
+    this.wineryService.loadPlanBPEL(this.modeler, this.bpelservice);
   }
 
   initiate(){
