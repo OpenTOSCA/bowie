@@ -1,6 +1,12 @@
-$fa-font-path: "../node_modules/font-awesome/fonts";
-@import "~font-awesome/scss/font-awesome.scss";
+$fa-font-path: "fontello/font";
+@import "fontello/css/fontello.css";
 
+.djs-context-pad .entry {
+  width: 0px;
+  height: 22px;
+  text-align: center;
+  display: inline-block;
+}
 .bpmn-icon-task.red {
     color: #cc0000 !important;
   }

@@ -9,7 +9,9 @@ import { ActivatedRoute, Params } from '@angular/router';
 import { PageParameter } from './model/page-parameter';
 import _camundaModdleDescriptor from "camunda-bpmn-moddle/resources/camunda.json";
 import moddle from '../docs/moddle.json';
+import PathMap from './bpmn-js/draw/PathMap';
 //import SituationPropertiesProvider from './provider/situations/SituationPropertiesProvider';
+import {BpelService} from './services/bpelparser.service';
 
 
 
@@ -52,21 +54,23 @@ export class AppComponent implements OnInit {
   static param : Params;
   static winery2: WineryService;
   
-  constructor(private http: HttpClient, private route: ActivatedRoute,private wineryService: WineryService) {
+  constructor(private http: HttpClient, private route: ActivatedRoute,private wineryService: WineryService, private bpelservice: BpelService) {
   }
 
   ngOnInit(): void {
     this.modeler = new Modeler({
+      keyboard: { bindTo: document },
       container: '#canvas',
       width: '100%',
       height: '600px',
       additionalModules: [
         PropertiesPanelModule,
         OriginalPropertiesProvider,
-      {[InjectionNames.bpmnPropertiesProvider]: ['type', OriginalPropertiesProvider.propertiesProvider[1]]},
+        {[InjectionNames.bpmnPropertiesProvider]: ['type', OriginalPropertiesProvider.propertiesProvider[1]]},
         {[InjectionNames.propertiesProvider]: ['type', CustomPropsProvider]},
         
         {[InjectionNames.bpmnRenderer]: ['type', OriginalRenderer]},
+        {[InjectionNames.pathMap]: ['type', PathMap]},
         {[InjectionNames.renderer]: ['type', CustomRenderer]},
         {[InjectionNames.originalPaletteProvider]: ['type', OriginalPaletteProvider]},
         {[InjectionNames.paletteProvider]: ['type', CustomPaletteProvider]},
@@ -85,8 +89,15 @@ export class AppComponent implements OnInit {
       //AppComponent.winery2 = this.wineryService;
     CustomPropsProvider.winery2 = this.wineryService
   });
-
-    this.initiate();
+    this.route.queryParams.forEach(params => {if(params.plan != undefined){
+           let bpelPlan = params.plan.includes('bpel');
+           if(bpelPlan){
+            this.initiateBPEL();
+          }
+          // this step is also important for bpel plans to initiate a process id
+          this.initiate();
+          
+    }})
     
   }
 
@@ -94,6 +105,10 @@ export class AppComponent implements OnInit {
     if (err) {
       console.warn('Ups, error: ', err);
     }
+  }
+
+  initiateBPEL(){
+    this.wineryService.loadPlanBPEL(this.modeler, this.bpelservice);
   }
 
   initiate(){
@@ -115,15 +130,7 @@ export class AppComponent implements OnInit {
     this.wineryService.loadPlan2(this.modeler);
   }
 
-  save(): void {
-        this.modeler.saveXML((err: any, xml: any) => {
-            console.log('Result of saving XML: ', err, xml);
-            let temp = JSON.stringify(xml);
-            this.wineryService.save(temp);
-        });
-    }
-
-    testsave(): void {
+  testsave(): void {
         this.modeler.saveXML((err: any, xml: any) => {
             console.log('Result of saving XML: ', err, xml);
             //let temp2 = JSON.stringify(xml);

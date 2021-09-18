@@ -1,10 +1,18 @@
 ## Angular BPMN for Winery
-Unser wunderschönes HiWi-Projekt.
+This angular project allows to model (customized) BPMN 2.0 plans for the [Winery](https://github.com/OpenTOSCA/winery).
+
+# Why you should use this project?
+
+- easy to use
+- customize your workflows
+- extensible
+- saves time
 
 
-# Documentation
+# Installation
+There are various ways to install this modeler.
 
-
+####  **NPM** - A nodejs based package manager.
 To run this project with live-reload etc: 
  
     npm install
@@ -12,7 +20,7 @@ To run this project with live-reload etc:
     
 Then look at http://localhost:4242. 
 
-
+####  **Docker** 
 To run this project with docker:
 
     docker build -t angularmodeler .
@@ -20,18 +28,31 @@ To run this project with docker:
 
 Then look at http://localhost:4242.
 
-# Features / Status
+# Features
 
-- Starten mit Docker
-- Laden von Diagrammen
-- Speichern von Diagrammen
+- Docker
+- save BPMN plans
+- customized tasks & data objects
+- asynchronous communication 
+- dynamic properties panel & extension elements
+- custom meta model to allow execution
 
+# Project Structure
 
-# To Do
+- `app/bpmn-js`: allows different rendering & colors for tasks
+- `app/model`: contains the structures for different constructs (e.g. nodetemplate..)
+- `app/props-provider`: 
 
--  Dockerfile noch anpassen (docker rise)
--  vielleicht den Load Button später entfernen
--  den Save Button in der Palette fürs Erste ignorieren
-
-Phase 3:
-- Node Management Task hinzufügen (siehe Präsentation & SITCOM)
+  -`CustomPropsProvider`: responsible for new tabs allows the user to set/edit properties of individual tasks
+  
+  -`CustomPaletteProvider`: 
+  
+    - defines tasks & data objects for the palette
+    - defines which extension elements already exists
+- `app/services`: responsible for the connection to the winery (see github/winery)
+- `app/util`: contains the http features
+- `assets`: contains the initial bpmn diagram & groovy scripts
+- `docs`:
+  - contains the moddle extension to define new attributes which are compatible with the Camunda Engine
+  - contains helpful explanation how the tasks works, how to connect to the winery...
+       
