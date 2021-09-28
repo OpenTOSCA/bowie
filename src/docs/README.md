@@ -125,7 +125,7 @@ Now are creating a “hosted on”-relationship instance between the source MyTi
 
 ### 9. Step: Set ServiceTemplate instance state
 ![](./pictures/Step15.PNG)
-Now we can set the state of the ServiceInstanceURL to STARTED.
+Now we can set the state of the ServiceInstanceURL to CREATED.
 
 ### 10. Step: The whole workflow
 ![](./pictures/Step15.PNG)

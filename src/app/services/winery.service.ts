@@ -55,26 +55,26 @@ export class WineryService {
             //this.loadPlan();
         }
     }
-    public getArtifactTemplates(ref: string){
+    public getArtifactTemplates(ref: string) {
         //http://localhost:8080/winery/artifacttemplates/http%253A%252F%252Fopentosca.org%252Fartifacttemplates/MyTinyToDo_DA/xml
         let httpserv = this.http;
         let namespace = ref.split('}')[0];
         namespace = namespace.replace('{', '');
         let da = ref.split('}')[1];
-        const url = 'artifacttemplates/' + this.encode(namespace)+ '/' +  da + '/xml';  
-        const headers = new HttpHeaders({ 'Content-Type': 'application/xml' }); 
+        const url = 'artifacttemplates/' + this.encode(namespace) + '/' + da + '/xml';
+        const headers = new HttpHeaders({ 'Content-Type': 'application/xml' });
         console.log(this.getFullUrl(url))
         httpserv.get(this.getFullUrl(url), {
             headers: headers, responseType: 'text'
         }).subscribe(response => {
             console.log("TESTST")
             let parser = new DOMParser();
-            let xmlDoc = parser.parseFromString(response,"text/xml").getElementsByTagName("ArtifactReference")[0].getAttribute("reference");
+            let xmlDoc = parser.parseFromString(response, "text/xml").getElementsByTagName("ArtifactReference")[0].getAttribute("reference");
             CustomPropsProvider.references.push(xmlDoc);
-            
+
             console.log(xmlDoc);
         })
-        
+
     }
 
     public loadNodeTemplates() {
@@ -132,15 +132,17 @@ export class WineryService {
                     });
                     CustomPropsProvider.properties.push(nodeTemplate);
                     if (nodeTemplate.deploymentArtifacts != undefined) {
-                        for (var k = 0; k < nodeTemplate.deploymentArtifacts.deploymentArtifact.length; k++) {
-                            let ref = nodeTemplate.deploymentArtifacts.deploymentArtifact[k].artifactRef;
-                            this.getArtifactTemplates(ref);
-                            let index = ref.indexOf("}");
-                            let temp = ref.substring(index + 1);
-                            CustomPropsProvider.DA.push({
-                                value: temp, name:
-                                    temp
-                            });
+                        if (nodeTemplate.deploymentArtifacts.deploymentArtifact != undefined) {
+                            for (var k = 0; k < nodeTemplate.deploymentArtifacts.deploymentArtifact.length; k++) {
+                                let ref = nodeTemplate.deploymentArtifacts.deploymentArtifact[k].artifactRef;
+                                this.getArtifactTemplates(ref);
+                                let index = ref.indexOf("}");
+                                let temp = ref.substring(index + 1);
+                                CustomPropsProvider.DA.push({
+                                    value: temp, name:
+                                        temp
+                                });
+                            }
                         }
                     }
                 }
@@ -287,9 +289,9 @@ export class WineryService {
               .subscribe(response => {console.log('save date success'); console.log(fullUrl); });
       }
       */
-    
 
-      public testsave(xml: string) {
+
+    public testsave(xml: string) {
         let zip2 = new JSZip();
         let count = 0;
         let blobcontent;
@@ -305,8 +307,8 @@ export class WineryService {
         console.log("fullUrl");
         console.log(fullUrl);
         const url2 = [
-            "../../assets/SetState.groovy", 
-            "../../assets/SetProperties.groovy", 
+            "../../assets/SetState.groovy",
+            "../../assets/SetProperties.groovy",
             "../../assets/CreateServiceInstance.groovy",
             "../../assets/DataObject.groovy",
             "../../assets/CreateRelationshipInstance.groovy",
@@ -315,30 +317,30 @@ export class WineryService {
         url2.forEach((urlll) => {
             const filename = urlll.split('/')[urlll.split('/').length - 1];
 
-          this.http.get(urlll, {
-              headers: {observe: 'response'}, responseType: 'text'
-          }).subscribe(
-              (y: any) => {
-                  next: zip2.file(filename, y);
-                  count++;
-                  if (count === url2.length) {
-                      zip2.file("insertplannamehere.bpmn", xml);
-                      zip2.generateAsync({ type: "blob" })
-                          .then(function (content) {
+            this.http.get(urlll, {
+                headers: { observe: 'response' }, responseType: 'text'
+            }).subscribe(
+                (y: any) => {
+                    next: zip2.file(filename, y);
+                    count++;
+                    if (count === url2.length) {
+                        zip2.file("insertplannamehere.bpmn", xml);
+                        zip2.generateAsync({ type: "blob" })
+                            .then(function (content) {
 
-                            const fd = new FormData();
-                            fd.append('overwrite', 'false');
-                            fd.append('file', content, 'plan.zip');
-                            httpcli.put(fullUrl, fd)
-                                  .subscribe(response => {console.log('save date success'); console.log(fullUrl); });
-                              //httpcli.put(fullUrl, content, {headers: headers})
-                              //    .subscribe(response => {console.log('save date success'); console.log(fullUrl); });
+                                const fd = new FormData();
+                                fd.append('overwrite', 'false');
+                                fd.append('file', content, 'plan.zip');
+                                httpcli.put(fullUrl, fd)
+                                    .subscribe(response => { console.log('save date success'); console.log(fullUrl); });
+                                //httpcli.put(fullUrl, content, {headers: headers})
+                                //    .subscribe(response => {console.log('save date success'); console.log(fullUrl); });
 
 
-                          });
-                  }
-                  error: this.handleError(y);
-              });
+                            });
+                    }
+                    error: this.handleError(y);
+                });
 
         });
 
@@ -363,7 +365,7 @@ export class WineryService {
         */
 
     }
- 
+
 
     public loadPlan() {
         const url = 'servicetemplates/' + this.encode(this.namespace)
@@ -379,98 +381,98 @@ export class WineryService {
     }
 
 
-    loadPlan2(modeler:any) {
+    loadPlan2(modeler: any) {
 
         let url = 'servicetemplates/' + this.encode(this.namespace)
             + '/' + this.encode(this.serviceTemplateId) + '/plans/' + this.encode(this.plan) + '/file';
         console.log(url);
         url = this.getFullUrl(url);
-    
-        return new Promise(function() {
-    
-          // request zip file representing plan
-          const xmlhttp = new XMLHttpRequest();
-          xmlhttp.responseType = 'blob';
-          xmlhttp.onload = async function(callback) {
-            if (xmlhttp.status === 200) {
-              console.log('Request finished with status code 200 for plan at path %s!', url);
-              const blob = new Blob([xmlhttp.response], { type: 'application/zip' });
-    
-              // load zip file using JSZip
-              let jszip = new JSZip();
-              let zip = await jszip.loadAsync(blob);
-              console.log('Successfully loaded zip!', zip);
-    
-              // find BPMN file in QAA
-              let files = zip.filter(function(relativePath, file) {
-                return !relativePath.startsWith('deployment-models') && relativePath.endsWith('.bpmn');
-              });
-              console.log(files[0]);
 
-    
-              // check if exaclty one workflow is contained in the QAA
-              if (files.length !== 1) {
-                console.error('Plan with path %s must contain exactly one BPMN file but contains %i!', url, files.length);
-                
-              }
-              console.log(files[0]);
-              console.log(files);
-              let bpmn = await files[0].async('string');
-              modeler.importXML(bpmn);
-              return bpmn;
-              
-            }
-          };
-          xmlhttp.open('GET', url, true);
-          xmlhttp.send();
+        return new Promise(function () {
+
+            // request zip file representing plan
+            const xmlhttp = new XMLHttpRequest();
+            xmlhttp.responseType = 'blob';
+            xmlhttp.onload = async function (callback) {
+                if (xmlhttp.status === 200) {
+                    console.log('Request finished with status code 200 for plan at path %s!', url);
+                    const blob = new Blob([xmlhttp.response], { type: 'application/zip' });
+
+                    // load zip file using JSZip
+                    let jszip = new JSZip();
+                    let zip = await jszip.loadAsync(blob);
+                    console.log('Successfully loaded zip!', zip);
+
+                    // find BPMN file in QAA
+                    let files = zip.filter(function (relativePath, file) {
+                        return !relativePath.startsWith('deployment-models') && relativePath.endsWith('.bpmn');
+                    });
+                    console.log(files[0]);
+
+
+                    // check if exaclty one workflow is contained in the QAA
+                    if (files.length !== 1) {
+                        console.error('Plan with path %s must contain exactly one BPMN file but contains %i!', url, files.length);
+
+                    }
+                    console.log(files[0]);
+                    console.log(files);
+                    let bpmn = await files[0].async('string');
+                    modeler.importXML(bpmn);
+                    return bpmn;
+
+                }
+            };
+            xmlhttp.open('GET', url, true);
+            xmlhttp.send();
         });
-      }
+    }
 
-      loadPlanBPEL(modeler:any, bpelService: any) {
+    loadPlanBPEL(modeler: any, bpelService: any) {
         let planName = this.plan.split('/bpel')[0];
         let url = 'servicetemplates/' + this.encode(this.namespace)
             + '/' + this.encode(this.serviceTemplateId) + '/plans/' + this.encode(planName) + '/file';
         console.log(url);
         url = this.getFullUrl(url);
-    
-        return new Promise(function() {
-    
-          // request zip file representing plan
-          const xmlhttp = new XMLHttpRequest();
-          xmlhttp.responseType = 'blob';
-          xmlhttp.onload = async function(callback) {
-            if (xmlhttp.status === 200) {
-              console.log('Request finished with status code 200 for plan at path %s!', url);
-              const blob = new Blob([xmlhttp.response], { type: 'application/zip' });
-    
-              // load zip file using JSZip
-              let jszip = new JSZip();
-              let zip = await jszip.loadAsync(blob);
-              console.log('Successfully loaded zip!', zip);
-    
-              // find BPEL file in QAA
-              let files = zip.filter(function(relativePath, file) {
-                return !relativePath.startsWith('deployment-models') && relativePath.endsWith('.bpel');
-              });
-              console.log(files[0]);
 
-    
-              // check if exaclty one workflow is contained in the QAA
-              if (files.length !== 1) {
-                console.error('Plan with path %s must contain exactly one BPEL file but contains %i!', url, files.length);
-                
-              }
-              
-              let bpel = await files[0].async('string');
-              bpelService.bpelspass(bpel, modeler);
-              return bpel;
-              
-            }
-          };
-          xmlhttp.open('GET', url, true);
-          xmlhttp.send();
+        return new Promise(function () {
+
+            // request zip file representing plan
+            const xmlhttp = new XMLHttpRequest();
+            xmlhttp.responseType = 'blob';
+            xmlhttp.onload = async function (callback) {
+                if (xmlhttp.status === 200) {
+                    console.log('Request finished with status code 200 for plan at path %s!', url);
+                    const blob = new Blob([xmlhttp.response], { type: 'application/zip' });
+
+                    // load zip file using JSZip
+                    let jszip = new JSZip();
+                    let zip = await jszip.loadAsync(blob);
+                    console.log('Successfully loaded zip!', zip);
+
+                    // find BPEL file in QAA
+                    let files = zip.filter(function (relativePath, file) {
+                        return !relativePath.startsWith('deployment-models') && relativePath.endsWith('.bpel');
+                    });
+                    console.log(files[0]);
+
+
+                    // check if exaclty one workflow is contained in the QAA
+                    if (files.length !== 1) {
+                        console.error('Plan with path %s must contain exactly one BPEL file but contains %i!', url, files.length);
+
+                    }
+
+                    let bpel = await files[0].async('string');
+                    bpelService.bpelspass(bpel, modeler);
+                    return bpel;
+
+                }
+            };
+            xmlhttp.open('GET', url, true);
+            xmlhttp.send();
         });
-      }
+    }
 
 
     private encode(param: string): string {

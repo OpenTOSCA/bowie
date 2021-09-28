@@ -82,10 +82,11 @@ export class CustomPropsProvider implements IPropertiesProvider {
       http2.onreadystatechange = function () {
         if (http2.readyState === XMLHttpRequest.DONE) {
           let response = JSON.parse(http2.responseText);
+          console.log(response)
           CustomPropsProvider.interfaces = [];
           CustomPropsProvider.tosca = [];
           for (let i = 0; i < response.length; i++) {
-            CustomPropsProvider.tosca.push({ name: response[i].name, value: response[i].operation });
+            CustomPropsProvider.tosca.push({ name: response[i].name, value: response[i].operations });
             //array.push({
             //    name: response[i].name, value: response[i].name
             //});
@@ -95,6 +96,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
 
             //window['interfaceN'] = array;
           }
+          console.log(CustomPropsProvider.tosca)
           //element.businessObject.$attrs['qa:interface'] = CustomPropsProvider.interfaces;
           //console.log("hier für interfaces checken:");
           //console.log(CustomPropsProvider.tosca);
@@ -301,7 +303,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     element.businessObject.$attrs['qa:type2Input'] = 'none';
                     element.businessObject.$attrs['qa:typeInput'] = 'none';
                     element.businessObject.$attrs['qa:outputParams'] = [];
-                    CustomPropsProvider.operations = [];
+                    //CustomPropsProvider.operations = [];
                     CustomPropsProvider.options = [];
                     CustomPropsProvider.outputParam = [];
                     CustomPropsProvider.interfaceindex = -1;
@@ -311,6 +313,8 @@ export class CustomPropsProvider implements IPropertiesProvider {
                         element.businessObject.extensionElements.values[0].inputParameters[4].value = values['qa:interface'];
                       }
                     }
+
+                    console.log(CustomPropsProvider.tosca)
                     /*
                     if (element.businessObject.$attrs['qa:interface'] !== undefined) {
                       for (let i = 0; i < CustomPropsProvider.interfaces.length; i++) {
@@ -343,13 +347,15 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       if ((CustomPropsProvider.int.length > 0) && (CustomPropsProvider.operations.length === 0) && (CustomPropsProvider.nodetemplateindex !== -1)) {
                         for (let i = 0; i < CustomPropsProvider.interfaces.length; i++) {
                           if (element.businessObject.$attrs['qa:interface'] === CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].interfaces[i].name) {
-                            console.log("check2");
-                            for (let j = 0; j < CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].interfaces[i].value.length; j++) {
-                              CustomPropsProvider.operations.push({
-                                name: CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].interfaces[i].value[j].name,
-                                value: CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].interfaces[i].value[j].name
-                              });
-                              CustomPropsProvider.interfaceindex = i;
+                            if (CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].interfaces[i].value != undefined) {
+
+                              for (let j = 0; j < CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].interfaces[i].value.length; j++) {
+                                CustomPropsProvider.operations.push({
+                                  name: CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].interfaces[i].value[j].name,
+                                  value: CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].interfaces[i].value[j].name
+                                });
+                                CustomPropsProvider.interfaceindex = i;
+                              }
                             }
                           }
                         }
@@ -382,11 +388,12 @@ export class CustomPropsProvider implements IPropertiesProvider {
                                 CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].interfaces[CustomPropsProvider.interfaceindex].value[k].name)
                                 && (CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].interfaces[CustomPropsProvider.interfaceindex].value[k].
                                   hasOwnProperty('inputParameters'))) {
+                                    
                                 for (let l = 0; l < CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].
-                                  interfaces[CustomPropsProvider.interfaceindex].value[k].inputParameters.inputParameter.length; l++) {
+                                  interfaces[CustomPropsProvider.interfaceindex].value[k].inputParameters.length; l++) {
                                   // warum so und dann splitten??
                                   let parameter = CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].
-                                    interfaces[CustomPropsProvider.interfaceindex].value[k].inputParameters.inputParameter;
+                                    interfaces[CustomPropsProvider.interfaceindex].value[k].inputParameters;
                                   CustomPropsProvider.options.push({
                                     name: parameter[l].name,
                                     value: parameter[l].name + ',' + parameter[l].type
@@ -709,10 +716,10 @@ export class CustomPropsProvider implements IPropertiesProvider {
                             && (CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].interfaces[CustomPropsProvider.interfaceindex].value[k].
                               hasOwnProperty('outputParameters'))) {
                             for (let l = 0; l < CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].
-                              interfaces[CustomPropsProvider.interfaceindex].value[k].outputParameters.outputParameter.length; l++) {
+                              interfaces[CustomPropsProvider.interfaceindex].value[k].outputParameters.length; l++) {
 
                               let outparameter = CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].
-                                interfaces[CustomPropsProvider.interfaceindex].value[k].outputParameters.outputParameter;
+                                interfaces[CustomPropsProvider.interfaceindex].value[k].outputParameters;
                               CustomPropsProvider.outputParam.push({
                                 name: outparameter[l].name,
                                 value: outparameter[l].name + ',' + outparameter[l].type
