@@ -3,7 +3,7 @@ name: Push docker image to Dockerhub
 
 on:
   push:
-    branches: master
+    branches: propUi
     tags:
       - "v*.*.*"
 
@@ -27,7 +27,7 @@ jobs:
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
 
       - name: Build and push latest Container
-        if: ${{ steps.vars.outputs.tag == 'master' }}
+        if: ${{ steps.vars.outputs.tag == 'propUi' }}
         uses: docker/build-push-action@v2
         with:
           context: .
