@@ -2,6 +2,7 @@ import groovy.xml.XmlUtil
 def message2 = execution.getVariable("State");
 def nodeInstance = execution.getVariable("NodeInstanceURL");
 def nodeInstanceURL = execution.getVariable(nodeInstance); 
+def nodeProperties = execution.getVariable("Properties");
 
 if(nodeInstanceURL != null){
     // change state if set
@@ -50,10 +51,35 @@ if(nodeInstanceURL != null){
     }
 
 
-    def xml = new XmlSlurper().parseText(get.getInputStream().getText());
-    properties.eachWithIndex { property, index ->
-        xml.'**'.findAll { if(it.name() == property) it.replaceBody execution.getVariable('Input_'+property) }
+	println 'This is the content of nodeProperties:'
+	println nodeProperties
+	
+	println 'These are all variables in the current context:'
+	def varNamesInContext = execution.getVariableNames();
+	varNamesInContext.each{
+		varName -> println 'VarName: ' + varName + ' VarValue: ' + execution.getVariable(varName)
+	}
+	
+	
+	def proptext = get.getInputStream().getText();
+	println 'This is the response from API:'
+	println proptext
+	println 'We try to update the following list of properties in the xml:'
+	println nodeProperties
+    def xml = new XmlSlurper().parseText(proptext);
+    nodeProperties.split(',').each{property ->
+		println 'Trying to find property:' + property + '.';
+        if (xml.'**'.find{it -> it.name() == property} != null) {
+			println 'Found property in xml with name: ' + property;
+			def val = execution.getVariable(property);
+			println 'Writing value: ' + val;
+			xml.'**'.find{it -> it.name() == property}.replaceBody(val);
+		}
     }
+	
+	println 'The xml we send:'
+	println XmlUtil.serialize(xml)
+	
     def put = new URL(url).openConnection();
     put.setRequestMethod("PUT");
     put.setDoOutput(true);
