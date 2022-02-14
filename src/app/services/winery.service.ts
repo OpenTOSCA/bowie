@@ -56,6 +56,8 @@ export class WineryService {
         }
     }
     public getArtifactTemplates(ref: string) {
+        console.info(ref);
+        console.info("Compute deployment artifacts")
         //http://localhost:8080/winery/artifacttemplates/http%253A%252F%252Fopentosca.org%252Fartifacttemplates/MyTinyToDo_DA/xml
         let httpserv = this.http;
         let namespace = ref.split('}')[0];
@@ -67,12 +69,11 @@ export class WineryService {
         httpserv.get(this.getFullUrl(url), {
             headers: headers, responseType: 'text'
         }).subscribe(response => {
-            console.log("TESTST")
             let parser = new DOMParser();
-            let xmlDoc = parser.parseFromString(response, "text/xml").getElementsByTagName("ArtifactReference")[0].getAttribute("reference");
-            CustomPropsProvider.references.push(xmlDoc);
-
-            console.log(xmlDoc);
+            console.info("Add corresponding reference of da");
+            let reference = parser.parseFromString(response, "text/xml").getElementsByTagName("ArtifactReference")[0].getAttribute("reference");
+            console.info(reference);
+           // CustomPropsProvider.references.push(reference);
         })
 
     }
@@ -80,8 +81,6 @@ export class WineryService {
     public loadNodeTemplates() {
         const url = 'servicetemplates/' + this.encode(this.namespace)
             + '/' + this.encode(this.serviceTemplateId) + '/topologytemplate/';
-        console.log(this.namespace);
-        console.log(this.serviceTemplateId);
         this.httpService.get(this.getFullUrl(url)).subscribe(response => {
             this.transferResponse2NodeTemplate(response);
 
@@ -91,7 +90,7 @@ export class WineryService {
 
 
     private transferResponse2NodeTemplate(response: any) {
-        console.log(response);
+        console.info("Transfer json to nodetemplates");
         for (const relation in response.relationshipTemplates) {
             if (response.relationshipTemplates.hasOwnProperty(relation)) {
                 const relationshipTemplate = response.relationshipTemplates[relation];
@@ -124,6 +123,22 @@ export class WineryService {
                     if (nodeTemplate.id == CustomPropsProvider.template[j].name) {
                         containsParam = true;
                     }
+                    if (nodeTemplate.deploymentArtifacts !== undefined) {
+                        console.log(nodeTemplate.deploymentArtifacts);
+                            for (var k = 0; k < nodeTemplate.deploymentArtifacts.length; k++) {
+                                let ref = nodeTemplate.deploymentArtifacts[k].artifactRef;
+                                //this.getArtifactTemplates(ref);
+                                let index = ref.indexOf("}");
+                                let daName = ref.substring(index + 1);
+                                CustomPropsProvider.references.push({
+                                    name: ref, value:ref
+                                })
+                                CustomPropsProvider.DA.push({
+                                    value: daName, name:
+                                        daName
+                                });
+                            }
+                        }
                 }
                 if (!containsParam) {
                     CustomPropsProvider.template.push({
@@ -131,20 +146,8 @@ export class WineryService {
                             nodeTemplate.id
                     });
                     CustomPropsProvider.properties.push(nodeTemplate);
-                    if (nodeTemplate.deploymentArtifacts != undefined) {
-                        if (nodeTemplate.deploymentArtifacts.deploymentArtifact != undefined) {
-                            for (var k = 0; k < nodeTemplate.deploymentArtifacts.deploymentArtifact.length; k++) {
-                                let ref = nodeTemplate.deploymentArtifacts.deploymentArtifact[k].artifactRef;
-                                this.getArtifactTemplates(ref);
-                                let index = ref.indexOf("}");
-                                let temp = ref.substring(index + 1);
-                                CustomPropsProvider.DA.push({
-                                    value: temp, name:
-                                        temp
-                                });
-                            }
-                        }
-                    }
+                    
+                
                 }
                 if (CustomPropsProvider.template.length == 0) {
                     CustomPropsProvider.template.push({
@@ -154,11 +157,14 @@ export class WineryService {
                     CustomPropsProvider.properties.push(nodeTemplate);
                     if (nodeTemplate.deploymentArtifacts != undefined) {
                         for (var k = 0; k < nodeTemplate.deploymentArtifacts.length; k++) {
-                            let ref = nodeTemplate.deploymentArtifacts.deploymentArtifact[k].artifactRef;
-                            this.getArtifactTemplates(ref);
+                            let ref = nodeTemplate.deploymentArtifacts[k].artifactRef;
+                            //this.getArtifactTemplates(ref);
+                            CustomPropsProvider.references.push({
+                                name: ref, value:ref
+                            })
                             CustomPropsProvider.DA.push({
-                                value: nodeTemplate.deploymentArtifacts.deploymentArtifact[k].artifactRef, name:
-                                    nodeTemplate.deploymentArtifacts.deploymentArtifact[k].artifactRef
+                                value: nodeTemplate.deploymentArtifacts[k].artifactRef, name:
+                                    nodeTemplate.deploymentArtifacts[k].artifactRef
                             });
                         }
                     }
@@ -170,7 +176,6 @@ export class WineryService {
                     nodeTemplate.type.replace(/^\{(.+)\}(.+)/, '$1')));
             }
         }
-        console.log("NODETEM");
         console.log(nodeTemplates);
         return nodeTemplates;
     }

@@ -23,13 +23,10 @@ export class CustomPropsProvider implements IPropertiesProvider {
   static relationshiptemplate = [{ name: 'none', value: 'none' }];
   static winery2: WineryService;
   static tosca = [];
-  static opt = [{ name: 'INITIAL', value: 'INITIAL' }, { name: 'CREATING', value: 'CREATING' }, { name: 'CREATED', value: 'CREATED' }, { name: 'CONFIGURING', value: 'CONFIGURING' },
-  { name: 'STARTING', value: 'STARTING' }, { name: 'STARTED', value: 'STARTED' }, { name: 'STOPPING', value: 'STOPPING' }, { name: 'STOPPED', value: 'STOPPED' }, { name: 'DELETING', value: 'DELETING' },
-  { name: 'DELETED', value: 'DELETED' }, { name: 'ERROR', value: 'ERROR' }, { name: 'MIGRATED', value: 'MIGRATED' }];
   static types = [{ name: 'none', value: 'none' }, { name: 'VALUE', value: 'VALUE' }, { name: 'String', value: 'String' }, { name: 'DA', value: 'DA' }];
   static DA = [{ name: 'none', value: 'none' }];
   static moddle = new BpmnModdle({ camunda: _camundaModdleDescriptor });
-  static references = [];
+  static references = [{ name: 'none', value: 'none' }];
   static properties = [];
   static int = [];
   static nodetemplateindex = -1;
@@ -346,15 +343,17 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     if (element.businessObject.$attrs['qa:interface'] !== undefined) {
                       if ((CustomPropsProvider.int.length > 0) && (CustomPropsProvider.operations.length === 0) && (CustomPropsProvider.nodetemplateindex !== -1)) {
                         for (let i = 0; i < CustomPropsProvider.interfaces.length; i++) {
-                          if (element.businessObject.$attrs['qa:interface'] === CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].interfaces[i].name) {
-                            if (CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].interfaces[i].value != undefined) {
+                          if (CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].interfaces[i] !== undefined) {
+                            if (element.businessObject.$attrs['qa:interface'] === CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].interfaces[i].name) {
+                              if (CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].interfaces[i].value != undefined) {
 
-                              for (let j = 0; j < CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].interfaces[i].value.length; j++) {
-                                CustomPropsProvider.operations.push({
-                                  name: CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].interfaces[i].value[j].name,
-                                  value: CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].interfaces[i].value[j].name
-                                });
-                                CustomPropsProvider.interfaceindex = i;
+                                for (let j = 0; j < CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].interfaces[i].value.length; j++) {
+                                  CustomPropsProvider.operations.push({
+                                    name: CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].interfaces[i].value[j].name,
+                                    value: CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].interfaces[i].value[j].name
+                                  });
+                                  CustomPropsProvider.interfaceindex = i;
+                                }
                               }
                             }
                           }
@@ -388,7 +387,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                                 CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].interfaces[CustomPropsProvider.interfaceindex].value[k].name)
                                 && (CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].interfaces[CustomPropsProvider.interfaceindex].value[k].
                                   hasOwnProperty('inputParameters'))) {
-                                    
+
                                 for (let l = 0; l < CustomPropsProvider.int[CustomPropsProvider.nodetemplateindex].
                                   interfaces[CustomPropsProvider.interfaceindex].value[k].inputParameters.length; l++) {
                                   // warum so und dann splitten??
@@ -543,19 +542,20 @@ export class CustomPropsProvider implements IPropertiesProvider {
                     let name = element.businessObject.$attrs['qa:inputParams'].split(",")[0];
                     let reference = '';
                     let fileName = '';
-                    for (let d = 0; d < CustomPropsProvider.references.length; d++) {
-                      reference = CustomPropsProvider.references[d];
+                    let namespaceDA = '';
+                    //element.businessObject.$attrs['qa:namespaceDA'];
+                    for (let d = 1; d < CustomPropsProvider.references.length; d++) {
+                      reference = CustomPropsProvider.references[d].name;
                       let da = values['qa:deploymentArtifact'];
                       if (reference.includes(da)) {
-                        let index = reference.lastIndexOf('/');
-                        fileName = reference.substring(index + 1);
+                        namespaceDA = reference;
                       }
                     }
                     for (let o = 0; o < element.businessObject.extensionElements.values[0].inputParameters.length; o++) {
                       let extensionElement = element.businessObject.extensionElements.values[0].inputParameters[o].name;
                       extensionElement = extensionElement.split('Input_')[1];
                       if (name === extensionElement) {
-                        element.businessObject.extensionElements.values[0].inputParameters[o].value = 'DA!' + values['qa:deploymentArtifact'] + '#' + fileName;
+                        element.businessObject.extensionElements.values[0].inputParameters[o].value = 'DA!' + namespaceDA + values['qa:deploymentArtifact'] + '#' + fileName;
                       }
                     }
                     return;
@@ -900,13 +900,13 @@ export class CustomPropsProvider implements IPropertiesProvider {
                   //description: 'State',
                   label: 'State',
                   selectOptions: function (element, values) {
-                    let opt = [{ name: '', value: '' }, { name: 'INITIAL', value: 'INITIAL' }, { name: 'CREATING', value: 'CREATING' }, { name: 'CREATED', value: 'CREATED' }, { name: 'CONFIGURING', value: 'CONFIGURING' },
+                    let states = [{ name: '', value: '' }, { name: 'INITIAL', value: 'INITIAL' }, { name: 'CREATING', value: 'CREATING' }, { name: 'CREATED', value: 'CREATED' }, { name: 'CONFIGURING', value: 'CONFIGURING' },
                     { name: 'STARTING', value: 'STARTING' }, { name: 'STARTED', value: 'STARTED' }, { name: 'STOPPING', value: 'STOPPING' }, { name: 'STOPPED', value: 'STOPPED' }, { name: 'DELETING', value: 'DELETING' },
                     { name: 'DELETED', value: 'DELETED' }, { name: 'ERROR', value: 'ERROR' }, { name: 'MIGRATED', value: 'MIGRATED' }];
                     if (values.selectedOptions.length > 0 && (values.selectedOptions[0] != undefined)) {
                       element.businessObject.extensionElements.values[0].inputParameters[0].value = values.selectedOptions[0].value;
                     }
-                    return opt;
+                    return states;
 
                   },
                   setControlValue: true,
