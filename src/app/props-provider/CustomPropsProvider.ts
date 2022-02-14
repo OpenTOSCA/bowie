@@ -555,7 +555,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       let extensionElement = element.businessObject.extensionElements.values[0].inputParameters[o].name;
                       extensionElement = extensionElement.split('Input_')[1];
                       if (name === extensionElement) {
-                        element.businessObject.extensionElements.values[0].inputParameters[o].value = 'DA!' + namespaceDA + values['qa:deploymentArtifact'] + '#' + fileName;
+                        element.businessObject.extensionElements.values[0].inputParameters[o].value = 'DA!' + '{' + namespaceDA + '}' + values['qa:deploymentArtifact'] + '#' + fileName;
                       }
                     }
                     return;
