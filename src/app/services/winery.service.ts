@@ -55,25 +55,24 @@ export class WineryService {
             //this.loadPlan();
         }
     }
-    public getArtifactTemplates(ref: string) {
-        console.info(ref);
-        console.info("Compute deployment artifacts")
-        //http://localhost:8080/winery/artifacttemplates/http%253A%252F%252Fopentosca.org%252Fartifacttemplates/MyTinyToDo_DA/xml
+    public getFileNameOfArtifactTemplates(ref: string) {
+        console.info("Compute file name of deployment artifacts")
         let httpserv = this.http;
         let namespace = ref.split('}')[0];
         namespace = namespace.replace('{', '');
         let da = ref.split('}')[1];
         const url = 'artifacttemplates/' + this.encode(namespace) + '/' + da + '/xml';
         const headers = new HttpHeaders({ 'Content-Type': 'application/xml' });
-        console.log(this.getFullUrl(url))
         httpserv.get(this.getFullUrl(url), {
             headers: headers, responseType: 'text'
         }).subscribe(response => {
             let parser = new DOMParser();
-            console.info("Add corresponding reference of da");
             let reference = parser.parseFromString(response, "text/xml").getElementsByTagName("ArtifactReference")[0].getAttribute("reference");
-            console.info(reference);
-           // CustomPropsProvider.references.push(reference);
+            let fileNameIndex = reference.lastIndexOf('/');
+            let fileName = reference.substring(fileNameIndex + 1);
+            CustomPropsProvider.references.push({
+                name: ref, value: fileName
+            })
         })
 
     }
@@ -125,20 +124,17 @@ export class WineryService {
                     }
                     if (nodeTemplate.deploymentArtifacts !== undefined) {
                         console.log(nodeTemplate.deploymentArtifacts);
-                            for (var k = 0; k < nodeTemplate.deploymentArtifacts.length; k++) {
-                                let ref = nodeTemplate.deploymentArtifacts[k].artifactRef;
-                                //this.getArtifactTemplates(ref);
-                                let index = ref.indexOf("}");
-                                let daName = ref.substring(index + 1);
-                                CustomPropsProvider.references.push({
-                                    name: ref, value:ref
-                                })
-                                CustomPropsProvider.DA.push({
-                                    value: daName, name:
-                                        daName
-                                });
-                            }
+                        for (var k = 0; k < nodeTemplate.deploymentArtifacts.length; k++) {
+                            let ref = nodeTemplate.deploymentArtifacts[k].artifactRef;
+                            this.getFileNameOfArtifactTemplates(ref);
+                            let index = ref.indexOf("}");
+                            let daName = ref.substring(index + 1);
+                            CustomPropsProvider.DA.push({
+                                value: daName, name:
+                                    daName
+                            });
                         }
+                    }
                 }
                 if (!containsParam) {
                     CustomPropsProvider.template.push({
@@ -146,8 +142,8 @@ export class WineryService {
                             nodeTemplate.id
                     });
                     CustomPropsProvider.properties.push(nodeTemplate);
-                    
-                
+
+
                 }
                 if (CustomPropsProvider.template.length == 0) {
                     CustomPropsProvider.template.push({
@@ -158,13 +154,12 @@ export class WineryService {
                     if (nodeTemplate.deploymentArtifacts != undefined) {
                         for (var k = 0; k < nodeTemplate.deploymentArtifacts.length; k++) {
                             let ref = nodeTemplate.deploymentArtifacts[k].artifactRef;
-                            //this.getArtifactTemplates(ref);
-                            CustomPropsProvider.references.push({
-                                name: ref, value:ref
-                            })
+                            this.getFileNameOfArtifactTemplates(ref);
+                            let index = ref.indexOf("}");
+                            let daName = ref.substring(index + 1);
                             CustomPropsProvider.DA.push({
-                                value: nodeTemplate.deploymentArtifacts[k].artifactRef, name:
-                                    nodeTemplate.deploymentArtifacts[k].artifactRef
+                                value: daName, name:
+                                    daName
                             });
                         }
                     }

@@ -26,6 +26,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
   static types = [{ name: 'none', value: 'none' }, { name: 'VALUE', value: 'VALUE' }, { name: 'String', value: 'String' }, { name: 'DA', value: 'DA' }];
   static DA = [{ name: 'none', value: 'none' }];
   static moddle = new BpmnModdle({ camunda: _camundaModdleDescriptor });
+  // name contains the namespace of the da, value contains the fileName
   static references = [{ name: 'none', value: 'none' }];
   static properties = [];
   static int = [];
@@ -59,7 +60,7 @@ export class CustomPropsProvider implements IPropertiesProvider {
         }
       }
     }
-    console.log('inerfaceloadfuinction');
+    console.log('inerfaceloadfunction');
     console.log(CustomPropsProvider.int);
   }
 
@@ -549,13 +550,14 @@ export class CustomPropsProvider implements IPropertiesProvider {
                       let da = values['qa:deploymentArtifact'];
                       if (reference.includes(da)) {
                         namespaceDA = reference;
+                        fileName = CustomPropsProvider.references[d].value;
                       }
                     }
                     for (let o = 0; o < element.businessObject.extensionElements.values[0].inputParameters.length; o++) {
                       let extensionElement = element.businessObject.extensionElements.values[0].inputParameters[o].name;
                       extensionElement = extensionElement.split('Input_')[1];
                       if (name === extensionElement) {
-                        element.businessObject.extensionElements.values[0].inputParameters[o].value = 'DA!' + '{' + namespaceDA + '}' + values['qa:deploymentArtifact'] + '#' + fileName;
+                        element.businessObject.extensionElements.values[0].inputParameters[o].value = 'DA!' + namespaceDA + '#' + fileName;
                       }
                     }
                     return;
