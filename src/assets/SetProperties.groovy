@@ -34,23 +34,6 @@ if(nodeInstanceURL != null){
 
     def newProperties = properties;
 
-    for(int j in 0..properties.size()-1){
-        for(int i in 0..propertiesNames.size()-1){
-            if(propertiesNames[i].startsWith(nodeInstance) && !propertiesNames[i].endsWith(nodeInstance)){
-                def temp = propertiesNames[i].split(nodeInstance)[1];
-                if(temp == properties[j]){
-                def value = execution.getVariable('Input_'+temp);
-                if(value.contains('->')){
-                    def port = value.split('->')[1];
-                    value = port;
-                }
-                execution.setVariable(nodeInstance+properties[j], value);
-                }
-            }
-        }
-    }
-
-
 	println 'This is the content of nodeProperties:'
 	println nodeProperties
 	
@@ -67,13 +50,57 @@ if(nodeInstanceURL != null){
 	println 'We try to update the following list of properties in the xml:'
 	println nodeProperties
     def xml = new XmlSlurper().parseText(proptext);
+
+    println 'These are the properties';
+    println properties;
+    println 'These are the propNames';
+    println propertiesNames;
     nodeProperties.split(',').each{property ->
 		println 'Trying to find property:' + property + '.';
         if (xml.'**'.find{it -> it.name() == property} != null) {
 			println 'Found property in xml with name: ' + property;
 			def val = execution.getVariable(property);
-			println 'Writing value: ' + val;
-			xml.'**'.find{it -> it.name() == property}.replaceBody(val);
+            def propertyWithPrefix = 'Input_' + property;
+            def valueInputProperty = execution.getVariable('Input_' + property);
+            // this is true when it is set in this task
+            def alreadySet = false;
+            if (valueInputProperty) {
+                    for(int i in 0..propertiesNames.size() - 1) {
+                        // case for data object
+                        if (propertiesNames[i].startsWith(nodeInstance) && !propertiesNames[i].endsWith(nodeInstance)) {
+                            def temp = propertiesNames[i].split(nodeInstance)[1];
+                            if(temp == property && !alreadySet) {
+                                def value = execution.getVariable('Input_'+ temp);
+                                if (value.contains('->')) {
+                                    def index = value.indexOf('->');
+                                    def substring = value.substring(index+2, value.length()-1);
+                                    value = substring;
+                                }
+                            execution.setVariable(nodeInstance+property, value);
+                            println 'Writing valuewritedataobject: ' + value;
+			                xml.'**'.find{it -> it.name() == property}.replaceBody(value);
+                            alreadySet = true;
+                            }
+                        }else {
+                            def temp = propertiesNames[i];
+                            if (temp == propertyWithPrefix && !alreadySet) {
+                                def value = execution.getVariable(temp);
+                                if (value.contains('->')) {
+                                    def index = value.indexOf('->');
+                                    def substring = value.substring(index+2, value.length()-1);
+                                    value = substring;
+                                }
+                                println 'Writing valuenotdataobject: ' + value;
+			                    xml.'**'.find{it -> it.name() == property}.replaceBody(value);
+                                alreadySet = true;
+                            }
+                        }
+                }
+            }else {
+                println 'Writing value: ' + val;
+			    xml.'**'.find{it -> it.name() == property}.replaceBody(val);
+            }
+			
 		}
     }
 	
