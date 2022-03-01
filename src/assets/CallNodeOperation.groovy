@@ -26,9 +26,10 @@ for(int i in 0..inputParamNames.size()-1){
            def paramDA = execution.getVariable("instanceDataAPIUrl").split("/servicetemplates")[0];
            def da = param.split("#")[0];
            def fileName = param.split("#")[1];
-           def namespace = URLEncoder.encode('http://opentosca.org/artifacttemplates', "UTF-8");
+           def namespace = URLEncoder.encode(da.split("}")[0].substring(1), "UTF-8");
+		   def daName = da.split("}")[1]
            namespace = URLEncoder.encode(namespace, "UTF-8");
-           paramDA= paramDA+'/content/artifacttemplates/'+namespace+'/'+ da + '/files/' + fileName;
+           paramDA= paramDA+'/content/artifacttemplates/'+namespace+'/'+ daName + '/files/' + fileName;
            param = paramDA;
         }
         if(type=='VALUE'){
