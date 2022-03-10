@@ -1,5 +1,5 @@
 ## Angular BPMN for Winery
-This angular project allows to model (customized) BPMN 2.0 plans for the [Winery](https://github.com/OpenTOSCA/winery).
+This angular project allows to model (customized) BPMN 2.0 plans for the [Winery](https://github.com/OpenTOSCA/winery). Also the project allows to visualize BPEL plans by rewriting the BPEL constructs into BPMN components. 
 
 # Why you should use this project?
 
@@ -28,6 +28,13 @@ To run this project with docker:
 
 Then look at http://localhost:4242.
 
+# Establish connection 
+
+1) Navigate in the Winery to the `Administration` tab and select `Configuration` (if locally started it should be http://localhost:8080/#/admin/configuration)
+2) Save the corresponding URL (in our case it's http://localhost:4242 but feel free to change it)
+
+for more details: [setup](./src/docs/Setup.md)
+
 # Features
 
 - Docker
@@ -36,6 +43,7 @@ Then look at http://localhost:4242.
 - asynchronous communication 
 - dynamic properties panel & extension elements
 - custom meta model to allow execution
+- visualize BPEL plans
 
 # Project Structure
 

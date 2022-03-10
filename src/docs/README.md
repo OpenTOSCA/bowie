@@ -1,4 +1,5 @@
 # BPMN Modeler for Winery
+BOWIE is more than just a modeling tool, it allows to integrate the generic TOSCA components into portable BPMN. Also it addresses the issue that BPEL has no visualization that's why the project automatically rewrites BPEL constructs into BPMN constructs. 
 
 ## 1)	Motivation
 Applications consists of many different components that need to be maintained.  Manual deployment is a problem, because it is error-prone, time-consuming, and costly. On 08.06.2021 an admin configuration of the cloud provider Fastly caused a problem, which lead to 85% of the network returning errors. Consequently, applications like Netflix, Amazon or PayPal were not available for a certain amount of time. Another reason why manual deployment is not sufficient, is the complexity of an application or the requirement for deployment configuration / customization. Therefore, you need experts in this field, which typically causes higher expenses. An approach to prevent this problem is to select a specific deployment system. That on the other hand could lead to a vendor lock-in because most deployment systems differ in their functionalities. This leads to the compromise of using one of the available deployment systems, which matches most of your needs. This solution is insufficient, which is why we need a standard to deploy and manage cloud applications in a portable manner. TOSCA (The Topology and Orchestration Specification for Cloud Applications) is such a standard. It allows the automation of deployment and management of cloud applications in a portable manner. TOSCA also allows the imperative deployment modeling approach, i.e. you can upload a BPEL & BPMN plan to define a management plan. However, the current approach of the BPMN connection is not fully implemented yet. That is why we present a new BPMN modeler for the winery, which allows modelling of (customized) workflows with user-defined behavior. You can use this modeler to define a plan, which gets executed in the OpenTOSCA Runtime. In addition, the modeler is easy to use and to extend, which allows for different ways to create new tasks and integrate them into the project.
@@ -128,6 +129,7 @@ Now are creating a “hosted on”-relationship instance between the source MyTi
 Now we can set the state of the ServiceInstanceURL to CREATED.
 
 ### 10. Step: The whole workflow
-![](./pictures/Step15.PNG)
+![](./pictures/Step16.PNG)
 This is a complete workflow which specifies the build plan of the CSAR MyTinyToDo_Bare_Docker_BPMN.
+
 
