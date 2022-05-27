@@ -2,6 +2,9 @@
 FROM node:12.7-alpine AS build
 WORKDIR /usr/src/app
 COPY package.json package-lock.json ./
+RUN apk add --no-cache python2
+RUN apk add --no-cache make
+RUN apk add --no-cache g++
 RUN npm install
 COPY . .
 RUN npm run build
